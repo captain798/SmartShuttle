@@ -8,3 +8,13 @@ page {
   flex: 1;
   overflow-y: hidden;
 }
+.location-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.location-display text {
+  font-size: 16px;
+}

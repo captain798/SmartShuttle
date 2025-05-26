@@ -1,7 +1,14 @@
 <!--index.wxml-->
-<navigation-bar title="Weixin" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<navigation-bar title="智约班车" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<view class="location-picker">
+  <view class="location-display">
+    <text>起点：{{startPoint || '本部'}}</text>
+    <button size="mini" bindtap="swapLocations">⇅ 调换</button>
+    <text>终点：{{endPoint || '网安基地'}}</text>
+  </view>
+</view>
 <scroll-view class="scrollarea" scroll-y type="list">
   <view class="container">
-    Weixin
+    班次列表（等待实现）
   </view>
 </scroll-view>
