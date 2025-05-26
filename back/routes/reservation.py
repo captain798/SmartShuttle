@@ -1,0 +1,440 @@
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from model import db, User, Schedule, Reservation, ReservationStatusEnum, RoleEnum, Penalty
+from datetime import datetime, timedelta
+from sqlalchemy import and_, or_
+import logging
+import re
+import uuid
+import qrcode
+import io
+import base64
+
+reservation_bp = Blueprint('reservation', __name__)
+
+# 预约相关配置
+MAX_CANCEL_TIMES = 5  # 每天最大取消次数
+PENALTY_DAYS = 7  # 惩罚天数
+TEACHER_PRIORITY_SEATS = 5  # 教师优先座位数
+
+# 班次ID格式：年月日+路线编号+序号，例如：20240315A001
+SCHEDULE_ID_PATTERN = r'^\d{8}[A-Z]\d{3}$'
+
+def generate_qr_code(reservation_id):
+    """
+    生成预约二维码
+    Args:
+        reservation_id: 预约ID
+    Returns:
+        str: Base64编码的二维码图片
+    """
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(str(reservation_id))
+    qr.make(fit=True)
+    
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode()
+
+@reservation_bp.route('/create', methods=['POST'])
+@jwt_required()
+def create_reservation():
+    """
+    创建班车预约
+    请求体:
+        schedule_id: 班次ID (格式: 年月日+路线编号+序号，如: 20240315A001)
+    返回:
+        成功:
+            message: 预约成功
+            reservation: {
+                id: 预约ID
+                schedule_id: 班次ID
+                seat_number: 座位号
+                status: 预约状态
+                qr_code: 预约二维码
+                qr_image: 二维码图片(Base64)
+            }
+        失败:
+            error: 错误信息
+    权限要求:
+        需要JWT认证
+    业务规则:
+        1. 用户不能在惩罚期内
+        2. 每个用户同时只能有一个有效预约
+        3. 教师有优先座位权
+        4. 预约成功后生成唯一二维码
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        
+        # 检查用户是否在惩罚期内
+        if user.penalty_until and user.penalty_until > datetime.utcnow():
+            return jsonify({
+                'error': '您在惩罚期内，无法预约',
+                'penalty_until': user.penalty_until.isoformat()
+            }), 403
+
+        schedule_id = request.json.get('schedule_id')
+        if not schedule_id:
+            return jsonify({'error': '缺少班次ID'}), 400
+            
+        # 验证班次ID格式
+        if not re.match(SCHEDULE_ID_PATTERN, schedule_id):
+            return jsonify({'error': '班次ID格式不正确'}), 400
+
+        # 检查班次是否存在且有效
+        schedule = Schedule.query.get(schedule_id)
+        if not schedule or schedule.status != 'normal':
+            return jsonify({'error': '班次不存在或已取消'}), 400
+
+        # 检查是否已经预约过该班次
+        existing_reservation = Reservation.query.filter_by(
+            user_id=current_user_id,
+            schedule_id=schedule_id,
+            status=ReservationStatusEnum.active
+        ).first()
+        
+        if existing_reservation:
+            return jsonify({'error': '您已经预约过该班次'}), 400
+
+        # 检查用户是否已有其他有效预约
+        active_reservation = Reservation.query.filter_by(
+            user_id=current_user_id,
+            status=ReservationStatusEnum.active
+        ).first()
+        
+        if active_reservation:
+            return jsonify({'error': '您已有其他有效预约'}), 400
+
+        # 获取当前预约数量
+        current_reservations = Reservation.query.filter_by(
+            schedule_id=schedule_id,
+            status=ReservationStatusEnum.active
+        ).count()
+
+        # 检查是否还有座位
+        if current_reservations >= schedule.dynamic_capacity:
+            return jsonify({'error': '该班次已满'}), 400
+
+        # 检查教师优先座位
+        is_teacher = user.role == RoleEnum.teacher
+        if not is_teacher and current_reservations >= (schedule.dynamic_capacity - TEACHER_PRIORITY_SEATS):
+            return jsonify({'error': '该班次仅剩教师优先座位'}), 400
+
+        # 生成唯一二维码
+        qr_code = str(uuid.uuid4())
+
+        # 创建预约
+        reservation = Reservation(
+            user_id=current_user_id,
+            schedule_id=schedule_id,
+            seat_number=current_reservations + 1,
+            priority_used=is_teacher,
+            qr_code=qr_code
+        )
+
+        db.session.add(reservation)
+        db.session.commit()
+
+        # 生成二维码图片
+        qr_image = generate_qr_code(reservation.id)
+
+        return jsonify({
+            'message': '预约成功',
+            'reservation': {
+                'id': reservation.id,
+                'schedule_id': reservation.schedule_id,
+                'seat_number': reservation.seat_number,
+                'status': reservation.status.value,
+                'qr_code': qr_code,
+                'qr_image': qr_image
+            }
+        })
+
+    except Exception as e:
+        logging.error(f"创建预约失败: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': '系统错误'}), 500
+
+@reservation_bp.route('/check-in/<string:qr_code>', methods=['POST'])
+@jwt_required()
+def check_in(qr_code):
+    """
+    扫描二维码进行签到
+    Args:
+        qr_code: 预约二维码
+    返回:
+        成功:
+            message: 签到成功
+            reservation: {
+                id: 预约ID
+                user_name: 用户姓名
+                seat_number: 座位号
+            }
+        失败:
+            error: 错误信息
+    权限要求:
+        需要JWT认证，且用户角色必须为司机
+    业务规则:
+        1. 只能对有效预约进行签到
+        2. 必须在发车前完成签到
+        3. 签到后更新预约状态为已签到
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        
+        # 检查权限（仅司机可以签到）
+        if user.role != RoleEnum.driver:
+            return jsonify({'error': '只有司机可以进行签到操作'}), 403
+
+        # 查找预约记录
+        reservation = Reservation.query.filter_by(qr_code=qr_code).first()
+        if not reservation:
+            return jsonify({'error': '无效的二维码'}), 404
+
+        # 检查预约状态
+        if reservation.status != ReservationStatusEnum.active:
+            return jsonify({'error': '该预约已取消或无效'}), 400
+
+        # 检查班次时间
+        schedule = Schedule.query.get(reservation.schedule_id)
+        if datetime.utcnow() > schedule.departure_datetime:
+            return jsonify({'error': '该班次已发车，无法签到'}), 400
+
+        # 更新预约状态
+        reservation.status = ReservationStatusEnum.checked_in
+        reservation.checked_in_at = datetime.utcnow()
+        
+        db.session.commit()
+
+        return jsonify({
+            'message': '签到成功',
+            'reservation': {
+                'id': reservation.id,
+                'user_name': reservation.user.name,
+                'seat_number': reservation.seat_number
+            }
+        })
+
+    except Exception as e:
+        logging.error(f"签到失败: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': '系统错误'}), 500
+
+@reservation_bp.route('/mark-absent', methods=['POST'])
+@jwt_required()
+def mark_absent():
+    """
+    标记班次中所有未签到的预约为缺席
+    请求体:
+        schedule_id: 班次ID
+    返回:
+        成功:
+            message: 标记成功信息
+            absent_count: 标记为缺席的预约数量
+        失败:
+            error: 错误信息
+    权限要求:
+        需要JWT认证，且用户角色必须为管理员或司机
+    业务规则:
+        1. 只能标记已发车班次的未签到预约
+        2. 自动为缺席用户添加惩罚记录
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        
+        # 检查权限（仅管理员和司机可以标记缺席）
+        if user.role not in [RoleEnum.admin, RoleEnum.driver]:
+            return jsonify({'error': '无权操作'}), 403
+
+        schedule_id = request.json.get('schedule_id')
+        if not schedule_id:
+            return jsonify({'error': '缺少班次ID'}), 400
+
+        # 获取班次信息
+        schedule = Schedule.query.get(schedule_id)
+        if not schedule:
+            return jsonify({'error': '班次不存在'}), 404
+
+        # 获取所有未签到的有效预约
+        absent_reservations = Reservation.query.filter(
+            and_(
+                Reservation.schedule_id == schedule_id,
+                Reservation.status == ReservationStatusEnum.active,
+                Schedule.departure_datetime < datetime.utcnow()
+            )
+        ).all()
+
+        # 标记缺席并添加惩罚
+        for reservation in absent_reservations:
+            reservation.status = ReservationStatusEnum.absent
+            
+            # 添加惩罚记录
+            penalty = Penalty(
+                user_id=reservation.user_id,
+                penalty_until=datetime.utcnow() + timedelta(days=PENALTY_DAYS)
+            )
+            db.session.add(penalty)
+            
+            # 更新用户惩罚状态
+            absent_user = User.query.get(reservation.user_id)
+            absent_user.penalty_until = penalty.penalty_until
+
+        db.session.commit()
+
+        return jsonify({
+            'message': f'已标记 {len(absent_reservations)} 个预约为缺席',
+            'absent_count': len(absent_reservations)
+        })
+
+    except Exception as e:
+        logging.error(f"标记缺席失败: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': '系统错误'}), 500
+
+@reservation_bp.route('/cancel/<int:reservation_id>', methods=['POST'])
+@jwt_required()
+def cancel_reservation(reservation_id):
+    """
+    取消预约
+    Args:
+        reservation_id: 预约ID
+    返回:
+        成功:
+            message: 取消成功信息
+            cancel_count: 今日已取消次数
+        失败:
+            error: 错误信息
+    权限要求:
+        需要JWT认证
+    业务规则:
+        1. 只能取消自己的预约
+        2. 每天最多取消5次
+        3. 只能取消有效预约
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        
+        # 查找预约记录
+        reservation = Reservation.query.get(reservation_id)
+        if not reservation:
+            return jsonify({'error': '预约记录不存在'}), 404
+
+        # 检查是否是自己的预约
+        if reservation.user_id != current_user_id:
+            return jsonify({'error': '无权操作此预约'}), 403
+
+        # 检查预约状态
+        if reservation.status != ReservationStatusEnum.active:
+            return jsonify({'error': '该预约已取消或无效'}), 400
+
+        # 检查取消次数(每天可取消5次)
+        cancel_count = Reservation.query.filter(
+            and_(
+                Reservation.user_id == current_user_id,
+                Reservation.reserved_at > datetime.date.today(),
+                Reservation.status == ReservationStatusEnum.canceled
+            )
+        ).count()
+
+        if cancel_count >= MAX_CANCEL_TIMES:
+            return jsonify({'error': '您已达到最大取消次数'}), 400
+
+        else:
+            # 更新预约状态
+            reservation.status = ReservationStatusEnum.canceled
+            reservation.canceled_at = datetime.utcnow()
+            
+            db.session.commit()
+
+            return jsonify({
+                'message': '取消预约成功',
+                'cancel_count': cancel_count + 1
+            })
+
+    except Exception as e:
+        logging.error(f"取消预约失败: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': '系统错误'}), 500
+
+@reservation_bp.route('/list', methods=['GET'])
+@jwt_required()
+def list_reservations():
+    """
+    获取用户的预约列表
+    查询参数:
+        status: 预约状态筛选（可选）
+        page: 页码（默认1）
+        per_page: 每页数量（默认10）
+    返回:
+        成功:
+            reservations: [
+                {
+                    id: 预约ID
+                    schedule_id: 班次ID
+                    seat_number: 座位号
+                    status: 预约状态
+                    reserved_at: 预约时间
+                    canceled_at: 取消时间（如果有）
+                    priority_used: 是否使用教师优先
+                }
+            ]
+            total: 总记录数
+            pages: 总页数
+            current_page: 当前页码
+        失败:
+            error: 错误信息
+    权限要求:
+        需要JWT认证
+    业务规则:
+        1. 只能查看自己的预约记录
+        2. 支持分页和状态筛选
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        
+        # 获取查询参数
+        status = request.args.get('status')
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+
+        # 构建查询
+        query = Reservation.query.filter_by(user_id=current_user_id)
+        
+        if status:
+            query = query.filter_by(status=ReservationStatusEnum[status])
+
+        # 分页查询
+        pagination = query.order_by(Reservation.reserved_at.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+
+        reservations = [{
+            'id': r.id,
+            'schedule_id': r.schedule_id,
+            'seat_number': r.seat_number,
+            'status': r.status.value,
+            'reserved_at': r.reserved_at.isoformat(),
+            'canceled_at': r.canceled_at.isoformat() if r.canceled_at else None,
+            'priority_used': r.priority_used
+        } for r in pagination.items]
+
+        return jsonify({
+            'reservations': reservations,
+            'total': pagination.total,
+            'pages': pagination.pages,
+            'current_page': page
+        })
+
+    except Exception as e:
+        logging.error(f"获取预约列表失败: {str(e)}")
+        return jsonify({'error': '系统错误'}), 500 
