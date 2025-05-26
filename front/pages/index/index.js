@@ -4,7 +4,7 @@ Page({
    * 页面初始数据
    */
   data: {
-    startPoint: '本部',
+    startPoint: '武汉大学本部',
     endPoint: '网安基地'
   },
 
