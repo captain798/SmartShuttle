@@ -1,2 +1,5 @@
 <!--pages/mines/mines.wxml-->
-<text>pages/mines/mines.wxml</text>
+<navigation-bar title="智约班车" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<view class="container">
+  <text>我的页面内容</text>
+</view>
