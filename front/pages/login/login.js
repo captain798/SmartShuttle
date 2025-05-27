@@ -90,6 +90,27 @@ Page({
         console.error('登录请求失败:', err);
       }
     });
-  }
+  },
 
-})
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad: function() {
+    wx.showModal({
+      title: '温馨提示',
+      content: '智约班车需要获取您的微信绑定手机号才能继续使用服务',
+      confirmText: '立即授权',
+      cancelText: '暂不授权',
+      success: (res) => {
+        if (res.confirm) {
+          this.getPhoneNumber();
+        } else {
+          wx.showToast({
+            title: '需要授权手机号才能继续使用服务',
+            icon: 'none'
+          });
+        }
+      }
+    });
+  },
+});

@@ -1,13 +1,25 @@
 <!--pages/login/login.wxml-->
 <view class="container">
-  <view class="input-group">
-    <input type="text" placeholder="请输入学号" bindinput="onCodeInput" />
+  <view class="title fade-in" style="animation-delay: 0.1s;">武汉大学</view>
+  <view class="logo fade-in" style="animation-delay: 0.4s;">
+    <image src="/images/WHU.png" mode="aspectFit" class="logo-img"/>
   </view>
-  <view class="input-group">
-    <input type="password" placeholder="请输入姓名" bindinput="onNameInput" />
-  </view>
-  <view class="input-group">
-    <input type="password" placeholder="请输入手机号" bindinput="onPhoneInput" />
-  </view>
-  <button bindtap="login">验证</button>
+  <form class="form-wrap fade-in" style="animation-delay: 0.7s;">
+    <view class="input-item fade-in" style="animation-delay: 0.8s;">
+      <image src="/images/用户.png" class="input-icon" />
+      <input type="text" placeholder="学工号" placeholder-class="placeholder" class="input-field"/>
+    </view>
+    <view class="input-item fade-in"  style="animation-delay: 0.9s;">
+      <image src="/images/密码.png" class="input-icon" />
+      <input type="password" placeholder="姓名" placeholder-class="placeholder" class="input-field"/>
+    </view>
+    <button class="login-btn">登录</button>
+    <view class="form-bottom">
+      <label class="checkbox-label">
+        <checkbox checked="{{true}}" />
+        <text class="checkbox-text">近期免登录</text>
+      </label>
+      <text class="forgot-password">忘记密码？</text>
+    </view>
+  </form>
 </view>
