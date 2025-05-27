@@ -16,14 +16,14 @@
   color: #fff;
   font-weight: 700;
   margin: 40rpx 0 0 0;
-  letter-spacing: 2rpx;
+  letter-spacing: 2rpx;  /* 字符边距 */
   text-shadow: 0 4rpx 12rpx rgba(0,0,0,0.10);
 }
 
-/* logo加大，padding变小，margin适中 */
+/* logo容器 */
 .logo {
   background: #fff;
-  border-radius: 50%;
+  border-radius: 50%;  /* 圆形 */
   padding: 10rpx;
   margin-top: 80rpx;
   margin-bottom: 40rpx;
@@ -33,6 +33,7 @@
   justify-content: center;
   transition: box-shadow 0.25s;
 }
+/* logo */
 .logo-img {
   width: 240rpx;
   height: 240rpx;
@@ -42,27 +43,26 @@
   box-shadow: 0 2rpx 10rpx rgba(16,154,98,0.05);
 }
 .logo:hover .logo-img {
-  transform: scale(1.08);
+  transform: scale(1.08);  /* 鼠标点击放大 */
 }
 
-/* 表单卡片适当下移，居中感更好 */
+/* 表单卡片 */
 .form-wrap {
   width: 96vw;
   max-width: 700rpx;
   background: #fff;
   border-radius: 36rpx;
-  padding: 56rpx 32rpx 38rpx;
+  padding: 56rpx 32rpx 38rpx;  /* 内边距 */
   margin-top: 0;
   margin-bottom: 0;
   box-shadow: 0 10rpx 36rpx 0 rgba(16, 154, 98, 0.12);
   display: flex;
   flex-direction: column;
-  gap: 0;
-  animation: fadeInUp 0.7s cubic-bezier(.32,.72,.37,1.2);
+  gap: 0; /* 子元素间距 */
+  animation: fadeInUp 0.7s cubic-bezier(.32,.72,.37,1.2);  /* 淡入上移动画 */
 }
 
-/* 其余表单、输入项等样式保持不变 */
-
+/* 输入框 */
 .input-item {
   display: flex;
   align-items: center;
@@ -72,27 +72,29 @@
   padding: 0 28rpx;
   margin-bottom: 32rpx;
   box-shadow: 0 1rpx 4rpx rgba(7, 113, 67, 0.03) inset;
-  transition: border-color .2s, background .2s;
+  transition: border-color .2s, background .2s;  /* 边框和背景过渡动画 */
   height: 88rpx;
 }
 .input-item:focus-within {
-  border-color: #0dbb8b;
-  background: #f1fff7;
+  border-color: #0dbb8b;  /* 聚焦时边框颜色 */
+  background: #f1fff7;  /* 聚焦时背景颜色 */
 }
+/* 输入框图标 */
 .input-icon {
   width: 44rpx;
   height: 44rpx;
   margin-right: 18rpx;
-  opacity: .74;
+  opacity: .74;  /* 透明度 */
 }
+/* 输入框 */
 .input-field {
   flex: 1;
   height: 88rpx;
   font-size: 36rpx;
   color: #2d3a4b;
-  background: transparent;
+  background: transparent;  /* 透明背景 */
   border: none;
-  outline: none;
+  outline: none;  /* 无聚焦轮廓 */
   border-radius: 0 18rpx 18rpx 0;
   padding-left: 8rpx;
 }
@@ -102,6 +104,7 @@
   opacity: .8;
   font-weight: 400;
 }
+/* 登录按钮 */
 .login-btn {
   width: 100%;
   height: 90rpx;
@@ -120,20 +123,22 @@
 .login-btn:active,
 .login-btn:focus,
 .login-btn:hover {
-  opacity: 0.93;
-  transform: translateY(-2rpx) scale(0.98);
+  opacity: 0.93;  /* 悬停时透明度 */
+  transform: translateY(-2rpx) scale(0.98);  /* 悬停时上移并缩小 */
   box-shadow: 0 4rpx 20rpx rgba(25,170,98,0.13);
 }
+/* 表单底部样式 */
 .form-bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 10rpx;
 }
+/* 复选框 */
 .checkbox-label {
   display: flex;
   align-items: center;
-  cursor: pointer;
+  cursor: pointer;  /* 光标样式 */
   gap: 8rpx;
 }
 .checkbox {
@@ -145,7 +150,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  position: relative;  /* 相对定位 */
   transition: border-color .2s, background .2s;
 }
 .checkbox[checked], .checkbox.checked {
@@ -153,14 +158,14 @@
   border-color: #19aa62;
 }
 .checkbox[checked]::after, .checkbox.checked::after {
-  content: "";
+  content: "";  /* 伪元素内容 */
   display: block;
   width: 16rpx;
   height: 8rpx;
   border-left: 4rpx solid #fff;
   border-bottom: 4rpx solid #fff;
   transform: rotate(-45deg);
-  position: absolute;
+  position: absolute;  /* 绝对定位 */
   left: 7rpx;
   top: 12rpx;
 }
@@ -170,17 +175,19 @@
   margin-left: 9rpx;
   font-weight: 500;
 }
+/* 忘记密码 */
 .forgot-password {
   color: #18b97c;
   font-size: 32rpx;
   font-weight: 600;
-  text-decoration: underline;
+  text-decoration: underline;  /* 下划线 */
   cursor: pointer; 
   transition: color .18s;
 }
 .forgot-password:hover {
   color: #0a8651;
 }
+/* 媒体查询 */
 @media (max-width: 700px) {
   .form-wrap {
     width: 98vw;
