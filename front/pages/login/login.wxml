@@ -1,0 +1,13 @@
+<!--pages/login/login.wxml-->
+<view class="container">
+  <view class="input-group">
+    <input type="text" placeholder="请输入学号" bindinput="onCodeInput" />
+  </view>
+  <view class="input-group">
+    <input type="password" placeholder="请输入姓名" bindinput="onNameInput" />
+  </view>
+  <view class="input-group">
+    <input type="password" placeholder="请输入手机号" bindinput="onPhoneInput" />
+  </view>
+  <button bindtap="login">验证</button>
+</view>
