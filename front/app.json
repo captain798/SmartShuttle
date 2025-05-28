@@ -2,7 +2,9 @@
   "pages": [
     "pages/login/login",
     "pages/index/index",
-    "pages/mines/mines"
+    "pages/mines/mines",
+    "pages/driver/driver",
+    "pages/reservation-list/reservation-list"
   ],
   "window": {
     "navigationBarTextStyle": "black",
@@ -27,11 +29,21 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "首页"
+        "text": "班车预约",
+        "iconPath": "images/VehicleBus.png",
+        "selectedIconPath": "images/Selected_VehicleBus.png"
+      },
+      {
+        "pagePath": "pages/reservation-list/reservation-list",
+        "text": "我的预约",
+        "iconPath": "images/reserve.png",
+        "selectedIconPath": "images/reserve.png"
       },
       {
         "pagePath": "pages/mines/mines", 
-        "text": "我的"
+        "text": "我的",
+        "iconPath": "images/mine.png",
+        "selectedIconPath": "images/Selected_mine.png"
       }
     ]
   }

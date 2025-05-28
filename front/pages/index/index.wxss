@@ -14,10 +14,6 @@ page {
   justify-content: space-between;
   padding: 10px;
 }
-
-.location-display text {
-  font-size: 16px;
-}
 .schedule-item {
   padding: 20rpx;
   margin: 10rpx 0;
@@ -26,4 +22,52 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width : 80%;
+}
+/* 定义班车预约卡片样式 */
+.location-picker {
+  padding: 20rpx;
+  margin: 20rpx;
+  border: 1rpx solid #ccc;
+  border-radius: 16rpx;
+  background-color: #fff;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+}
+
+.swap-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.location-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.location-item text {
+  margin: 2px 0;
+}
+
+.schedule-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.time-area {
+  flex: 1;
+}
+
+.seats-area {
+  flex: 1;
+  text-align: center;
+}
+
+.button-area {
+  flex: 1;
+  text-align: right;
 }

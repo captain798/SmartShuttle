@@ -123,6 +123,10 @@ Page({
   
   //生命周期函数--监听页面加载
   onLoad: function() {
+    // 暂时跳过登陆界面，进行其他界面的开发
+    wx.switchTab({
+      url: '/pages/index/index'
+    })
     // 先获取临时登录凭证
     wx.login({
       success: (res) => {

@@ -1,5 +1,22 @@
 <!--pages/mines/mines.wxml-->
-<navigation-bar title="智约班车" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<navigation-bar title="我的" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 <view class="container">
-  <text>我的页面内容</text>
+  <!-- 学生信息卡片 -->
+  <view class="student-card">
+    <text class="card-title">学生信息</text>
+    <text class="info-item">姓名：{{studentName || '暂无姓名'}}</text>
+    <text class="info-item">学号：{{studentId || '暂无学号'}}</text>
+  </view>
+  <!-- 图标栏 -->
+  <view class="icon-bar">
+    <view class="icon-item">
+      <image class="icon" src="/images/reserve.png" bindtap = "navigateToReservationList"></image>
+      <text>我的预约</text>
+    </view>
+    <view class="icon-item">
+      <image class="icon" src="/images/notice.png"></image>
+      <text>预约须知</text>
+    </view>
+  </view>
 </view>
+

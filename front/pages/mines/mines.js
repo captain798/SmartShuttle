@@ -1,14 +1,20 @@
 // pages/mines/mines.js
 Page({
-  /**
-   * 页面的初始数据
-   */
-  data: {},
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad(options) {
-    console.log('我的页面加载完成')
+  // 页面初始数据
+  data: {
+    studentName : '网小安',
+    studentId : '001'
+  },
+  
+  //跳转到预约记录页面
+  navigateToReservationList() {
+    wx.navigateTo({
+      url: '/pages/reservation-list/reservation-list',
+      fail: (err) => {
+        console.error('跳转失败', err);
+      }
+    });
   }
+  
 })
