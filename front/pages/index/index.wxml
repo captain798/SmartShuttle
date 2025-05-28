@@ -7,8 +7,17 @@
     <text>终点：{{endPoint || '网安基地'}}</text>
   </view>
 </view>
+// ... existing code ...
 <scroll-view class="scrollarea" scroll-y type="list">
   <view class="container">
-    班次列表（等待实现）
+    <!-- 动态班次列表 -->
+    <block wx:for="{{schedules}}" wx:key="id">
+      <view class="schedule-item">
+        <text>{{item.time}} 发车</text>
+        <text>剩余座位: {{item.seats}}</text>
+        <button size="mini" bindtap="bookSchedule" data-id="{{item.id}}">预约</button>
+      </view>
+    </block>
+    <button bindtap="refreshSchedules">刷新班次</button>
   </view>
 </scroll-view>

@@ -2,7 +2,7 @@
   "libVersion": "3.8.6",
   "projectname": "front",
   "setting": {
-    "urlCheck": true,
+    "urlCheck": false,
     "coverView": true,
     "lazyloadPlaceholderEnable": false,
     "skylineRenderEnable": false,

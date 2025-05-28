@@ -18,3 +18,12 @@ page {
 .location-display text {
   font-size: 16px;
 }
+.schedule-item {
+  padding: 20rpx;
+  margin: 10rpx 0;
+  border: 1rpx solid #eee;
+  border-radius: 8rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
