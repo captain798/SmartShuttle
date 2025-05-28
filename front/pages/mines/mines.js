@@ -9,7 +9,7 @@ Page({
   
   //跳转到预约记录页面
   navigateToReservationList() {
-    wx.navigateTo({
+    wx.switchTab({
       url: '/pages/reservation-list/reservation-list',
       fail: (err) => {
         console.error('跳转失败', err);
