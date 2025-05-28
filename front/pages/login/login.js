@@ -5,7 +5,8 @@ Page({
   data: {
     code: '', // 学号
     name: '', // 密码
-    phone: '', // 手机号码
+    phone: '114514', // 手机号码
+    roldId : '',
   },
 
     // 获取用户手机号
@@ -14,7 +15,7 @@ Page({
         // 获取到加密数据
         const encryptedData = e.detail.encryptedData;
         const iv = e.detail.iv;
-        const loginCode = wx.getStorageSync('loginCode');
+        const loginCode = wx.getStorageSync('login_code');
         if(!loginCode){
           wx.login({
             success:(res) => {
@@ -65,7 +66,7 @@ Page({
 
   // 登录函数
   login: function () {
-    const { code, name, phone } = this.data;
+    const { code, name, phone, role} = this.data;
     // 表单验证
     if(!code || !name || !phone){
       wx.showToast({
@@ -92,6 +93,11 @@ Page({
           wx.setStorageSync('refresh_token', res.data.refresh_token);
           wx.setStorageSync('userInfo', res.data.user);
           
+          if (res.data.user.role === 'driver') {
+            wx.navigateTo({
+              url: '/pages/driver/driver'
+            });
+          } else {
           wx.showToast({
             title: '登录成功',
             icon: 'success',
@@ -103,6 +109,7 @@ Page({
               });
             }
           });
+         }
         } else {
           wx.showToast({
             title: res.data.error || '登录失败',
@@ -125,7 +132,7 @@ Page({
   //生命周期函数--监听页面加载
   onLoad: function() {
     
-    // 暂时跳过登陆界面，进行其他界面的开发
+    // 暂时跳过登陆界面，进行其他界面的开发（后续需删除）
     wx.switchTab({
       url: '/pages/index/index'
     })

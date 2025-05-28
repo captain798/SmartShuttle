@@ -1,0 +1,10 @@
+<!--pages/scan/scan.wxml-->
+<navigation-bar title="司机界面" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<view class="button-container">
+  <!-- 添加加载状态提示 -->
+  <view wx:if="{{isLoading}}" class="loading-tip">正在扫码，请稍候...</view>
+  <button bindtap="scanCode" class="scan-button">
+    <text>点击扫码</text>
+  </button>
+  
+</view>

@@ -1,0 +1,23 @@
+/* pages/scan/scan.wxss */
+/* 新增父容器样式，让按钮竖直排列 */
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  button {
+    /* 修正语法错误，去掉多余逗号 */
+    color: white;
+    /* 添加背景颜色 */
+    background-color: #b3b3dd;
+    /* 添加圆角 */
+    border-radius: 8rpx;
+    /* 添加内边距 */
+    padding: 20rpx;
+    /* 添加外边距 */
+    margin: 20rpx;
+    /* 确保按钮宽度合适 */
+    width: 80%;
+  }
+  

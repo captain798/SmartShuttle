@@ -1,5 +1,13 @@
 // 页面的初始数据
 Page({
+  onShow: function () {
+    if (typeof this.getTabBar === 'function' &&  this.getTabBar()) {
+    this.getTabBar().setData({
+       selected: 1
+      })
+    }
+  },
+
   data: {
     isLoading: false, // 初始时显示加载中
     // 模拟的预约列表数据

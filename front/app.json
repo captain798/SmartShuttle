@@ -4,6 +4,7 @@
     "pages/index/index",
     "pages/mines/mines",
     "pages/driver/driver",
+    "pages/scan/scan",
     "pages/reservation-list/reservation-list",
     "pages/reservation-notice/reservation-notice"
   ],
@@ -15,6 +16,7 @@
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents",
   "tabBar": {
+    "custom": true,
     "list": [
       {
         "pagePath": "pages/index/index",
@@ -33,6 +35,14 @@
         "text": "我的",
         "iconPath": "images/mine.png",
         "selectedIconPath": "images/Selected_mine.png"
+      },
+      {
+        "pagePath": "pages/scan/scan",
+        "text": "扫码"
+      },
+      {
+        "pagePath": "pages/driver/driver",
+        "text": "司机"
       }
     ]
   }

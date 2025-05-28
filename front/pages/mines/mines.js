@@ -1,5 +1,13 @@
 // pages/mines/mines.js
 Page({
+  
+  onShow: function () {
+    if (typeof this.getTabBar === 'function' &&  this.getTabBar()) {
+    this.getTabBar().setData({
+       selected: 2
+      })
+    }
+  },
 
   // 页面初始数据
   data: {
