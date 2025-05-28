@@ -1,4 +1,4 @@
-<navigation-bar title="预约记录" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<navigation-bar title="预约记录" back="{{true}}" color="black" background="#FFF"></navigation-bar>
 
 <view class="container">
 

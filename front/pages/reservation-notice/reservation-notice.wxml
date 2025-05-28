@@ -1,5 +1,5 @@
 <!--pages/reservation-notice/reservation-notice.wxml-->
-<navigation-bar title="预约须知" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<navigation-bar title="预约须知" back="{{true}}" color="black" background="#FFF"></navigation-bar>
 <view class="page-container">
   <view class="reservation-notice-container">
     <view class="notice-content">
