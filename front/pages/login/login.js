@@ -14,15 +14,23 @@ Page({
         // 获取到加密数据
         const encryptedData = e.detail.encryptedData;
         const iv = e.detail.iv;
-        
-        // 这里可以发送到后端解密获取手机号
+        const loginCode = wx.getStorageSync('loginCode');
+        if(!loginCode){
+          wx.login({
+            success:(res) => {
+              wx.setStorageSync('loginCode', res.code);
+            }
+          })
+          }
+
+        // 发送到后端解密获取手机号
         wx.request({
           url: 'http://127.0.0.1:5000/auth/getPhoneNumber',
           method: 'POST',
           data: {
             encryptedData: encryptedData,
             iv: iv,
-            code: wx.getStorageSync('login_code') // 需要先获取临时登录凭证
+            code: loginCode 
           },
           success: (res) => {
             if (res.statusCode === 200) {
@@ -52,13 +60,6 @@ Page({
   onNameInput: function (e) {
     this.setData({
       name: e.detail.value
-    });
-  },
-
-  // 手机号码输入函数
-  onPhoneInput: function (e) {
-    this.setData({
-      phone: e.detail.value
     });
   },
 
@@ -123,10 +124,12 @@ Page({
   
   //生命周期函数--监听页面加载
   onLoad: function() {
+    
     // 暂时跳过登陆界面，进行其他界面的开发
     wx.switchTab({
       url: '/pages/index/index'
     })
+
     // 先获取临时登录凭证
     wx.login({
       success: (res) => {
@@ -144,9 +147,14 @@ Page({
               if (res.confirm) {
                 this.getPhoneNumber();
               } else {
-                wx.showToast({
-                  title: '需要授权手机号才能继续使用服务',
-                  icon: 'none'
+                wx.showToast({ 
+                  title: '需要授权手机号才能继续使用服务', 
+                  icon: 'none' 
+                });
+                // 退出小程序
+                wx.exitMiniProgram({ 
+                  success: () => console.log('成功退出小程序'), 
+                  fail: (err) => console.error('退出小程序失败:', err) 
                 });
               }
             }
