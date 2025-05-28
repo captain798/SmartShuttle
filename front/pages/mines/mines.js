@@ -15,6 +15,15 @@ Page({
         console.error('跳转失败', err);
       }
     });
+  },
+
+  navigateToReservationNotice() {
+    wx.navigateTo({
+      url: '/pages/reservation-notice/reservation-notice',
+      fail: (err) => {
+        console.error('跳转失败', err);
+      }
+    });
   }
   
 })

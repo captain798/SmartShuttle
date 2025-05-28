@@ -4,7 +4,8 @@
     "pages/index/index",
     "pages/mines/mines",
     "pages/driver/driver",
-    "pages/reservation-list/reservation-list"
+    "pages/reservation-list/reservation-list",
+    "pages/reservation-notice/reservation-notice"
   ],
   "window": {
     "navigationBarTextStyle": "black",

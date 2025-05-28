@@ -14,7 +14,7 @@
       <text>我的预约</text>
     </view>
     <view class="icon-item">
-      <image class="icon" src="/images/notice.png"></image>
+      <image class="icon" src="/images/notice.png" bindtap = "navigateToReservationNotice"></image>
       <text>预约须知</text>
     </view>
   </view>

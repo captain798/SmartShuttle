@@ -1,0 +1,12 @@
+<!--pages/reservation-notice/reservation-notice.wxml-->
+<navigation-bar title="预约须知" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<view class="page-container">
+  <view class="reservation-notice-container">
+    <view class="notice-content">
+      <text class="notice-item">1. 请提前至少 24 小时进行预约，以便我们做好安排。</text>
+      <text class="notice-item">2. 取消预约请在出发前 12 小时前操作，否则可能会产生费用。</text>
+      <text class="notice-item">3. 请在预约时间前 10 分钟到达指定上车地点。</text>
+      <text class="notice-item">4. 如有特殊需求，请在预约时备注说明。</text>
+    </view>
+  </view>
+</view>
