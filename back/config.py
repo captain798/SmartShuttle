@@ -3,7 +3,7 @@ from datetime import timedelta
 
 class Config:
     # 基础配置
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
+    SECRET_KEY = os.environ.get('SECRET_KEY', '114514')
     DEBUG = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
     
     # 数据库配置
