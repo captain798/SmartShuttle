@@ -28,12 +28,44 @@ Page({
    */
   scanCode: function() {
     wx.scanCode({
+      onlyFromCamera: true, // 只允许从相机扫码
+      scanType: ['qrCode'], // 只允许扫二维码
       success: (res) => {
         console.log('扫码结果:', res.result);
-        // 可以在这里添加处理扫码结果的逻辑
+        
+        wx.request({
+          url: 'https://127.0.0.1/api/check-in/' + encodeURIComponent(res.result),
+          method: 'POST',
+          header: {
+            'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+          },
+          success: function(response) {
+            if (response.statusCode === 200 && response.data.message) {
+              wx.showToast({
+                title: response.data.message,
+                icon: 'success'
+              });
+            } else {
+              wx.showToast({
+                title: response.data.error || '扫码失败',
+                icon: 'none'
+              });
+            }
+          },
+          fail: function() {
+            wx.showToast({
+              title: '网络错误',
+              icon: 'none'
+            });
+          }
+        });
       },
       fail: (err) => {
         console.error('扫码失败:', err);
+        wx.showToast({
+          title: '扫码失败',
+          icon: 'none'
+        });
       }
     });
   }
