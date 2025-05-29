@@ -1,2 +1,16 @@
 <!--pages/driver/driver.wxml-->
 <navigation-bar title="司机界面" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+
+<!-- 班次列表区域 -->
+<scroll-view class="schedule-list" scroll-y>
+  <block wx:for="{{schedules}}" wx:key="id">
+    <view class="schedule-card">
+      <view class="card-header">
+        <text>路线：{{item.route_name}} | 时间：{{item.departure_datetime}}</text>
+      </view>
+      <view class="card-body">
+        <text>状态：{{item.status}} | 剩余座位：{{item.total_seats - item.reserved_seats}}</text>
+      </view>
+    </view>
+  </block>
+</scroll-view>

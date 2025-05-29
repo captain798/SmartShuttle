@@ -1,1 +1,58 @@
 /* pages/driver/driver.wxss */
+
+/* 班次列表主容器 */
+.schedule-list-container {
+  padding: 32rpx 24rpx; /* 上下32rpx 左右24rpx内边距 */
+  background-color: #f7f8fa; /* 浅灰色背景 */
+  min-height: 100vh; /* 占满整个屏幕高度 */
+}
+
+/* 单个班次卡片 */
+.schedule-card {
+  background: #ffffff;
+  border-radius: 16rpx; /* 16rpx圆角 */
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06); /* 轻微阴影 */
+  margin-bottom: 24rpx; /* 卡片间底部间距 */
+  padding: 24rpx; /* 卡片内边距 */
+}
+
+/* 卡片头部（路线+时间） */
+.schedule-card__header {
+  display: flex;
+  justify-content: space-between; /* 左右两端对齐 */
+  align-items: center;
+  margin-bottom: 16rpx; /* 头部与主体间距 */
+}
+
+/* 路线名称 */
+.schedule-card__route {
+  font-size: 32rpx;
+  font-weight: 600; /* 半粗体 */
+  color: #262626; /* 深灰色文字 */
+}
+
+/* 发车时间 */
+.schedule-card__time {
+  font-size: 28rpx;
+  color: #8c8c8c; /* 中灰色文字 */
+}
+
+/* 卡片主体（状态+座位+按钮） */
+.schedule-card__body {
+  display: flex;
+  flex-wrap: wrap; /* 内容换行 */
+  align-items: center;
+  gap: 16rpx; /* 元素间间距 */
+}
+
+/* 班次状态 */
+.schedule-card__status {
+  font-size: 28rpx;
+  color: #1890ff; /* 蓝色状态（可根据实际状态动态修改颜色） */
+}
+
+/* 剩余座位 */
+.schedule-card__seats {
+  font-size: 28rpx;
+  color: #595959; /* 深灰色文字 */
+}
