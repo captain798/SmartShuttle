@@ -2,21 +2,30 @@
 <navigation-bar title="我的" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 <view class="container">
   <!-- 学生信息卡片 -->
-  <view class="student-card">
-    <text class="card-title">学生信息</text>
-    <text class="info-item">姓名：{{studentName || '暂无姓名'}}</text>
-    <text class="info-item">学号：{{studentId || '暂无学号'}}</text>
-  </view>
-  <!-- 图标栏 -->
-  <view class="icon-bar">
-    <view class="icon-item">
-      <image class="icon" src="/images/reserve.png" bindtap = "navigateToReservationList"></image>
-      <text>我的预约</text>
-    </view>
-    <view class="icon-item">
-      <image class="icon" src="/images/notice.png" bindtap = "navigateToReservationNotice"></image>
-      <text>预约须知</text>
+  <view class="student-card student-row">
+    <image class="avatar" src="/images/mine.png"></image>
+    <view class="student-info">
+      <text class="info-item">姓名：{{studentName || '暂无姓名'}}</text>
+      <text class="info-item">学号：{{studentId || '暂无学号'}}</text>
     </view>
   </view>
+  <!-- 图标表单卡片 -->
+  <view class="form-card">
+    <view class="action-list">
+      <view class="action-item" bindtap="navigateToReservationList">
+        <image class="action-icon" src="/images/reserve.png"></image>
+        <text class="action-text">我的预约</text>
+        <image class="arrow-icon" src="/images/arrow-right.png"></image>
+      </view>
+      <view class="action-item" bindtap="navigateToReservationNotice">
+        <image class="action-icon" src="/images/notice.png"></image>
+        <text class="action-text">预约须知</text>
+        <image class="arrow-icon" src="/images/arrow-right.png"></image>
+      </view>
+    </view>
+  </view>
+
 </view>
+
+
 

@@ -1,27 +1,99 @@
-/* 加载动画样式 */
+/* 页面容器 */
 page {
   height: 100vh;
+  background: #f7f8fa;  /* 添加背景颜色凸出卡片 */
   display: flex;
   flex-direction: column;
 }
 
+/* 卡片式预约项 */
+.reservation-list{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+  padding: 24rpx 0;
+}
+
 /* 卡片式布局样式 */
 .reservation-card {
-  background-color: #fff;
-  border-radius: 10rpx;
-  margin: 20rpx;
-  padding: 20rpx;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+  width: 94vw;
+  margin: 10rpx;
+  background: #fff;
+  border-radius: 18rpx;
+  box-shadow: 0 4rpx 20rpx 0 rgba(44,62,80,0.07);
+  padding: 24rpx 28rpx 24rpx 28rpx;
+  transition: box-shadow 0.2s;  /* 悬停动画过渡 */
+  border-left: 8rpx solid #417af3;  /* 左侧边框 */
 }
 
+/* 卡片悬停加深阴影 */
+.reservation-card:hover {
+  box-shadow: 0 8rpx 36rpx 0 rgba(44,62,80,0.15);
+}
+
+/* 卡片头部 */
 .card-header {
-  border-bottom: 1rpx solid #eee;
-  padding-bottom: 10rpx;
-  margin-bottom: 10rpx;
+  border-bottom: 1rpx solid #f0f1f3;
+  padding-bottom: 20rpx;
+  margin-bottom: 18rpx;
 }
 
+/* 标题 */
+.item-title{
+  color: #2d3a4b;
+  font-size: 32rpx;
+  font-weight: 600;
+  letter-spacing: 1.5rpx;
+}
+
+/* 出发地、目的地左右分栏 */
 .card-body {
-  color: #666;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-top: 4rpx;
+}
+
+/* 单行文本溢出处理 */
+.item-content {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #4b5e72;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;  /* 溢出显示省略号 */
+}
+
+/* 出发地图标 */
+.start-location::before {
+  content: "🚩";
+  display: inline-block;
+  margin-right: 12rpx;
+}
+
+/* 目的地图标 */
+.end-location::before {
+  content: "🏁";
+  display: inline-block;
+  margin-right: 12rpx;
+}
+
+/* 出发地样式 */
+.start-location{
+  flex: 1;
+  min-width: 0;  /* 允许内容收缩 */
+  text-align: right;
+  padding-left: 18rpx;
+}
+
+/* 目的地样式 */
+.end-location {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  padding-left: 18rpx;
 }
 
 /* 无数据提示样式 */
@@ -29,62 +101,75 @@ page {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 100rpx 20rpx 0 20rpx;
+  color: #bfbfbf;
+}
+
+/* 无数据图标样式 */
+.no-data-icon {
+  width: 220rpx;
+  height: 220rpx;
+  margin-bottom: 30rpx;
+}
+
+/* 无数据文字样式 */
+.no-data text {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #bfbfbf;
+  margin-top: 12rpx;
+  letter-spacing: 1rpx;
+}
+
+/* 响应式适配 */
+@media (max-width: 750px) {
+  .reservation-card {
+    width: 98vw;
+    padding: 28rpx 16rpx 18rpx 16rpx;
+  }
+  .item-title, .no-data text {
+    font-size: 30rpx;
+  }
+  .item-content {
+    font-size: 26rpx;
+  }
+}
+
+/* 加载状态容器 */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 40rpx;
 }
 
-.no-data-icon {
-  width: 200rpx;
-  height: 200rpx;
-  margin-bottom: 20rpx;
+/* 加载图标样式 */
+.loading-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-bottom: 18rpx;
 }
 
+/* 动画 */
 .animated {
-  animation: shake 1.5s infinite;
+  animation: shake 1.5s infinite; /* 抖动动画 */
 }
 
+/* 抖动动画关键帧 */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-10rpx); }
   75% { transform: translateX(10rpx); }
 }
 
-/* 加载动画样式 */
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20rpx;
-}
-
-.loading-icon {
-  width: 40rpx;
-  height: 40rpx;
-  margin-bottom: 10rpx;
-}
-
-/* 卡片式布局样式 */
-.reservation-card {
-  background-color: #fff;
-  border-radius: 10rpx;
-  margin: 20rpx;
-  padding: 20rpx;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-  border-bottom: 1rpx solid #eee;
-  padding-bottom: 10rpx;
-  margin-bottom: 10rpx;
-}
-
-/* 确保标题栏使用弹性布局 */
+/* 页面头部样式 */
 .header {
   display: flex;
   align-items: center; 
-  justify-content: flex-start; /* 让内容从左侧开始排列 */
+  justify-content: flex-start; /* 左对齐 */
   padding: 20rpx;
   background-color: #ffffff;
-  border-bottom: 1rpx solid #eeeeee;
+  border-bottom: 1rpx solid #eeeeee;  /* 底部细线分隔 */
 }
 
 /* 调整返回箭头样式 */
@@ -104,57 +189,7 @@ page {
   font-weight: bold;
 }
 
-/* 设置 card-body 为弹性布局，两端对齐 */
-.card-body {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-
-/* 无数据提示样式 */
-.no-data {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 40rpx;
-}
-
-.no-data-icon {
-  width: 200rpx;
-  height: 200rpx;
-  margin-bottom: 20rpx;
-}
-
-.animated {
-  animation: shake 1.5s infinite;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10rpx); }
-  75% { transform: translateX(10rpx); }
-}
-
-/* 让预约列表容器占满父容器宽度 */
-.reservation-list {
-  width: 100%;
-}
-
-/* 让预约卡片占满父容器宽度 */
-.reservation-card {
-  width: 95%;
-  box-sizing: border-box; /* 确保内边距和边框包含在宽度内 */
-  margin-bottom: 10px; /* 卡片之间添加一些间距 */
-}
-
-
-/* 可以根据需要调整文本样式 */
-.start-location, .end-location {
-  padding-left: 40rpx; /* 左边添加间距 */
-  padding-right: 40rpx; /* 右边添加间距 */
-}
-
+/* 通用容器重置 */
 .container {
     margin: 0;
     padding: 0;
