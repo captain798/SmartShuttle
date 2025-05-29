@@ -10,7 +10,7 @@ import logging
 from app import app
 import base64
 import json
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 
 auth_bp = Blueprint('auth', __name__)
 

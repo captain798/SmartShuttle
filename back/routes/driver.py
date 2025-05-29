@@ -4,7 +4,6 @@ from model import db, User, Schedule, Reservation, ReservationStatusEnum, RoleEn
 from datetime import datetime, timedelta
 from sqlalchemy import and_, or_
 import logging
-from utils.notification import send_notification
 
 driver_bp = Blueprint('driver', __name__)
 
