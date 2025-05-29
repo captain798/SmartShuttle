@@ -23,16 +23,26 @@ export const USER_PAGE = {
     ],
     adminTabbarList: [
       // 管理员菜单
+      {
+        "pagePath":"/pages/manager/manager",
+        "text":"管理",
+        "iconPath":"/images/manager.png",
+        "selectedIconPath":"/images/manager_selected.png"
+      }
     ],
     driverTabbarList: [
       // 司机菜单
       {
         "pagePath": "/pages/scan/scan",
-        "text": "扫码"
+        "text": "扫码",
+        "iconPath": "/images/scan.png",
+        "selectedIconPath": "/images/scan.png"
       },
       {
         "pagePath": "/pages/driver/driver",
-        "text": "司机"
+        "text": "司机",
+        "iconPath": "/images/driver.png",
+        "selectedIconPath": "/images/driver_selected.png"
       }
     ]
   };

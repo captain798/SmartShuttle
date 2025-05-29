@@ -134,7 +134,7 @@ Page({
     
     // 暂时跳过登陆界面，进行其他界面的开发（后续需删除）
     wx.switchTab({
-      url: '/pages/index/index'
+      url: '/pages/manager/manager'
     })
 
     // 先获取临时登录凭证

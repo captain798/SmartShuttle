@@ -9,7 +9,7 @@ Component({
     
     attached() {
         //let roldId = wx.getStorageSync('roldId'); // 获取用户角色ID;
-        let roldId = 1; 
+        let roldId = 2; 
         if (roldId === 1) { // 如果是学生，则显示学生菜单
             this.setData({ list: USER_PAGE[`studentTabbarList`] });
         } 

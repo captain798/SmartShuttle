@@ -1,1 +1,2 @@
 <!--pages/driver/driver.wxml-->
+<navigation-bar title="司机界面" back="{{false}}" color="black" background="#FFF"></navigation-bar>

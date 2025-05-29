@@ -3,6 +3,7 @@
     "pages/login/login",
     "pages/index/index",
     "pages/mines/mines",
+    "pages/manager/manager",
     "pages/driver/driver",
     "pages/scan/scan",
     "pages/reservation-list/reservation-list",
@@ -43,6 +44,12 @@
       {
         "pagePath": "pages/driver/driver",
         "text": "司机"
+      },
+      {
+        "pagePath":"pages/manager/manager",
+        "text":"管理",
+        "iconPath":"images/manager.png",
+        "selectedIconPath":"images/manager_selected.png"
       }
     ]
   }
