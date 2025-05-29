@@ -1,4 +1,4 @@
-// pages/manager/manager.js
+// pages/reservation/reservation-detail/reservation-detail.js
 Page({
 
   /**

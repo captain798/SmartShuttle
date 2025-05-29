@@ -18,7 +18,7 @@ Page({
   //跳转到预约记录页面
   navigateToReservationList() {
     wx.switchTab({
-      url: '/pages/reservation-list/reservation-list',
+      url: '/pages/reservation/reservation-list/reservation-list',
       fail: (err) => {
         console.error('跳转失败', err);
       }
@@ -27,7 +27,7 @@ Page({
 
   navigateToReservationNotice() {
     wx.navigateTo({
-      url: '/pages/reservation-notice/reservation-notice',
+      url: '/pages/reservation/reservation-notice/reservation-notice',
       fail: (err) => {
         console.error('跳转失败', err);
       }

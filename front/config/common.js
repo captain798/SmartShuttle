@@ -9,7 +9,7 @@ export const USER_PAGE = {
         "selectedIconPath": "/images/Selected_VehicleBus.png"
       },
       {
-        "pagePath": "/pages/reservation-list/reservation-list",
+        "pagePath": "/pages/reservation/reservation-list/reservation-list",
         "text": "我的预约",
         "iconPath": "/images/reserve.png",
         "selectedIconPath": "/images/reserve.png"

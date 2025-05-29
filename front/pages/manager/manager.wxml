@@ -1,2 +1,2 @@
 <!--pages/manager/manager.wxml-->
-<navigation-bar title="管理界面" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<text>pages/manager/manager.wxml</text>

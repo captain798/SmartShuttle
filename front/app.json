@@ -3,11 +3,12 @@
     "pages/login/login",
     "pages/index/index",
     "pages/mines/mines",
-    "pages/manager/manager",
-    "pages/driver/driver",
-    "pages/scan/scan",
-    "pages/reservation-list/reservation-list",
-    "pages/reservation-notice/reservation-notice"
+    "pages/driver/scan/scan",
+    "pages/driver/driver-list/driver-list",
+    "pages/reservation/reservation-list/reservation-list",
+    "pages/reservation/reservation-notice/reservation-notice",
+    "pages/reservation/reservation-detail/reservation-detail",
+    "pages/driver/driver-list"
   ],
   "window": {
     "navigationBarTextStyle": "black",
@@ -26,13 +27,13 @@
         "selectedIconPath": "images/Selected_VehicleBus.png"
       },
       {
-        "pagePath": "pages/reservation-list/reservation-list",
+        "pagePath": "pages/reservation/reservation-list/reservation-list",
         "text": "我的预约",
         "iconPath": "images/reserve.png",
         "selectedIconPath": "images/reserve.png"
       },
       {
-        "pagePath": "pages/mines/mines", 
+        "pagePath": "pages/mines/mines",
         "text": "我的",
         "iconPath": "images/mine.png",
         "selectedIconPath": "images/Selected_mine.png"
@@ -46,10 +47,10 @@
         "text": "司机"
       },
       {
-        "pagePath":"pages/manager/manager",
-        "text":"管理",
-        "iconPath":"images/manager.png",
-        "selectedIconPath":"images/manager_selected.png"
+        "pagePath": "pages/manager/manager",
+        "text": "管理",
+        "iconPath": "images/manager.png",
+        "selectedIconPath": "images/manager_selected.png"
       }
     ]
   }

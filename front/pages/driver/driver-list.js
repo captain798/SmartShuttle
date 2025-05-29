@@ -1,4 +1,4 @@
-// pages/manager/manager.js
+// pages/driver/driver-list.js
 Page({
 
   /**
