@@ -1,2 +1,16 @@
 2025-05-30 11:37:06,739 - app - INFO - Request: GET / - IP: 127.0.0.1
 2025-05-30 11:37:08,099 - app - INFO - Request: GET /favicon.ico - IP: 127.0.0.1
+2025-05-30 23:11:56,268 - app - INFO - Request: POST /auth/login - IP: 127.0.0.1
+2025-05-30 23:15:20,316 - app - INFO - Request: POST /auth/login - IP: 127.0.0.1
+2025-05-30 23:15:39,672 - app - INFO - Request: POST /auth/login - IP: 127.0.0.1
+2025-05-30 23:17:02,492 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-05-30 23:17:14,392 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-05-30 23:41:34,382 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-05-30 23:46:25,269 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-05-30 23:48:47,794 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-05-30 23:51:12,114 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-05-30 23:51:41,412 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-05-30 23:52:28,105 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-05-30 23:57:01,869 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-05-31 00:00:19,768 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-05-31 00:08:14,806 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1

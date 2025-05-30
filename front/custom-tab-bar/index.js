@@ -8,17 +8,17 @@ Component({
     },
     
     attached() {
-        //let roldId = wx.getStorageSync('roldId'); // 获取用户角色ID;
-        let roldId = 3; 
-        if (roldId === 1) { // 如果是学生，则显示学生菜单
+        const userinfo = wx.getStorageSync('userInfo'); 
+        const role = userInfo?.role; 
+        
+        // 根据角色类型设置底部导航菜单
+        if (role === 'student') { 
             this.setData({ list: USER_PAGE[`studentTabbarList`] });
         } 
-        else if (roldId === 2) 
-        { // 如果是管理员，则显示管理员菜单
+        else if (role === 'manager') { 
             this.setData({ list: USER_PAGE[`adminTabbarList`] });
         } 
-        else if (roldId === 3) 
-        { // 如果是司机，则显示司机菜单
+        else if (role === 'driver') { 
             this.setData({ list: USER_PAGE[`driverTabbarList`] });
         }
     },

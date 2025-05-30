@@ -4,7 +4,11 @@ from datetime import datetime, timedelta
 import enum
 import json
 
-db = SQLAlchemy()
+# 帮后端修个bug，导入db by captain
+from extensions import db
+# 注释掉这句 by captain
+# db = SQLAlchemy()
+
 
 # ----------------------------
 # 枚举类型定义
@@ -44,7 +48,7 @@ class RouteStatusEnum(enum.Enum):
 
 class User(db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     wechat_openid = db.Column(db.String(64), unique=True, nullable=False)
     role = db.Column(db.Enum(RoleEnum), nullable=False)
     name = db.Column(db.String(50), nullable=False)

@@ -60,21 +60,38 @@ def login():
             db.session.add(user)
             db.session.commit()
 
-            # 生成 JWT Token
-            access_token = create_access_token(identity=user.id)
-            refresh_token = create_refresh_token(identity=user.id)
-            
-            return jsonify({
-                'access_token': access_token,
-                'refresh_token': refresh_token,
-                'user': {
-                    'id': user.id,
-                    'role': user.role,
-                    'name': user.name,
-                    'student_id': user.student_id,
-                    'phone': user.phone
-                }
-            })
+            # 原错误位置：仅新用户返回，老用户无响应（已注释）
+            # # 生成 JWT Token
+            # access_token = create_access_token(identity=user.id)
+            # refresh_token = create_refresh_token(identity=user.id)
+            # return jsonify({
+            #     'access_token': access_token,
+            #     'refresh_token': refresh_token,
+            #     'user': {
+            #         'id': user.id,
+            #         'role': user.role.value,
+            #         'name': user.name,
+            #         'student_id': user.student_id,
+            #         'phone': user.phone
+            #     }
+            # })
+
+        # 帮后端debug：统一处理新/老用户的Token生成与响应返回   by captain
+        access_token = create_access_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=user.id)
+        return jsonify({
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'user': {
+                'id': user.id,
+                # 帮后端debug：将枚举对象转化为字符串值，符合json格式   by captain
+                # 'role': user.role,
+                'role': user.role.value,
+                'name': user.name,
+                'student_id': user.student_id,
+                'phone': user.phone
+            }
+        })
 
     except Exception as e:
         logging.error(f"登录过程发生错误: {str(e)}")

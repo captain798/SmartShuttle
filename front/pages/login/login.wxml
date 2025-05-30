@@ -5,15 +5,12 @@
     <image src="/images/WHU.png" mode="aspectFit" class="logo-img"/>
   </view>
   <form class="form-wrap fade-in" style="animation-delay: 0.7s;">
-    <view class="input-item fade-in" style="animation-delay: 0.8s;">
-      <image src="/images/学工号.png" class="input-icon" />
-      <input type="text" placeholder="学工号" placeholder-class="placeholder" class="input-field"/>
-    </view>
     <view class="input-item fade-in"  style="animation-delay: 0.9s;">
       <image src="/images/用户.png" class="input-icon" />
-      <input type="password" placeholder="姓名" placeholder-class="placeholder" class="input-field"/>
+      <input type="password" placeholder="姓名" placeholder-class="placeholder" class="input-field"
+        bindinput="onNameInput" value="{{name}}" />
     </view>
-    <button class="login-btn">登录</button>
+    <button class="login-btn" bindtap="login">登录</button>
     <view class="form-bottom">
       <label class="checkbox-label">
         <checkbox checked="{{true}}" />
