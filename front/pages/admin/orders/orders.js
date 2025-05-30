@@ -1,4 +1,4 @@
-// pages/driver/driver-list/driver-list.js
+// pages/admin/orders/orders.js
 Page({
 
   /**

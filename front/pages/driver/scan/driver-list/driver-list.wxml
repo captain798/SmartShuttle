@@ -1,0 +1,35 @@
+<navigation-bar title="我的" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<view class="page-bg">
+  <view class="container">
+    <!-- 司机信息卡片 -->
+    <view class="driver-card driver-row">
+      <image class="avatar" src="/images/mine.png"></image>
+      <view class="driver-info">
+        <text class="info-item">姓名：{{driverName || '暂无姓名'}}</text>
+        <text class="info-item">工号：{{driverId || '暂无工号'}}</text>
+      </view>
+    </view>
+    <!-- 间隔 -->
+    <view class="spacer"></view>
+    <!-- 功能菜单卡片 -->
+    <view class="form-card">
+      <view class="action-list">
+        <view class="action-item" hover-class="action-hover">
+          <image class="action-icon" src="/images/Selected_VehicleBus.png"></image>
+          <text class="action-text">我的班车</text>
+          <image class="arrow-icon" src="/images/arrow-right.png"></image>
+        </view>
+        <view class="action-item" hover-class="action-hover">
+          <image class="action-icon" src="/images/pen.png"></image>
+          <text class="action-text">班车调整</text>
+          <image class="arrow-icon" src="/images/arrow-right.png"></image>
+        </view>
+        <view class="action-item" hover-class="action-hover">
+          <image class="action-icon" src="/images/reserve.png"></image>
+          <text class="action-text">预约情况</text>
+          <image class="arrow-icon" src="/images/arrow-right.png"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
