@@ -33,13 +33,13 @@ export const USER_PAGE = {
     driverTabbarList: [
       // 司机菜单
       {
-        "pagePath": "/pages/scan/scan",
+        "pagePath": "/pages/driver/scan/scan",
         "text": "扫码",
         "iconPath": "/images/scan.png",
         "selectedIconPath": "/images/scan.png"
       },
       {
-        "pagePath": "/pages/driver/driver",
+        "pagePath": "/pages/driver/driver-list/driver-list",
         "text": "司机",
         "iconPath": "/images/driver.png",
         "selectedIconPath": "/images/driver_selected.png"

@@ -7,8 +7,7 @@
     "pages/driver/driver-list/driver-list",
     "pages/reservation/reservation-list/reservation-list",
     "pages/reservation/reservation-notice/reservation-notice",
-    "pages/reservation/reservation-detail/reservation-detail",
-    "pages/driver/driver-list"
+    "pages/reservation/reservation-detail/reservation-detail"
   ],
   "window": {
     "navigationBarTextStyle": "black",
@@ -39,19 +38,14 @@
         "selectedIconPath": "images/Selected_mine.png"
       },
       {
-        "pagePath": "pages/scan/scan",
+        "pagePath": "pages/driver/scan/scan",
         "text": "扫码"
       },
       {
-        "pagePath": "pages/driver/driver",
+        "pagePath": "pages/driver/driver-list/driver-list",
         "text": "司机"
-      },
-      {
-        "pagePath": "pages/manager/manager",
-        "text": "管理",
-        "iconPath": "images/manager.png",
-        "selectedIconPath": "images/manager_selected.png"
       }
+      
     ]
   }
 }
