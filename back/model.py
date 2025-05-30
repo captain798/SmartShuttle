@@ -29,8 +29,10 @@ class ReservationStatusEnum(enum.Enum):
     absent = 'absent'      # 缺席
 
 class RouteNameEnum(enum.Enum):
-    A = 'A'
-    B = 'B'
+    A = '武大本部网安院-新校区新珈楼门口'
+    B = '新校区一食堂门口-武大本部当代楼'
+    C = '新校区新珈楼门口-武大本部当代楼'
+    D = '新校区新珈楼门口-武大本部网安院'
 
 class RouteStatusEnum(enum.Enum):
     active = 'active'

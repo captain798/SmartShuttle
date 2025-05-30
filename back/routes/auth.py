@@ -1,13 +1,13 @@
 # routes/auth.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
+from werkzeug.security import generate_password_hash, check_password_hash
+from extensions import db, jwt
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from model import User, RoleEnum
 import requests
-from model import User, db
 from config import Config
-from flask_jwt_extended import create_access_token, create_refresh_token
 from sqlalchemy.exc import SQLAlchemyError
 import logging
-
-from app import app
 import base64
 import json
 from Cryptodome.Cipher import AES
@@ -80,7 +80,6 @@ def login():
         logging.error(f"登录过程发生错误: {str(e)}")
         return jsonify({'error': '系统错误'}), 500
 
-
 # 微信小程序解密手机号
 @auth_bp.route('/getPhoneNumber', methods=['POST'])
 def get_phone_number():
@@ -104,8 +103,8 @@ def get_phone_number():
 
 # 获取微信session_key
 def get_session_key(code):
-    appid = app.config['WX_APPID']
-    secret = app.config['WX_SECRET']
+    appid = current_app.config['WECHAT_APPID']
+    secret = current_app.config['WECHAT_SECRET']
     url = f'https://api.weixin.qq.com/sns/jscode2session?appid={appid}&secret={secret}&js_code={code}&grant_type=authorization_code'
     
     response = requests.get(url)
