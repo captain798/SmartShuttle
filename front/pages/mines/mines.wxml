@@ -1,12 +1,12 @@
 <navigation-bar title="我的" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 <view class="page-bg">
   <view class="container">
-    <!-- 学生信息卡片 -->
-    <view class="student-card student-row">
+    <!-- 学生信息卡片，添加 bindtap 事件 -->
+    <view class="student-card student-row" bindtap="checkAuthentication">
       <image class="avatar" src="/images/mine.png"></image>
       <view class="student-info">
-        <text class="info-item">姓名：{{studentName || '暂无姓名'}}</text>
-        <text class="info-item">学号：{{studentId || '暂无学号'}}</text>
+        <text class="info-item">姓名：{{userName || '暂无姓名'}}</text>
+        <text class="info-item">学号：{{userCard || '暂无学工号'}}</text>
       </view>
     </view>
     <!-- 间隔 -->

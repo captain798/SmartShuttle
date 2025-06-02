@@ -8,7 +8,7 @@ Component({
     },
     
     attached() {
-        const userinfo = wx.getStorageSync('userInfo'); 
+        const userInfo = wx.getStorageSync('userInfo'); 
         const role = userInfo?.role; 
         
         // 根据角色类型设置底部导航菜单
@@ -20,6 +20,8 @@ Component({
         } 
         else if (role === 'driver') { 
             this.setData({ list: USER_PAGE[`driverTabbarList`] });
+        } else {
+          this.setData({list : USER_PAGE['studentTabbarList']})
         }
     },
 

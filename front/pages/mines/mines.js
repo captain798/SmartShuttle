@@ -1,4 +1,7 @@
 // pages/mines/mines.js
+
+const app = getApp() // 获取全局应用实例对象
+
 Page({
   
   onShow: function () {
@@ -9,13 +12,17 @@ Page({
     }
   },
 
-  // 页面初始数据
   data: {
-    studentName : '网小安',
-    studentId : '001'
+    userName : null,
+    userCard : null
   },
   
-  //跳转到预约记录页面
+  onLoad() {
+    const userName = app.globalData.userName; 
+    const userCard = app.globalData.userCard; 
+    this.setData({ userName, userCard });
+  },
+
   navigateToReservationList() {
     wx.switchTab({
       url: '/pages/reservation/reservation-list/reservation-list',
@@ -32,6 +39,5 @@ Page({
         console.error('跳转失败', err);
       }
     });
-  }
-  
+  },
 })
