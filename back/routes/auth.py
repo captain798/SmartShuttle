@@ -16,12 +16,12 @@ auth_bp = Blueprint('auth', __name__)
 
 WECHAT_LOGIN_URL = "https://api.weixin.qq.com/sns/jscode2session"
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST']) # 验证逻辑
 def login():
     try:
         code = request.json.get('code')
         name = request.json.get('name')
-        phone = request.json.get('phone')
+        phone = request.json.get('phone') # 更换为学工号
         
         if not code:
             return jsonify({'error': '缺少 code'}), 400
@@ -54,7 +54,7 @@ def login():
                 wechat_openid=openid,
                 role='student',  # 默认角色
                 name=name,
-                student_id=None,
+                student_id=None, # 学工号 源于输入
                 phone=phone
             )
             db.session.add(user)
@@ -80,7 +80,7 @@ def login():
         access_token = create_access_token(identity=user.id)
         refresh_token = create_refresh_token(identity=user.id)
         return jsonify({
-            'access_token': access_token,
+            'access_token': access_token, # 进行除验证之外操作的token
             'refresh_token': refresh_token,
             'user': {
                 'id': user.id,
@@ -97,50 +97,7 @@ def login():
         logging.error(f"登录过程发生错误: {str(e)}")
         return jsonify({'error': '系统错误'}), 500
 
-# 微信小程序解密手机号
-@auth_bp.route('/getPhoneNumber', methods=['POST'])
-def get_phone_number():
-    try:
-        data = request.get_json()
-        encrypted_data = data['encryptedData']
-        iv = data['iv']
-        code = data['code']
-        
-        # 获取微信session_key
-        session_key = get_session_key(code)
-        if not session_key:
-            return jsonify({'error': '获取session_key失败'}), 400
-            
-        # 解密手机号
-        phone_info = decrypt_phone_number(encrypted_data, iv, session_key)
-        return jsonify({'phoneNumber': phone_info.get('phoneNumber')})
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
-# 获取微信session_key
-def get_session_key(code):
-    appid = current_app.config['WECHAT_APPID']
-    secret = current_app.config['WECHAT_SECRET']
-    url = f'https://api.weixin.qq.com/sns/jscode2session?appid={appid}&secret={secret}&js_code={code}&grant_type=authorization_code'
-    
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        return data.get('session_key')
-    return None
 
-# AES解密手机号
-def decrypt_phone_number(encrypted_data, iv, session_key):
-    encrypted_data = base64.b64decode(encrypted_data)
-    iv = base64.b64decode(iv)
-    session_key = base64.b64decode(session_key)
-    
-    cipher = AES.new(session_key, AES.MODE_CBC, iv)
-    decrypted = cipher.decrypt(encrypted_data)
-    
-    # 去除填充
-    pad = decrypted[-1]
-    decrypted = decrypted[:-pad]
-    
-    return json.loads(decrypted.decode('utf-8'))
+
+

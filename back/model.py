@@ -52,8 +52,8 @@ class User(db.Model):
     wechat_openid = db.Column(db.String(64), unique=True, nullable=False)
     role = db.Column(db.Enum(RoleEnum), nullable=False)
     name = db.Column(db.String(50), nullable=False)
-    student_id = db.Column(db.String(20), unique=True, nullable=True)
-    phone = db.Column(db.String(128))  # AES加密存储
+    student_id = db.Column(db.String(20), unique=True, nullable=True) # 学工号
+    phone = db.Column(db.String(128))  # AES加密存储 # delete
     penalty_until = db.Column(db.DateTime, default=None)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -110,13 +110,14 @@ class Reservation(db.Model):
     id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), nullable=False)
     schedule_id = db.Column(db.String(20), db.ForeignKey('schedules.id'), nullable=False)
-    seat_number = db.Column(db.Integer, nullable=False)
+    seat_number = db.Column(db.Integer, nullable=False) # 序号：预约的顺序
     status = db.Column(db.Enum(ReservationStatusEnum), default='active')
     priority_used = db.Column(db.Boolean, default=False)
     qr_code = db.Column(db.String(64), unique=True, nullable=False)  # 预约二维码
     checked_in_at = db.Column(db.DateTime, default=None)  # 签到时间
     reserved_at = db.Column(db.DateTime, default=datetime.utcnow)
     canceled_at = db.Column(db.DateTime, default=None)
+    
 
 # ----------------------------
 # 惩罚记录模型
