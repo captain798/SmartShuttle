@@ -28,3 +28,9 @@
     </view>
   </view>
 </view>
+<input-modal 
+  show="{{showInputModal}}" 
+  title="请输入认证信息" 
+  bind:hide="hideInputModal" 
+  bind:confirm="confirmInput"
+></input-modal>
