@@ -11,6 +11,7 @@ import logging
 import base64
 import json
 from Cryptodome.Cipher import AES
+from utils.csv_utils import verify_user_identity
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -21,12 +22,19 @@ def login():
     try:
         code = request.json.get('code')
         name = request.json.get('name')
-        phone = request.json.get('phone') # 更换为学工号
+        school_id = request.json.get('school_id') # 更换为学工号
         
         if not code:
             return jsonify({'error': '缺少 code'}), 400
         if not name:
             return jsonify({'error': '缺少 name'}), 400
+        if not school_id:
+            return jsonify({'error': '缺少 school_id'}), 400
+        
+        # 验证用户身份
+        user_info = verify_user_identity(name, school_id)
+        if not user_info:
+            return jsonify({'error': '身份验证失败，请确认姓名和学工号是否正确'}), 401
 
         # 请求微信接口验证 code
         try:
@@ -52,31 +60,13 @@ def login():
         if not user:
             user = User(
                 wechat_openid=openid,
-                role='student',  # 默认角色
+                role=user_info['role'],  # 默认角色
                 name=name,
-                student_id=None, # 学工号 源于输入
-                phone=phone
+                school_id=school_id, # 学工号 源于输入
             )
             db.session.add(user)
             db.session.commit()
 
-            # 原错误位置：仅新用户返回，老用户无响应（已注释）
-            # # 生成 JWT Token
-            # access_token = create_access_token(identity=user.id)
-            # refresh_token = create_refresh_token(identity=user.id)
-            # return jsonify({
-            #     'access_token': access_token,
-            #     'refresh_token': refresh_token,
-            #     'user': {
-            #         'id': user.id,
-            #         'role': user.role.value,
-            #         'name': user.name,
-            #         'student_id': user.student_id,
-            #         'phone': user.phone
-            #     }
-            # })
-
-        # 帮后端debug：统一处理新/老用户的Token生成与响应返回   by captain
         access_token = create_access_token(identity=user.id)
         refresh_token = create_refresh_token(identity=user.id)
         return jsonify({
@@ -84,12 +74,9 @@ def login():
             'refresh_token': refresh_token,
             'user': {
                 'id': user.id,
-                # 帮后端debug：将枚举对象转化为字符串值，符合json格式   by captain
-                # 'role': user.role,
                 'role': user.role.value,
                 'name': user.name,
-                'student_id': user.student_id,
-                'phone': user.phone
+                'school_id': user.school_id,
             }
         })
 

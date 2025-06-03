@@ -15,9 +15,9 @@ from extensions import db
 # ----------------------------
 
 class RoleEnum(enum.Enum):
-    admin = 'admin'
-    teacher = 'teacher'
-    student = 'student'
+    ADMIN = 'admin'
+    TEACHER = 'teacher'
+    STUDENT = 'student'
     driver = 'driver'
     temp = 'temp'
 
@@ -48,14 +48,16 @@ class RouteStatusEnum(enum.Enum):
 
 class User(db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    wechat_openid = db.Column(db.String(64), unique=True, nullable=False)
-    role = db.Column(db.Enum(RoleEnum), nullable=False)
-    name = db.Column(db.String(50), nullable=False)
-    student_id = db.Column(db.String(20), unique=True, nullable=True) # 学工号
-    phone = db.Column(db.String(128))  # AES加密存储 # delete
-    penalty_until = db.Column(db.DateTime, default=None)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    id = db.Column(db.Integer, primary_key=True)
+    wechat_openid = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(80), nullable=False)
+    school_id = db.Column(db.String(20), unique=True, nullable=False)
+    role = db.Column(db.Enum(RoleEnum), nullable=False, default=RoleEnum.STUDENT)
+    department = db.Column(db.String(100))
+    class_name = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # 与预约记录的关系
     reservations = db.relationship('Reservation', backref='user', lazy=True)
@@ -64,6 +66,9 @@ class User(db.Model):
         """生成JWT Token"""
         expires = timedelta(days=1)
         return create_access_token(identity={'id': self.id, 'role': self.role.value}, expires_delta=expires)
+
+    def __repr__(self):
+        return f'<User {self.name}>'
 
 # ----------------------------
 # 路线模型
