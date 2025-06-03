@@ -101,8 +101,8 @@ Page({
       success: (res) => {
         console.log(res);
         app.globalData.accessToken = res.data.accessToken;
-        app.globalData.userInfo = { name, school_id: card };
-        this.setData({ userName: name, userCard: card });
+        app.globalData.userInfo = res.data;
+        this.setData({ userName: res.data.user.name, userCard: res.data.user.school_id });
         wx.showToast({
           title: '认证成功',
           icon: 'success',
