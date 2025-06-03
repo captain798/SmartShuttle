@@ -15,9 +15,9 @@ from extensions import db
 # ----------------------------
 
 class RoleEnum(enum.Enum):
-    ADMIN = 'admin'
-    TEACHER = 'teacher'
-    STUDENT = 'student'
+    admin = 'admin'
+    teacher = 'teacher'
+    student = 'student'
     driver = 'driver'
     temp = 'temp'
 
