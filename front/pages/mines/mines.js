@@ -19,8 +19,8 @@ Page({
   },
   
   onLoad() {
-    const userName = app.globalData.userName; 
-    const userCard = app.globalData.userCard; 
+    const userName = app.globalData.userInfo?.name || null; 
+    const userCard = app.globalData.userInfo?.school_id || null; 
     this.setData({ userName, userCard });
   },
 
@@ -46,14 +46,20 @@ Page({
    * 检查用户是否认证，若未认证则弹出认证窗口
    */
   checkAuthentication() {
-    const app = getApp();
-    console.log("ok");
     // 假设用户信息存在则表示已认证
-    if (!app.globalData.userInfo) {
+    if (!app.globalData.accessToken) {
+      console.log("正在验证")
       this.setData({
         showInputModal: true
       });
+    } else {
+      wx.showToast({
+        title: '您已认证',
+        icon: 'success',
+        duration: 2000
+      });
     }
+
   },
 
   /**
