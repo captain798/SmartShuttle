@@ -53,7 +53,7 @@ class User(db.Model):
     wechat_openid = db.Column(db.String(100), unique=True, nullable=False)
     name = db.Column(db.String(80), nullable=False)
     school_id = db.Column(db.String(20), unique=True, nullable=False)
-    role = db.Column(db.Enum(RoleEnum), nullable=False, default=RoleEnum.STUDENT)
+    role = db.Column(db.Enum(RoleEnum), nullable=False, default=RoleEnum.student)
     department = db.Column(db.String(100))
     class_name = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)

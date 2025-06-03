@@ -29,3 +29,5 @@
 2025-06-03 14:30:59,189 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
 2025-06-03 14:31:31,871 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
 2025-06-03 14:36:48,405 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-06-03 14:44:46,328 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
+2025-06-03 14:44:50,728 - app - INFO - Request: POST /api/auth/login - IP: 127.0.0.1
