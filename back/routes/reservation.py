@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from model import db, User, Schedule, Reservation, ReservationStatusEnum, RoleEnum, Penalty
+from model import db, User, Schedule, Reservation, ReservationStatusEnum, RoleEnum, Penalty, Route, RouteNameEnum
 from datetime import datetime, timedelta
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func
 import logging
 import re
 import uuid
@@ -437,4 +437,124 @@ def list_reservations():
 
     except Exception as e:
         logging.error(f"获取预约列表失败: {str(e)}")
+        return jsonify({'error': '系统错误'}), 500
+
+@reservation_bp.route('/available-schedules', methods=['GET'])
+@jwt_required()
+def get_available_schedules():
+    """
+    获取可预约的班次列表
+    查询参数:
+        date: 日期 (YYYY-MM-DD)
+        start_point: 起点
+        end_point: 终点
+        page: 页码（默认1）
+        per_page: 每页数量（默认10）
+    返回:
+        成功:
+            schedules: [
+                {
+                    id: 班次ID
+                    route_name: 路线名称
+                    departure_time: 发车时间
+                    arrival_time: 到达时间
+                    available_seats: 剩余座位数
+                    total_seats: 总座位数
+                    vehicle_plate: 车牌号
+                    driver_name: 司机姓名
+                }
+            ]
+            total: 总记录数
+            pages: 总页数
+            current_page: 当前页码
+        失败:
+            error: 错误信息
+    权限要求:
+        需要JWT认证
+    业务规则:
+        1. 只返回未发车的班次
+        2. 只返回有剩余座位的班次
+        3. 支持按日期、起点、终点筛选
+        4. 支持分页
+    """
+    try:
+        # 获取查询参数
+        date_str = request.args.get('date')
+        start_point = request.args.get('start_point')
+        end_point = request.args.get('end_point')
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+
+        # 验证日期格式
+        try:
+            query_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            return jsonify({'error': '日期格式不正确，请使用 YYYY-MM-DD 格式'}), 400
+
+        # 构建基础查询
+        query = Schedule.query.join(Route).filter(
+            func.date(Schedule.departure_datetime) == query_date,
+            Schedule.status == 'normal',
+            Schedule.departure_datetime > datetime.utcnow()
+        )
+
+        # 根据起点和终点筛选
+        if start_point and end_point:
+            query = query.filter(
+                Route.start_point == start_point,
+                Route.end_point == end_point
+            )
+
+        # 计算每个班次的已预约数量
+        subquery = db.session.query(
+            Reservation.schedule_id,
+            func.count(Reservation.id).label('reserved_count')
+        ).filter(
+            Reservation.status == ReservationStatusEnum.active
+        ).group_by(Reservation.schedule_id).subquery()
+
+        # 添加已预约数量信息
+        query = query.outerjoin(
+            subquery,
+            Schedule.id == subquery.c.schedule_id
+        ).add_columns(
+            func.coalesce(subquery.c.reserved_count, 0).label('reserved_count')
+        )
+
+        # 只返回有剩余座位的班次
+        query = query.filter(
+            Schedule.dynamic_capacity > func.coalesce(subquery.c.reserved_count, 0)
+        )
+
+        # 分页查询
+        pagination = query.order_by(Schedule.departure_datetime).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+
+        # 构建返回数据
+        schedules = []
+        for schedule, reserved_count in pagination.items:
+            available_seats = schedule.dynamic_capacity - reserved_count
+            schedules.append({
+                'id': schedule.id,
+                'route_name': schedule.route.name.value,
+                'departure_time': schedule.departure_datetime.strftime('%Y-%m-%d %H:%M'),
+                'arrival_time': schedule.route.arrival_time.strftime('%H:%M'),
+                'available_seats': available_seats,
+                'total_seats': schedule.dynamic_capacity,
+                'vehicle_plate': schedule.vehicle_plate,
+                'driver_name': schedule.driver.name if schedule.driver else None,
+                'start_point': schedule.route.start_point,
+                'end_point': schedule.route.end_point
+            })
+
+        return jsonify({
+            'schedules': schedules,
+            'total': pagination.total,
+            'pages': pagination.pages,
+            'current_page': page
+        })
+
+    except Exception as e:
+        logging.error(f"获取可预约班次列表失败: {str(e)}")
         return jsonify({'error': '系统错误'}), 500 
