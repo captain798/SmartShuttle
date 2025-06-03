@@ -8,6 +8,7 @@ App({
   globalData: {
       userInfo: null,    // 用户信息对象
       accessToken: null, // 登录凭证
+      baseUrl : 'http://127.0.0.1:5001/api' // 服务器基础URL
   },
 
   onLaunch() {

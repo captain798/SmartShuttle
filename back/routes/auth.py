@@ -82,6 +82,7 @@ def login():
 
     except Exception as e:
         logging.error(f"登录过程发生错误: {str(e)}")
+        print(f"登录过程发生错误: {str(e)}")
         return jsonify({'error': '系统错误'}), 500
 
 

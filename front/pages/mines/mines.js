@@ -15,7 +15,8 @@ Page({
   data: {
     userName : null,
     userCard : null,
-    showInputModal: false
+    showInputModal: false,
+    code : null, // 登录码，用于获取用户信息
   },
   
   onLoad() {
@@ -46,11 +47,20 @@ Page({
    * 检查用户是否认证，若未认证则弹出认证窗口
    */
   checkAuthentication() {
-    // 假设用户信息存在则表示已认证
     if (!app.globalData.accessToken) {
-      console.log("正在验证")
+      console.log("正在验证");
       this.setData({
         showInputModal: true
+      });
+      wx.login({
+        success: (res) => {
+          console.log(res);
+          if (res.code) {
+            this.setData({ code: res.code });
+          } else {
+            console.error('登录失败！' + res.errMsg);
+          }
+        }
       });
     } else {
       wx.showToast({
@@ -59,16 +69,6 @@ Page({
         duration: 2000
       });
     }
-
-  },
-
-  /**
-   * 隐藏输入弹窗
-   */
-  hideInputModal() {
-    this.setData({
-      showInputModal: false
-    });
   },
 
   /**
@@ -77,17 +77,47 @@ Page({
    */
   confirmInput(e) {
     const { name, card } = e.detail;
-    const app = getApp();
-    app.globalData.userName = name;
-    app.globalData.userCard = card;
-    app.globalData.userInfo = { name, card };
-    this.setData({
-      userName: name,
-      userCard: card
-    });
-    wx.showToast({
-      title: '认证成功',
-      icon: 'success'
+    const code = this.data.code;
+    const baseUrl = app.globalData.baseUrl;
+
+    if (!code) {
+      console.error('未获取到登录码，请重试');
+      wx.showToast({
+        title: '认证失败，请重试',
+        icon: 'none',
+      });
+      return;
+    }
+
+    // 调用后端接口进行认证
+    wx.request({
+      url: `${baseUrl}/auth/login`,
+      method: 'POST',
+      data: {
+        code: code,
+        name: name,
+        school_id: card
+      },
+      success: (res) => {
+        console.log(res);
+        app.globalData.accessToken = res.data.accessToken;
+        app.globalData.userInfo = { name, school_id: card };
+        this.setData({ userName: name, userCard: card });
+        wx.showToast({
+          title: '认证成功',
+          icon: 'success',
+        });
+        this.setData({
+          showInputModal: false
+        });
+      },
+      fail: (err) => {
+        console.error('请求失败:', err);
+        wx.showToast({
+          title: '认证失败，请重试',
+          icon: 'none',
+        });
+      }
     });
   }
 });
