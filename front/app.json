@@ -2,11 +2,13 @@
   "pages": [
     "pages/index/index",
     "pages/mines/mines",
+
     "pages/driver/scan/scan",
     "pages/driver/driver-list/driver-list",
+
     "pages/reservation/reservation-list/reservation-list",
     "pages/reservation/reservation-notice/reservation-notice",
-    "pages/reservation/reservation-detail/reservation-detail",
+    
     "pages/admin/orders/orders",
     "pages/admin/admin-mines/admin-mines",
     "pages/admin/export/export"

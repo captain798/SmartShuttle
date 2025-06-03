@@ -43,6 +43,12 @@ Page({
     });
   },
 
+  hideInputModal() {
+    this.setData({
+      showInputModal: false
+    });
+  },
+
   /**
    * 检查用户是否认证，若未认证则弹出认证窗口
    */
@@ -79,6 +85,14 @@ Page({
     const { name, card } = e.detail;
     const code = this.data.code;
     const baseUrl = app.globalData.baseUrl;
+
+    if (!name || !card) {
+      console.error('请输入姓名和学号');
+      wx.showToast({
+        title: '请输入姓名和学号',
+        icon: 'none',
+      });
+    }
 
     if (!code) {
       console.error('未获取到登录码，请重试');

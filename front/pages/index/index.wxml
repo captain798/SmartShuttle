@@ -3,12 +3,12 @@
 
 <view class="location-picker">
   <view class="location-display">
-    <view class="location-item">
+    <view class="location-item" bindtap="selectStartPoint">
       <text>起点</text>
       <text>{{startPoint || '武汉大学本部'}}</text>
     </view>
     <button class="swap-button" size="mini" bindtap="swapLocations">调换</button>
-    <view class="location-item">
+    <view class="location-item" bindtap="selectEndPoint">
       <text>终点</text>
       <text>{{endPoint || '网安基地'}}</text>
     </view>
@@ -27,7 +27,7 @@
           <text>剩余座位: {{item.seats}}</text>
         </view>
         <view class="button-area">
-          <button size="mini" bindtap="bookSchedule" data-id="{{item.id}}">预约</button>
+          <button size="mini" bindtap="handleSchedule" id="{{item.schedule_id}}">{{item.isBooked ? '取消预约' : '预约'}}</button>
         </view>
       </view>
     </block>
