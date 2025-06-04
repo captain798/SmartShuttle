@@ -23,7 +23,7 @@ Page({
     const {startPoint , endPoint, selectedDate} = this.data;
     console.log(startPoint, endPoint, selectedDate);
     wx.request({
-      url: `${baseUrl}/schedule/list`,
+      url: `${baseUrl}/reservation/available-shedules`,
       method: 'GET',
       header: {
         'Authorization': 'Bearer'+ wx.getStorageSync('token'),
