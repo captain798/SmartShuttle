@@ -71,3 +71,24 @@ page {
   flex: 1;
   text-align: right;
 }
+
+.date-picker {
+  margin: 15rpx;
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  border-radius: 10rpx;
+  display: flex;
+  align-items: center;
+}
+
+.date-label {
+  color: #666;
+  font-size: 28rpx;
+  margin-right: 20rpx;
+}
+
+.selected-date {
+  color: #333;
+  font-size: 32rpx;
+  font-weight: bold;
+}

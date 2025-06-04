@@ -9,18 +9,19 @@ Page({
         selected: 0
       })
     }
-    this.fetchSchedulesData();
   },
 
   data: {
-    startPoint: '',
-    endPoint: '',
-    schedules: []
+    startPoint: '武大本部网安院门口',
+    endPoint: '新校区新珈楼门口',
+    schedules: [],
+    selectedDate: '今天' 
   },
 
   fetchSchedulesData: function () {
     const baseUrl = app.globalData.baseUrl;
-    const {startPoint , endPoint} = this.data;
+    const {startPoint , endPoint, selectedDate} = this.data;
+    console.log(startPoint, endPoint, selectedDate);
     wx.request({
       url: `${baseUrl}/schedule/list`,
       method: 'GET',
@@ -30,7 +31,9 @@ Page({
       },
       data: {
         start_point: startPoint,
-        end_point: endPoint
+        end_point: endPoint,
+        // 新增日期参数
+        date: selectedDate 
       },
       success: (res) => {
         if (res.statusCode === 200 && res.data.message) {
@@ -142,12 +145,13 @@ Page({
    * 选择起点
    */
   selectStartPoint() {
-    const locations = ['武汉大学本部', '网安基地', '其他地点'];
+    const locations = ['武大本部网安院', '武大本部当代楼', '新校区新珈楼', '新校区一食堂'];
     wx.showActionSheet({
       itemList: locations,
       success: (res) => {
         this.setData({
-          startPoint: locations[res.tapIndex]
+          startPoint: locations[res.tapIndex],
+          endPoint: '' // 重置终点
         });
       },
       fail: (res) => {
@@ -160,12 +164,42 @@ Page({
    * 选择终点
    */
   selectEndPoint() {
-    const locations = ['武汉大学本部', '网安基地', '其他地点'];
+    const { startPoint } = this.data;
+    let locations = [];
+    if (startPoint.includes('本部')) {
+      locations = ['新校区新珈楼门口', '新校区一食堂门口'];
+    } else {
+      // 这里可以根据实际需求设置新校区起点对应的终点
+      locations = ['武大本部网安院门口', '武大本部当代楼门口']; 
+    }
     wx.showActionSheet({
       itemList: locations,
       success: (res) => {
         this.setData({
           endPoint: locations[res.tapIndex]
+        },() => {
+          this.fetchSchedulesData();
+        });
+      },
+      fail: (res) => {
+        console.error(res.errMsg);
+      }
+    });
+  },
+
+  /**
+   * 选择日期
+   */
+  selectDate() {
+    const dates = ['今天', '明天'];
+    wx.showActionSheet({
+      itemList: dates,
+      success: (res) => {
+        this.setData({
+          selectedDate: dates[res.tapIndex]
+        }, () => {
+          // 日期变化后刷新数据
+          this.fetchSchedulesData();
         });
       },
       fail: (res) => {
