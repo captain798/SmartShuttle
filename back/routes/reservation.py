@@ -482,8 +482,6 @@ def get_available_schedules():
         date_str = request.args.get('date')
         start_point = request.args.get('start_point')
         end_point = request.args.get('end_point')
-        page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 10))
 
         # 验证日期格式
         try:
@@ -526,10 +524,6 @@ def get_available_schedules():
             Schedule.dynamic_capacity > func.coalesce(subquery.c.reserved_count, 0)
         )
 
-        # 分页查询
-        pagination = query.order_by(Schedule.departure_datetime).paginate(
-            page=page, per_page=per_page, error_out=False
-        )
 
         # 构建返回数据
         schedules = []
@@ -550,9 +544,6 @@ def get_available_schedules():
 
         return jsonify({
             'schedules': schedules,
-            'total': pagination.total,
-            'pages': pagination.pages,
-            'current_page': page
         })
 
     except Exception as e:

@@ -32,7 +32,6 @@ Page({
       data: {
         start_point: startPoint,
         end_point: endPoint,
-        // 新增日期参数
         date: selectedDate 
       },
       success: (res) => {

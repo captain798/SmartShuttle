@@ -4,11 +4,11 @@
 <view class="location-picker">
   <view class="location-display">
     <view class="location-item" bindtap="selectStartPoint">
-      <text>起点</text>
+      <text>始发站</text>
       <text>{{startPoint}}</text>
     </view>
     <view class="location-item" bindtap="selectEndPoint">
-      <text>终点</text>
+      <text>目的地</text>
       <text>{{endPoint}}</text>
     </view>
   </view>
