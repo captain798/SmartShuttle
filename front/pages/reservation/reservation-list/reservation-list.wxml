@@ -1,5 +1,16 @@
 <navigation-bar title="预约记录" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 
+<!-- 美化后的 picker 组件 -->
+<picker 
+  range="{{statusList}}" 
+  value="{{selectedStatusIndex}}" 
+  bindchange="bindStatusChange"
+  class="status-picker"
+>
+  <view class="status-picker-text">当前选择状态: {{status || '请选择'}}</view>
+</picker>
+
+
 <view class="container">
 
   <!-- 预约列表展示，使用卡片式布局，可滑动 -->

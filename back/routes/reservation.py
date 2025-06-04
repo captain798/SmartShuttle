@@ -373,8 +373,6 @@ def list_reservations():
     获取用户的预约列表
     查询参数:
         status: 预约状态筛选（可选）
-        page: 页码（默认1）
-        per_page: 每页数量（默认10）
     返回:
         成功:
             reservations: [
@@ -388,9 +386,6 @@ def list_reservations():
                     priority_used: 是否使用教师优先
                 }
             ]
-            total: 总记录数
-            pages: 总页数
-            current_page: 当前页码
         失败:
             error: 错误信息
     权限要求:
@@ -404,8 +399,6 @@ def list_reservations():
         
         # 获取查询参数
         status = request.args.get('status')
-        page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 10))
 
         # 构建查询
         query = Reservation.query.filter_by(user_id=current_user_id)
@@ -413,10 +406,6 @@ def list_reservations():
         if status:
             query = query.filter_by(status=ReservationStatusEnum[status])
 
-        # 分页查询
-        pagination = query.order_by(Reservation.reserved_at.desc()).paginate(
-            page=page, per_page=per_page, error_out=False
-        )
 
         reservations = [{
             'id': r.id,
@@ -430,9 +419,6 @@ def list_reservations():
 
         return jsonify({
             'reservations': reservations,
-            'total': pagination.total,
-            'pages': pagination.pages,
-            'current_page': page
         })
 
     except Exception as e:
