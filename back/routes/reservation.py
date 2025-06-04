@@ -406,6 +406,8 @@ def list_reservations():
         if status:
             query = query.filter_by(status=ReservationStatusEnum[status])
 
+        # 获取所有预约
+        reservation_data = query.all()
 
         reservations = [{
             'id': r.id,
@@ -415,7 +417,7 @@ def list_reservations():
             'reserved_at': r.reserved_at.isoformat(),
             'canceled_at': r.canceled_at.isoformat() if r.canceled_at else None,
             'priority_used': r.priority_used
-        } for r in pagination.items]
+        } for r in reservation_data]
 
         return jsonify({
             'reservations': reservations,
@@ -464,6 +466,7 @@ def get_available_schedules():
         4. 支持分页
     """
     try:
+        current_user_id = get_jwt_identity()
         # 获取查询参数
         date_str = request.args.get('date')
         start_point = request.args.get('start_point')
@@ -497,6 +500,13 @@ def get_available_schedules():
             Reservation.status == ReservationStatusEnum.active
         ).group_by(Reservation.schedule_id).subquery()
 
+        # 获取用户已预约的班次ID列表
+        user_booked_schedules = db.session.query(Reservation.schedule_id).filter(
+            Reservation.user_id == current_user_id,
+            Reservation.status == ReservationStatusEnum.active
+        ).all()
+        user_booked_schedule_ids = [schedule[0] for schedule in user_booked_schedules]
+
         # 添加已预约数量信息
         query = query.outerjoin(
             subquery,
@@ -510,10 +520,12 @@ def get_available_schedules():
             Schedule.dynamic_capacity > func.coalesce(subquery.c.reserved_count, 0)
         )
 
+        # 获取所有符合条件的班次
+        schedules_data = query.all()
 
         # 构建返回数据
         schedules = []
-        for schedule, reserved_count in pagination.items:
+        for schedule, reserved_count in schedules_data:
             available_seats = schedule.dynamic_capacity - reserved_count
             schedules.append({
                 'id': schedule.id,
@@ -525,7 +537,8 @@ def get_available_schedules():
                 'vehicle_plate': schedule.vehicle_plate,
                 'driver_name': schedule.driver.name if schedule.driver else None,
                 'start_point': schedule.route.start_point,
-                'end_point': schedule.route.end_point
+                'end_point': schedule.route.end_point,
+                'is_booked': schedule.id in user_booked_schedule_ids
             })
 
         return jsonify({
