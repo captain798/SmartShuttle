@@ -33,10 +33,8 @@ class ReservationStatusEnum(enum.Enum):
     absent = 'absent'      # 缺席
 
 class RouteNameEnum(enum.Enum):
-    A = '武大本部网安院-新校区新珈楼门口'
-    B = '新校区一食堂门口-武大本部当代楼'
-    C = '新校区新珈楼门口-武大本部当代楼'
-    D = '新校区新珈楼门口-武大本部网安院'
+    A = '武大-->东西湖'
+    B = '东西湖-->武大'
 
 class RouteStatusEnum(enum.Enum):
     active = 'active'
@@ -81,9 +79,10 @@ class Route(db.Model):
     start_point = db.Column(db.String(100), nullable=False)
     end_point = db.Column(db.String(100), nullable=False)
     departure_time = db.Column(db.Time, nullable=False)
-    arrival_time = db.Column(db.Time, nullable=False)
+    arrival_time = db.Column(db.Time, nullable=True)
     base_capacity = db.Column(db.Integer, default=30)
     status = db.Column(db.Enum(RouteStatusEnum), default='active')
+    is_weekend = db.Column(db.Boolean, default=False)
 
     # 与班次的关系
     schedules = db.relationship('Schedule', backref='route', lazy=True)
