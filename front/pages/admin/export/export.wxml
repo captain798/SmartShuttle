@@ -1,2 +1,25 @@
-<!--pages/admin/export/export.wxml-->
-<text>pages/admin/export/export.wxml</text>
+<!-- pages/export/export.wxml -->
+<view class="container">
+  <view class="date-picker">
+    <text>起始日期：</text>
+    <picker mode="date" bindchange="bindStartDateChange">
+      <view class="picker">{{startDate || '请选择起始日期'}}</view>
+    </picker>
+  </view>
+  
+  <view class="date-picker">
+    <text>终止日期：</text>
+    <picker mode="date" bindchange="bindEndDateChange">
+      <view class="picker">{{endDate || '请选择终止日期'}}</view>
+    </picker>
+  </view>
+  
+  <button 
+    type="primary" 
+    bindtap="exportExcel" 
+    loading="{{loading}}"
+    disabled="{{!startDate || !endDate}}"
+  >
+    导出Excel
+  </button>
+</view>
