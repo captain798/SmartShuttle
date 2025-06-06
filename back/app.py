@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_tok
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+from routes.reservation import init_routes_and_schedules
 
 def create_app():
     # 初始化 Flask 应用
@@ -120,6 +121,9 @@ def create_app():
         with app.app_context():
             # 创建数据库表
             db.create_all()
+            
+            # 初始化路线和班次数据
+            init_routes_and_schedules()
             
             # 初始化定时任务
             from tasks import init_scheduler

@@ -547,4 +547,156 @@ def get_available_schedules():
 
     except Exception as e:
         logging.error(f"获取可预约班次列表失败: {str(e)}")
-        return jsonify({'error': '系统错误'}), 500 
+        return jsonify({'error': '系统错误'}), 500
+
+def init_routes_and_schedules():
+    """
+    初始化路线和班次数据
+    """
+    try:
+        # 检查是否已经存在路线数据
+        if Route.query.first() is None:
+            # 创建基础路线
+            routes = [
+                Route(
+                    name=RouteNameEnum.A,
+                    start_point='武大本部网安院',
+                    end_point='新校区新珈楼门口',
+                    departure_time=datetime.strptime('07:00', '%H:%M').time()
+                ),
+                Route(
+                    name=RouteNameEnum.A,
+                    start_point='武大本部网安院',
+                    end_point='新校区新珈楼门口',
+                    departure_time=datetime.strptime('10:30', '%H:%M').time()
+                ),
+                Route(
+                    name=RouteNameEnum.A,
+                    start_point='武大本部网安院',
+                    end_point='新校区新珈楼门口',
+                    departure_time=datetime.strptime('12:30', '%H:%M').time()
+                ),
+                Route(
+                    name=RouteNameEnum.A,
+                    start_point='武大本部网安院',
+                    end_point='新校区新珈楼门口',
+                    departure_time=datetime.strptime('16:30', '%H:%M').time()
+                ),
+                Route(
+                    name=RouteNameEnum.A,
+                    start_point='武大本部当代楼附近校巴站',
+                    end_point='新校区一食堂门口',
+                    departure_time=datetime.strptime('18:30', '%H:%M').time()
+                ),
+                Route(
+                    name=RouteNameEnum.A,
+                    start_point='武大本部当代楼附近校巴站',
+                    end_point='新校区一食堂门口',
+                    departure_time=datetime.strptime('19:00', '%H:%M').time(),
+                    is_weekend=True
+                ),
+                Route(
+                    name=RouteNameEnum.B,
+                    start_point='新校区一食堂门口',
+                    end_point='武大本部当代楼',
+                    departure_time=datetime.strptime('06:40', '%H:%M').time()
+                ),
+                Route(
+                    name=RouteNameEnum.B,
+                    start_point='新校区新珈楼门口',
+                    end_point='武大本部网安院',
+                    departure_time=datetime.strptime('08:50', '%H:%M').time()
+                ),
+                Route(
+                    name=RouteNameEnum.B,
+                    start_point='新校区新珈楼门口',
+                    end_point='武大本部网安院',
+                    departure_time=datetime.strptime('13:00', '%H:%M').time()
+                ),
+                Route(
+                    name=RouteNameEnum.B,
+                    start_point='新校区新珈楼门口',
+                    end_point='武大本部网安院',
+                    departure_time=datetime.strptime('17:30', '%H:%M').time()
+                ),
+                Route(
+                    name=RouteNameEnum.B,
+                    start_point='新校区新珈楼门口',
+                    end_point='武大本部网安院',
+                    departure_time=datetime.strptime('18:00', '%H:%M').time()
+                ),
+                Route(
+                    name=RouteNameEnum.B,
+                    start_point='新校区一食堂门口',
+                    end_point='武大本部当代楼附近校巴站',
+                    departure_time=datetime.strptime('6:40', '%H:%M').time(),
+                    is_weekend=True
+                )
+            ]
+            db.session.add_all(routes)
+            db.session.commit()
+            logging.info("路线数据初始化成功")
+
+        # 检查是否已经存在班次数据
+        if Schedule.query.first() is None:
+            # 获取所有路线
+            routes = Route.query.all()
+            
+            # 获取当前日期
+            current_date = datetime.now().date()
+            # 计算下个月的最后一天
+            if current_date.month == 12:
+                next_month = current_date.replace(year=current_date.year + 1, month=1)
+            else:
+                next_month = current_date.replace(month=current_date.month + 1)
+            last_day = (next_month.replace(day=1) - timedelta(days=1)).day
+            
+            # 为未来一个月创建班次
+            for i in range(last_day):
+                target_date = current_date + timedelta(days=i)
+                is_weekend = target_date.weekday() >= 5  # 5和6是周六和周日
+                
+                for route in routes:
+                    # 工作日和周末使用不同的班次规则
+                    if is_weekend:
+                        # 周末班次
+                        if route.is_weekend :
+                            # 生成班次ID：年月日+路线编号+序号
+                            schedule_id = f"{target_date.strftime('%Y%m%d')}{route.name.value}001"
+                            
+                            # 创建班次
+                            schedule = Schedule(
+                                id=schedule_id,
+                                route_id=route.id,
+                                departure_datetime=datetime.combine(target_date, route.departure_time),
+                                dynamic_capacity=30,  # 默认座位数
+                                status='normal'
+                            )
+                            db.session.add(schedule)
+                    else:
+                        if is_weekend == False:
+                            # 工作日班次
+                            schedule_id = f"{target_date.strftime('%Y%m%d')}{route.name.value}001"
+                            
+                            # 创建班次
+                            schedule = Schedule(
+                                id=schedule_id,
+                                route_id=route.id,
+                                departure_datetime=datetime.combine(target_date, route.departure_time),
+                                dynamic_capacity=30,  # 默认座位数
+                                status='normal'
+                            )
+                            db.session.add(schedule)
+            
+            db.session.commit()
+            logging.info("班次数据初始化成功")
+
+    except Exception as e:
+        logging.error(f"初始化数据失败: {str(e)}")
+        db.session.rollback()
+        raise e
+
+# 在应用启动时调用初始化函数
+def init_app(app):
+    with app.app_context():
+        init_routes_and_schedules() 
