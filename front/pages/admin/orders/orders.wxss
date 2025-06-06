@@ -1,1 +1,42 @@
 /* pages/admin/orders/orders.wxss */
+
+/* 日期选择器样式 */
+.date-picker {
+  padding: 20rpx;
+  background-color: #f5f5f5;
+  text-align: center;
+}
+
+.date-text {
+  font-size: 32rpx;
+  color: #333;
+}
+
+/* 班次列表样式 */
+.schedule-list {
+  margin: 20rpx;
+}
+
+.schedule-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  background-color: #fff;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons button {
+  margin-left: 10rpx;
+}
+
+/* 添加按钮样式 */
+.add-button {
+  position: fixed;
+  bottom: 40rpx;
+  left: 0;
+  right: 0;
+  padding: 0 40rpx;
+}

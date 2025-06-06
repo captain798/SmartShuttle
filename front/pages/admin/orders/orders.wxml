@@ -1,2 +1,26 @@
-<!--pages/admin/orders/orders.wxml-->
+<!-- 顶部日期选择器 -->
+<view class="date-picker">
+  <picker mode="date" fields="day" start="2023-01-01" end="2030-12-31" bindchange="onDateChange">
+    <view class="date-text">{{currentDate}}</view>
+  </picker>
+</view>
+
+<!-- 班次列表 -->
+<view class="schedule-list">
+  <block wx:for="{{schedules}}" wx:key="id">
+    <view class="schedule-item">
+      <text>{{item.time}} 班次</text>
+      <text>座位: {{item.seats}}</text>
+      <view class="action-buttons">
+        <button size="mini" bindtap="editSchedule" data-id="{{item.id}}">编辑</button>
+        <button size="mini" bindtap="deleteSchedule" data-id="{{item.id}}">删除</button>
+      </view>
+    </view>
+  </block>
+</view>
+
+<!-- 添加班次按钮 -->
+<view class="add-button">
+  <button type="primary" bindtap="addSchedule">添加班次</button>
+</view>
 <text>pages/admin/orders/orders.wxml</text>
