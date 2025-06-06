@@ -28,6 +28,11 @@
           <text class="action-text">预约详情</text>
           <image class="arrow-icon" src="/images/arrow-right.png"></image>
         </view>
+        <view class="action-item" hover-class="action-hover" bindtap="navigateToExport">
+          <image class="action-icon" src="/images/scan.png"></image>
+          <text class="action-text">数据导出</text>
+          <image class="arrow-icon" src="/images/arrow-right.png"></image>
+        </view>
         <view class="action-item" hover-class="action-hover" bindtap="navigateToReservationAnalysis">
           <image class="action-icon" src="/images/analysis.png"></image>
           <text class="action-text">预约分析</text>
