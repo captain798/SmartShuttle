@@ -428,7 +428,7 @@ def list_reservations():
         return jsonify({'error': '系统错误'}), 500
 
 @reservation_bp.route('/available-schedules', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_available_schedules():
     """
     获取可预约的班次列表
@@ -466,11 +466,14 @@ def get_available_schedules():
         4. 支持分页
     """
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = 1
+        # current_user_id = get_jwt_identity()
         # 获取查询参数
         date_str = request.args.get('date')
         start_point = request.args.get('start_point')
         end_point = request.args.get('end_point')
+
+        print(f"请求参数: date={date_str}, start={start_point}, end={end_point}")
 
         # 验证日期格式
         try:

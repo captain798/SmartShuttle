@@ -12,21 +12,25 @@ Page({
   },
 
   data: {
-    startPoint: '武大本部网安院门口',
+    startPoint: '武大本部网安院',
     endPoint: '新校区新珈楼门口',
     schedules: [],
-    selectedDate: '今天' 
+    selectedDate: new Date().toLocaleDateString('zh-CN', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    }).replace(/\//g, '-') // 格式化为YYYY-MM-DD
   },
 
   fetchSchedulesData: function () {
     const baseUrl = app.globalData.baseUrl;
     const {startPoint , endPoint, selectedDate} = this.data;
-    console.log(startPoint, endPoint, selectedDate);
+    console.log(startPoint, endPoint, selectedDate, baseUrl);
     wx.request({
-      url: `${baseUrl}/reservation/available-shedules`,
+      url: `${baseUrl}/reservations/available-schedules`,
       method: 'GET',
       header: {
-        'Authorization': 'Bearer'+ wx.getStorageSync('token'),
+        'Authorization': 'Bearer ' + wx.getStorageSync('token'),  // 这里缺少空格
         'Content-Type': 'application/json'
       },
       data: {
@@ -35,10 +39,15 @@ Page({
         date: selectedDate 
       },
       success: (res) => {
-        if (res.statusCode === 200 && res.data.message) {
+        if (res.statusCode === 200) {
           this.setData({
-            schedules: res.data.data
+            schedules: res.data.schedules
           });
+          console.log(res.data.schedules);
+          wx.showToast({
+            title : "获取班次数据成功",
+            icon : 'success'
+          })
         } else {
           wx.showToast({
             title: res.data.error || '获取班次信息失败',
@@ -144,7 +153,7 @@ Page({
    * 选择起点
    */
   selectStartPoint() {
-    const locations = ['武大本部网安院', '武大本部当代楼', '新校区新珈楼', '新校区一食堂'];
+    const locations = ['武大本部网安院', '武大本部当代楼附近校巴站', '新校区新珈楼', '新校区一食堂'];
     wx.showActionSheet({
       itemList: locations,
       success: (res) => {
@@ -169,7 +178,7 @@ Page({
       locations = ['新校区新珈楼门口', '新校区一食堂门口'];
     } else {
       // 这里可以根据实际需求设置新校区起点对应的终点
-      locations = ['武大本部网安院门口', '武大本部当代楼门口']; 
+      locations = ['武大本部网安院', '武大本部当代楼附近校巴站']; 
     }
     wx.showActionSheet({
       itemList: locations,
@@ -188,14 +197,32 @@ Page({
 
   /**
    * 选择日期
+   * 将"今天"、"明天"转换为实际日期格式
    */
   selectDate() {
     const dates = ['今天', '明天'];
     wx.showActionSheet({
       itemList: dates,
       success: (res) => {
+        const today = new Date();
+        let selectedDate;
+        if (dates[res.tapIndex] === '今天') {
+          selectedDate = today.toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          }).replace(/\//g, '-');
+        } else {
+          const tomorrow = new Date(today);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          selectedDate = tomorrow.toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          }).replace(/\//g, '-');
+        }
         this.setData({
-          selectedDate: dates[res.tapIndex]
+          selectedDate: selectedDate
         }, () => {
           // 日期变化后刷新数据
           this.fetchSchedulesData();
