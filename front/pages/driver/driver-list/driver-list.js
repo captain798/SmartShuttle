@@ -1,4 +1,5 @@
 // pages/driver/driver-list/driver-list.js
+const app = getApp();
 Page({
 
   // 页面初始数据

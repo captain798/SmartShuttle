@@ -1,4 +1,6 @@
 // pages/scan/scan.js
+const app = getApp();
+const baseUrl = app.globalData.baseUrl;
 Page({
 
   onShow: function () {
