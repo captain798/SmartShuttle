@@ -52,6 +52,12 @@ def create_app():
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
 
+    # 禁用 SQLAlchemy 的所有日志输出
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.ERROR)
+    logging.getLogger('sqlalchemy.pool').setLevel(logging.ERROR)
+    logging.getLogger('sqlalchemy.dialects').setLevel(logging.ERROR)
+    logging.getLogger('sqlalchemy.orm').setLevel(logging.ERROR)
+
     # 初始化扩展
     db.init_app(app)
     jwt.init_app(app)

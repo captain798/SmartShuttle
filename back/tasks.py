@@ -75,10 +75,10 @@ def init_scheduler(flask_app):
     global app
     app = flask_app  # 保存应用实例
     
-    # 每分钟检查一次未签到的预约
+    # 每10分钟检查一次未签到的预约
     scheduler.add_job(
         check_absent_reservations,
-        CronTrigger(minute='*'),
+        CronTrigger(minute='*/10'),  # 每10分钟执行一次
         id='check_absent_reservations',
         replace_existing=True
     )

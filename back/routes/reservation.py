@@ -436,8 +436,6 @@ def get_available_schedules():
         date: 日期 (YYYY-MM-DD)
         start_point: 起点
         end_point: 终点
-        page: 页码（默认1）
-        per_page: 每页数量（默认10）
     返回:
         成功:
             schedules: [
@@ -450,11 +448,11 @@ def get_available_schedules():
                     total_seats: 总座位数
                     vehicle_plate: 车牌号
                     driver_name: 司机姓名
+                    is_full: 是否满座
+                    is_booked: 是否已预约
                 }
             ]
             total: 总记录数
-            pages: 总页数
-            current_page: 当前页码
         失败:
             error: 错误信息
     权限要求:
@@ -485,7 +483,11 @@ def get_available_schedules():
         query = Schedule.query.join(Route).filter(
             func.date(Schedule.departure_datetime) == query_date,
             Schedule.status == 'normal',
-            Schedule.departure_datetime > datetime.utcnow()
+            # 如果是今天，则只显示当前时间之后的班次
+            or_(
+                query_date > datetime.utcnow().date(),
+                func.time(Schedule.departure_datetime) > datetime.utcnow().time()
+            )
         )
 
         # 根据起点和终点筛选
@@ -518,10 +520,6 @@ def get_available_schedules():
             func.coalesce(subquery.c.reserved_count, 0).label('reserved_count')
         )
 
-        # 只返回有剩余座位的班次
-        query = query.filter(
-            Schedule.dynamic_capacity > func.coalesce(subquery.c.reserved_count, 0)
-        )
 
         # 获取所有符合条件的班次
         schedules_data = query.all()
@@ -530,6 +528,7 @@ def get_available_schedules():
         schedules = []
         for schedule, reserved_count in schedules_data:
             available_seats = schedule.dynamic_capacity - reserved_count
+            is_full = available_seats <= 0
             schedules.append({
                 'id': schedule.id,
                 'route_name': schedule.route.name.value,
@@ -541,6 +540,7 @@ def get_available_schedules():
                 'driver_name': schedule.driver.name if schedule.driver else None,
                 'start_point': schedule.route.start_point,
                 'end_point': schedule.route.end_point,
+                'is_full': is_full,
                 'is_booked': schedule.id in user_booked_schedule_ids
             })
 
