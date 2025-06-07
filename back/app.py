@@ -8,6 +8,31 @@ from logging.handlers import RotatingFileHandler
 import os
 from routes.reservation import init_routes_and_schedules
 
+def init_app(app):
+    """
+    初始化应用
+    Args:
+        app: Flask应用实例
+    """
+    with app.app_context():
+        try:
+            # 创建数据库表
+            db.create_all()
+            
+            # 初始化路线和班次数据
+            init_routes_and_schedules()
+            
+            # 初始化定时任务
+            from tasks import init_scheduler
+            init_scheduler(app)
+            
+            # 创建上传目录
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
+        except Exception as e:
+            app.logger.error(f"初始化应用失败: {str(e)}")
+            raise e
+
 def create_app():
     # 初始化 Flask 应用
     app = Flask(__name__)
@@ -114,27 +139,10 @@ def create_app():
         return jsonify(access_token=access_token)
 
     # ----------------------------
-    # 初始化数据库和定时任务
+    # 初始化应用
     # ----------------------------
 
-    def init_app():
-        with app.app_context():
-            # 创建数据库表
-            db.create_all()
-            
-            # 初始化路线和班次数据
-            init_routes_and_schedules()
-            
-            # 初始化定时任务
-            from tasks import init_scheduler
-            init_scheduler()
-            
-            # 创建上传目录
-            if not os.path.exists(app.config['UPLOAD_FOLDER']):
-                os.makedirs(app.config['UPLOAD_FOLDER'])
-
-    # 初始化应用
-    init_app()
+    init_app(app)
 
     # ----------------------------
     # 请求前处理

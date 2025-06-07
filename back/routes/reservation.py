@@ -703,5 +703,14 @@ def init_routes_and_schedules():
 
 # 在应用启动时调用初始化函数
 def init_app(app):
+    """
+    初始化应用
+    Args:
+        app: Flask应用实例
+    """
     with app.app_context():
-        init_routes_and_schedules() 
+        try:
+            init_routes_and_schedules()
+        except Exception as e:
+            logging.error(f"初始化数据失败: {str(e)}")
+            raise e 
