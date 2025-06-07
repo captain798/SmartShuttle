@@ -1,84 +1,81 @@
-/**index.wxss**/
+/** 页面基础样式 **/
 page {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: #f5f5f5;
+  padding: 20rpx;
+  box-sizing: border-box;
 }
+
+/** 滚动区域样式 **/
 .scrollarea {
   flex: 1;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
+
+/** 地点选择区域样式 - 优化固定高度 **/
+.location-picker {
+  margin: 30rpx 20rpx;
+  padding: 30rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  height: 200rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .location-display {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
-}
-.schedule-item {
-  padding: 20rpx;
-  margin: 10rpx 0;
-  border: 1rpx solid #eee;
-  border-radius: 8rpx;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width : 80%;
-}
-/* 定义班车预约卡片样式 */
-.location-picker {
-  padding: 20rpx;
-  margin: 20rpx;
-  border: 1rpx solid #ccc;
-  border-radius: 16rpx;
-  background-color: #fff;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+  height: 100%;
 }
 
-.swap-button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
+/** 地点选择区域样式 **/
 .location-item {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100%;
 }
 
-.location-item text {
-  margin: 2px 0;
+.label {
+  font-size: 28rpx;
+  color: #000000;
+  margin-bottom: 10rpx;
 }
 
-.schedule-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-.time-area {
-  flex: 1;
-}
-
-.seats-area {
-  flex: 1;
+.location-value {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+  padding: 10rpx 20rpx;
+  background: #f5f5f5;
+  border-radius: 16rpx;
+  margin-top: 8rpx;
   text-align: center;
+  min-width: 180rpx;
 }
 
-.button-area {
-  flex: 1;
-  text-align: right;
+.value {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
 }
 
 .date-picker {
-  margin: 15rpx;
-  padding: 20rpx;
-  background-color: #f5f5f5;
-  border-radius: 10rpx;
+  margin: 10rpx 20rpx 0rpx 20rpx;  
+  padding: 30rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .date-label {
@@ -91,41 +88,86 @@ page {
   color: #333;
   font-size: 32rpx;
   font-weight: bold;
+  flex: 1;
+  padding: 10rpx 20rpx;
+  background: #f5f5f5;
+  border-radius: 16rpx;
+  margin-right: 20rpx;
 }
 
-/* 优化班次项样式 */
-.schedule-item {
-  margin: 10px;
-  padding: 15px;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* 优化时间区域样式 */
-.time-area {
+/** 班次列表项样式 **/
+.schedule-item { 
+  margin-bottom: 20rpx; 
+  padding: 30rpx;
+  width: 95%;         
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 16rpx; 
+  transition: all 0.3s ease;
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 16px;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+/** 时间信息样式 **/
+.time-info {
+  font-size: 32rpx;
   font-weight: bold;
+  color: #333;
 }
 
-/* 优化座位信息样式 */
-.seats-info {
+/** 路线信息样式 **/
+.route-info {
+  font-size: 30rpx;
   color: #666;
-  margin: 8px 0;
 }
 
-/* 优化按钮区域样式 */
-.button-area {
-  text-align: right;
+/** 座位信息样式 **/
+.seats-info {
+  font-size: 28rpx;
+  color: #666;
 }
 
-/* 添加状态标签样式 */
-.status-tag {
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-  margin-left: 8px;
+.seats-info image {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 10rpx;
+}
+
+/** 按钮区域样式 **/
+.button-area button {
+  min-width: 180rpx;  
+  height: 72rpx;     
+  line-height: 72rpx;
+  font-size: 30rpx;
+  border-radius: 36rpx;
+  background: linear-gradient(135deg, #417af3, #619cfd);
+  color: white;
+  margin-left: 20rpx;
+  transition: opacity 0.2s;
+}
+
+.button-area button:active {
+  opacity: 0.9;      
+  transform: none;   
+}
+
+/** 状态标签样式 **/
+.route-tag {
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  font-weight: 500;  
+  text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.1); 
+}
+
+.route-tag.normal {
+  background-color: #07c160;
+  color: white;
+}
+
+.route-tag.full {
+  background-color: #f76260;
+  color: white;
 }
