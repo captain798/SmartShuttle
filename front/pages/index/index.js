@@ -22,15 +22,16 @@ Page({
     }).replace(/\//g, '-') // 格式化为YYYY-MM-DD
   },
 
+  // 获取班次数据
   fetchSchedulesData: function () {
     const baseUrl = app.globalData.baseUrl;
     const {startPoint , endPoint, selectedDate} = this.data;
-    console.log(startPoint, endPoint, selectedDate, baseUrl);
+    console.log('查询参数',startPoint, endPoint, selectedDate);
     wx.request({
       url: `${baseUrl}/reservations/available-schedules`,
       method: 'GET',
       header: {
-        'Authorization': 'Bearer ' + wx.getStorageSync('token'),  // 这里缺少空格
+        'Authorization': 'Bearer ' + wx.getStorageSync('token'),
         'Content-Type': 'application/json'
       },
       data: {
@@ -62,20 +63,16 @@ Page({
         });
       }
     })
-
   },
 
-  /**
-   * 预约或取消预约班次
-   * @param {Object} event - 事件对象
-   */
+  // 处理班次预约/取消预约
   handleSchedule: function(event) {
     const index = event.currentTarget.dataset.index;
     const schedule = this.data.schedules[index];
     if (schedule.isBooked) {
       // 取消预约
       wx.request({
-        url: `${baseUrl}/reservation/cancel`, // 后端取消预约接口
+        url: `${baseUrl}/reservation/cancel`,
         method: 'POST',
         header: {
           'Authorization': 'Bearer ' + wx.getStorageSync('token'),
@@ -112,7 +109,7 @@ Page({
     } else {
       // 预约
       wx.request({
-        url: `${baseUrl}/reservation/create`, // 后端预约接口
+        url: `${baseUrl}/reservation/create`,
         method: 'POST',
         header: {
           'Authorization': 'Bearer ' + wx.getStorageSync('token'),
@@ -149,9 +146,7 @@ Page({
     }
   },
 
-  /**
-   * 选择起点
-   */
+  // 选择起点
   selectStartPoint() {
     const locations = ['武大本部网安院', '武大本部当代楼附近校巴站', '新校区新珈楼', '新校区一食堂'];
     wx.showActionSheet({
@@ -168,16 +163,13 @@ Page({
     });
   },
 
-  /**
-   * 选择终点
-   */
+  // 选择终点
   selectEndPoint() {
     const { startPoint } = this.data;
     let locations = [];
     if (startPoint.includes('本部')) {
       locations = ['新校区新珈楼门口', '新校区一食堂门口'];
     } else {
-      // 这里可以根据实际需求设置新校区起点对应的终点
       locations = ['武大本部网安院', '武大本部当代楼附近校巴站']; 
     }
     wx.showActionSheet({
@@ -195,10 +187,7 @@ Page({
     });
   },
 
-  /**
-   * 选择日期
-   * 将"今天"、"明天"转换为实际日期格式
-   */
+  // 选择日期
   selectDate() {
     const dates = ['今天', '明天'];
     wx.showActionSheet({
@@ -224,7 +213,6 @@ Page({
         this.setData({
           selectedDate: selectedDate
         }, () => {
-          // 日期变化后刷新数据
           this.fetchSchedulesData();
         });
       },
