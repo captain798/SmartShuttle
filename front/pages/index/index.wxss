@@ -8,12 +8,6 @@ page {
   box-sizing: border-box;
 }
 
-/** 滚动区域样式 **/
-.scrollarea {
-  flex: 1;
-  overflow-y: auto;
-}
-
 /** 地点选择区域样式 - 优化固定高度 **/
 .location-picker {
   margin: 30rpx 20rpx;
@@ -95,79 +89,81 @@ page {
   margin-right: 20rpx;
 }
 
-/** 班次列表项样式 **/
-.schedule-item { 
-  margin-bottom: 20rpx; 
-  padding: 30rpx;
-  width: 95%;         
-  box-sizing: border-box;
-  background: #ffffff;
-  border-radius: 16rpx; 
-  transition: all 0.3s ease;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
+/* 班次列表容器样式 */
+.scrollarea {
+  height: calc(100vh - 400rpx); /* 计算剩余可视高度，留出顶部空间 */
+  background-color: #f5f5f5;     /* 设置背景色 */
 }
 
-/** 时间信息样式 **/
+/* 班次列表外层容器 */
+.container {
+  padding: 0 0 20rpx 0; /* 左右内边距20rpx，底部20rpx */
+}
+
+/* 单个班次卡片样式 */
+.schedule-item {
+  margin: 20rpx 0;             /* 添加上下边距20rpx，左右0 */
+  padding: 30rpx 20rpx;              /* 内边距30rpx */
+  background: #ffffff;    
+  width: 90%;     /* 白色背景 */
+  border-radius: 16rpx;        /* 圆角16rpx */
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08); /* 添加阴影效果 */
+}
+
+/* 时间信息区域样式 */
 .time-info {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
+  display: flex;                /* 弹性布局 */
+  align-items: center;         /* 垂直居中 */
 }
 
-/** 路线信息样式 **/
+.time-item text {
+  font-size: 28rpx;            /* 字体大小28rpx */
+  color: #333;                 /* 文字颜色深灰 */
+  font-weight: bold;           /* 加粗显示 */
+}
+
+/* 路线信息区域样式 */
 .route-info {
-  font-size: 30rpx;
-  color: #666;
+  margin-top: 10rpx;           /* 上边距10rpx */
 }
 
-/** 座位信息样式 **/
+.route-name {
+  font-size: 32rpx;            /* 字体稍大 */
+  color: #333;                 /* 文字颜色深灰 */
+}
+
+/* 座位信息区域样式 */
 .seats-info {
-  font-size: 28rpx;
-  color: #666;
+  margin-top: 10rpx;           /* 上边距10rpx */
 }
 
-.seats-info image {
-  width: 36rpx;
-  height: 36rpx;
-  margin-right: 10rpx;
+.seats-info text {
+  font-size: 26rpx;            /* 字体稍小 */
+  color: #666;                 /* 文字颜色灰色 */
 }
 
-/** 按钮区域样式 **/
-.button-area button {
-  min-width: 180rpx;  
-  height: 72rpx;     
-  line-height: 72rpx;
-  font-size: 30rpx;
-  border-radius: 36rpx;
-  background: linear-gradient(135deg, #417af3, #619cfd);
-  color: white;
-  margin-left: 20rpx;
-  transition: opacity 0.2s;
+/* 按钮区域样式 */
+.button-area {
+  margin-top: 20rpx;           /* 上边距20rpx */
+  display: flex;               /* 弹性布局 */
+  justify-content: flex-end;   /* 右对齐 */
 }
 
-.button-area button:active {
-  opacity: 0.9;      
-  transform: none;   
+/* 按钮基础样式 */
+button {
+  min-width: 120rpx;           /* 最小宽度 */
+  height: 60rpx;               /* 固定高度 */
+  line-height: 60rpx;          /* 行高等于高度实现垂直居中 */
+  border-radius: 30rpx;        /* 圆角按钮 */
 }
 
-/** 状态标签样式 **/
-.route-tag {
-  padding: 8rpx 16rpx;
-  border-radius: 8rpx;
-  font-size: 26rpx;
-  font-weight: 500;  
-  text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.1); 
+/* 预约按钮样式 */
+button[type="primary"] {
+  background-color: #07c160;   /* 微信绿色 */
 }
 
-.route-tag.normal {
-  background-color: #07c160;
-  color: white;
-}
-
-.route-tag.full {
-  background-color: #f76260;
-  color: white;
+/* 取消预约按钮样式 */
+button[type="warn"] {
+  background-color: #f5222d;   /* 警告红色 */
+  color: #feffff; 
 }
