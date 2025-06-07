@@ -26,7 +26,6 @@ def list_driver_schedules():
                     start_point: 起点
                     end_point: 终点
                     departure_time: 发车时间
-                    arrival_time: 到达时间
                     departure_datetime: 具体发车日期时间
                     vehicle_plate: 车牌号
                     status: 班次状态
@@ -94,7 +93,6 @@ def list_driver_schedules():
                 'start_point': schedule.route.start_point,
                 'end_point': schedule.route.end_point,
                 'departure_time': schedule.route.departure_time.strftime('%H:%M'),
-                'arrival_time': schedule.route.arrival_time.strftime('%H:%M'),
                 'departure_datetime': schedule.departure_datetime.isoformat(),
                 'vehicle_plate': schedule.vehicle_plate,
                 'status': schedule.status.value,
@@ -129,7 +127,6 @@ def get_schedule_detail(schedule_id):
                 start_point: 起点
                 end_point: 终点
                 departure_time: 发车时间
-                arrival_time: 到达时间
                 departure_datetime: 具体发车日期时间
                 vehicle_plate: 车牌号
                 status: 班次状态
@@ -185,7 +182,6 @@ def get_schedule_detail(schedule_id):
                 'start_point': schedule.route.start_point,
                 'end_point': schedule.route.end_point,
                 'departure_time': schedule.route.departure_time.strftime('%H:%M'),
-                'arrival_time': schedule.route.arrival_time.strftime('%H:%M'),
                 'departure_datetime': schedule.departure_datetime.isoformat(),
                 'vehicle_plate': schedule.vehicle_plate,
                 'status': schedule.status.value,

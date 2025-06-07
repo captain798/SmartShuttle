@@ -443,7 +443,6 @@ def get_available_schedules():
                     id: 班次ID
                     route_name: 路线名称
                     departure_time: 发车时间
-                    arrival_time: 到达时间
                     available_seats: 剩余座位数
                     total_seats: 总座位数
                     vehicle_plate: 车牌号
@@ -533,7 +532,6 @@ def get_available_schedules():
                 'id': schedule.id,
                 'route_name': schedule.route.name.value,
                 'departure_time': schedule.departure_datetime.strftime('%Y-%m-%d %H:%M'),
-                'arrival_time': schedule.route.arrival_time.strftime('%H:%M'),
                 'available_seats': available_seats,
                 'total_seats': schedule.dynamic_capacity,
                 'vehicle_plate': schedule.vehicle_plate,
