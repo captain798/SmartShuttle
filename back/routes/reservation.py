@@ -661,8 +661,9 @@ def init_routes_and_schedules():
                     if is_weekend:
                         # 周末班次
                         if route.is_weekend :
-                            # 生成班次ID：年月日+路线编号+序号
-                            schedule_id = f"{target_date.strftime('%Y%m%d')}{route.name.value}001"
+                            time = route.departure_time.strftime('%H%M')
+                            # 生成班次ID：年月日+路线编号+时间
+                            schedule_id = f"{target_date.strftime('%Y%m%d')}{route.name.value}{time}{route.is_weekend}"
                             
                             # 创建班次
                             schedule = Schedule(
@@ -676,7 +677,8 @@ def init_routes_and_schedules():
                     else:
                         if is_weekend == False:
                             # 工作日班次
-                            schedule_id = f"{target_date.strftime('%Y%m%d')}{route.name.value}001"
+                            time = route.departure_time.strftime('%H%M')
+                            schedule_id = f"{target_date.strftime('%Y%m%d')}{route.name.value}{time}{route.is_weekend}"
                             
                             # 创建班次
                             schedule = Schedule(
