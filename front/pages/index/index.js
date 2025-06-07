@@ -8,6 +8,9 @@ Page({
       this.getTabBar().setData({
         selected: 0
       })
+    };
+    if (this.data.startPoint && this.data.endPoint) {
+      this.fetchSchedulesData();
     }
   },
 
@@ -46,7 +49,7 @@ Page({
           });
           console.log(res.data.schedules);
           wx.showToast({
-            title : "获取班次数据成功",
+            title : "获取数据成功",
             icon : 'success'
           })
         } else {

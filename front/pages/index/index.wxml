@@ -25,13 +25,18 @@
     <block wx:for="{{schedules}}" wx:key="id">
       <view class="schedule-item">
         <view class="time-area">
-          <text>{{item.time}} 发车</text>
+          <text>{{item.route_name}} {{item.departure_time}} 发车</text>  <!-- 显示路线名称和发车时间 -->
+          <text>到达时间: {{item.arrival_time}}</text>  <!-- 显示到达时间 -->
         </view>
         <view class="seats-area">
-          <text>剩余座位: {{item.seats}}</text>
+          <text>车牌号: {{item.vehicle_plate || '未分配'}}</text>  <!-- 显示车牌号 -->
+          <text>司机: {{item.driver_name || '未分配'}}</text>  <!-- 显示司机姓名 -->
+        </view>
+        <view class="seats-info">
+          <text>座位: {{item.available_seats}}/{{item.total_seats}}</text>  <!-- 显示座位信息 -->
         </view>
         <view class="button-area">
-          <button size="mini" bindtap="handleSchedule" id="{{item.schedule_id}}">{{item.isBooked ? '取消预约' : '预约'}}</button>
+          <button size="mini" bindtap="handleSchedule" id="{{item.id}}">{{item.is_booked ? '取消预约' : '预约'}}</button>
         </view>
       </view>
     </block>
