@@ -111,7 +111,7 @@ class Schedule(db.Model):
 
 class Reservation(db.Model):
     __tablename__ = 'reservations'
-    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), nullable=False)
     schedule_id = db.Column(db.String(20), db.ForeignKey('schedules.id'), nullable=False)
     seat_number = db.Column(db.Integer, nullable=False) # 序号：预约的顺序
