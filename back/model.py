@@ -93,7 +93,7 @@ class Route(db.Model):
 
 class Schedule(db.Model):
     __tablename__ = 'schedules'
-    id = db.Column(db.String(20), primary_key=True) 
+    id = db.Column(db.String(100), primary_key=True) 
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id'), nullable=False)
     departure_datetime = db.Column(db.DateTime, nullable=False)
     dynamic_capacity = db.Column(db.Integer, default=30)
