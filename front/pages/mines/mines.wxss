@@ -77,7 +77,7 @@
   color: #eafff7;
   font-weight: 700;
   letter-spacing: 1.5rpx;
-  line-height: 2.0;
+  line-height: 1.8; /* 调整行高 */
   text-shadow: 0 1rpx 6rpx #0B5E3C44;
   opacity: 0.92;
 }

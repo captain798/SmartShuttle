@@ -15,6 +15,7 @@ Page({
   data: {
     userName : null,
     userCard : null,
+    userRole : null,
     showInputModal: false,
     code : null, // 登录码，用于获取用户信息
   },
@@ -22,7 +23,8 @@ Page({
   onLoad() {
     const userName = app.globalData.userInfo?.name || null; 
     const userCard = app.globalData.userInfo?.school_id || null; 
-    this.setData({ userName, userCard });
+    const userRole = app.glaobalData.userInfo?.role || null;
+    this.setData({ userName, userCard, userRole });
   },
 
   navigateToReservationList() {
