@@ -18,7 +18,7 @@ Page({
     isLoading: true, // 请求数据时显示加载中
     reservationList: [],
     status: null,
-    statusList: ['违约', '已完成', '已取消'], 
+    statusList: ['违约', '待完成', '已完成', '已取消'], 
     selectedStatusIndex: -1
   },
 

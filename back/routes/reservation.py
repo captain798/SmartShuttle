@@ -75,7 +75,7 @@ def create_reservation():
         user = User.query.get(current_user_id)
         
         # 检查用户是否在惩罚期内
-        if user.penalty_until and user.penalty_until > datetime.utcnow():
+        if hasattr(user, 'penalty_until') and user.penalty_until and user.penalty_until > datetime.utcnow():
             return jsonify({
                 'error': '您在惩罚期内，无法预约',
                 'penalty_until': user.penalty_until.isoformat()
@@ -711,4 +711,4 @@ def init_app(app):
             init_routes_and_schedules()
         except Exception as e:
             logging.error(f"初始化数据失败: {str(e)}")
-            raise e 
+            raise e

@@ -1,6 +1,6 @@
 // index.js
 const app = getApp();
-
+const baseUrl = app.globalData.baseUrl;
 Page({
 
   onShow: function () {
@@ -70,19 +70,24 @@ Page({
 
   // 处理班次预约/取消预约
   handleSchedule: function(event) {
-    const index = event.currentTarget.dataset.index;
-    const schedule = this.data.schedules[index];
-    if (schedule.isBooked) {
+    const id = event.currentTarget.id;  // 修改为获取id属性
+    const schedule = this.data.schedules.find(item => item.id === id); 
+    
+    console.log('点击的班次',schedule);
+    console.log('accessToken',app.globalData.accessToken);
+    
+    
+    if (schedule.is_booked) {
       // 取消预约
       wx.request({
-        url: `${baseUrl}/reservation/cancel`,
+        url: `${baseUrl}/reservations/cancel`,
         method: 'POST',
         header: {
           'Authorization': 'Bearer ' + wx.getStorageSync('token'),
           'Content-Type': 'application/json'
         },
         data: {
-          schedule_id: schedule.schedule_id
+          schedule_id: schedule.id
         },
         success: (res) => {
           if (res.statusCode === 200 && res.data.message) {
@@ -110,25 +115,25 @@ Page({
         }
       });
     } else {
-      // 预约
+      // 预约成功后的处理
       wx.request({
-        url: `${baseUrl}/reservation/create`,
+        url: `${baseUrl}/reservations/create`,
         method: 'POST',
         header: {
-          'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+          'Authorization': 'Bearer ' + app.globalData.accessToken,
           'Content-Type': 'application/json'
         },
         data: {
-          schedule_id: schedule.schedule_id
+          schedule_id: schedule.id
         },
         success: (res) => {
-          if (res.statusCode === 200 && res.data.message) {
+          if (res.statusCode === 200 && res.data.reservation) {  // 检查reservation字段
             wx.showToast({
               title: '预约成功',
               icon: 'success'
             });
             const newSchedules = [...this.data.schedules];
-            newSchedules[index].isBooked = true;
+            newSchedules[index].is_booked = true;  // 使用后端返回的字段名is_booked
             this.setData({
               schedules: newSchedules
             });

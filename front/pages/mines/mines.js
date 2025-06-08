@@ -114,9 +114,10 @@ Page({
       },
       success: (res) => {
         console.log(res);
-        app.globalData.accessToken = res.data.accessToken;
+        app.globalData.accessToken = res.data.access_token;
         app.globalData.userInfo = res.data;
         this.setData({ userName: res.data.user.name, userCard: res.data.user.school_id });
+        console.log('accessToken:', app.globalData.accessToken);
         wx.showToast({
           title: '认证成功',
           icon: 'success',
@@ -133,5 +134,12 @@ Page({
         });
       }
     });
+  },
+
+  onQrTap(e) {
+    // 二维码点击事件（如需自定义功能在此处理，否则可为空）
+    // 阻止冒泡到父级 info-card-cug
+    // 例如预览二维码等
+    // wx.previewImage({ urls: ['/images/QR-code.png'] });
   }
 });

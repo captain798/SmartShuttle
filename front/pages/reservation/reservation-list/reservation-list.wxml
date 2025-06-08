@@ -1,36 +1,65 @@
-<navigation-bar title="预约记录" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<!-- 背景容器 -->
+<view class="my-reservation-bg">
+  <!-- 自定义导航栏 -->
+  <navigation-bar title="预约记录" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 
-<!-- 美化后的 picker 组件 -->
-<picker 
-  range="{{statusList}}" 
-  value="{{selectedStatusIndex}}" 
-  bindchange="bindStatusChange"
-  class="status-picker"
->
-  <view class="status-picker-text">当前选择状态: {{status || '请选择'}}</view>
-</picker>
+  <!-- 预约状态选择器 -->
+  <picker
+    range="{{statusList}}"  
+    value="{{selectedStatusIndex}}"
+    bindchange="bindStatusChange"
+    class="status-picker"
+  >
+    <view class="status-picker-display">
+      <text class="status-picker-icon">📋</text>
+      <text>{{status || '请选择预约状态'}}</text>
+      <text class="status-picker-arrow">▼</text>
+    </view>
+  </picker>
 
-
-<view class="container">
-
-  <!-- 预约列表展示，使用卡片式布局，可滑动 -->
-  <scroll-view wx:if="{{reservationList.length > 0}}" class="reservation-list" scroll-y style="height: 80vh;">
-    <block wx:for="{{reservationList}}" wx:key="id">
-      <view class="reservation-card">
-        <view class="card-header">
-          <text class="item-title">预约时间: {{item.reservationTime}}</text>
+  <!-- 预约记录内容容器 -->
+  <view class="my-reservation-container content-scroll">
+    <!-- 如果有预约记录 -->
+    <scroll-view 
+      wx:if="{{reservationList.length > 0}}"
+      class="reservation-scroll"
+      scroll-y="true"
+      style="height: calc(100vh - 320rpx); -webkit-overflow-scrolling: touch;"
+    >
+      <block wx:for="{{reservationList}}" wx:key="id">
+        <view class="reservation-card" style="animation-delay: {{index * 120}}ms;">  <!-- 延迟动画 -->
+          <!-- 卡片头部 -->
+          <view class="card-header">
+            <view class="reservation-date-row">
+              <text class="reservation-date-icon">⏰</text>
+              <text class="reservation-date-text">{{item.reservationTime}}</text>
+            </view>
+          </view>
+          <!-- 卡片主体 -->
+          <view class="card-body">
+            <view class="card-timeline">
+              <view class="timeline-dot start"></view>
+              <view class="timeline-line"></view>
+              <view class="timeline-dot end"></view>
+            </view>
+            <!-- 出发地和目的地 -->
+            <view class="location-info">
+              <view class="location-row">
+                <text class="location-label start-label">出发地</text>
+                <text class="location-content">{{item.startLocation}}</text>
+              </view>
+              <view class="location-row">
+                <text class="location-label end-label">目的地</text>
+                <text class="location-content">{{item.endLocation}}</text>
+              </view>
+            </view>
+          </view>
         </view>
-        <view class="card-body">
-          <!-- 修改样式使出发地居左，目的地居右 -->
-          <text class="item-content start-location">出发地: {{item.startLocation}}</text>
-          <text class="item-content end-location">目的地: {{item.endLocation}}</text>
-        </view>
-      </view>
-    </block>
-  </scroll-view>
-
-  <view wx:else class="no-data">
-    <text>暂无预约记录</text>
+      </block>
+    </scroll-view>
+    <!-- 无预约记录 -->
+    <view wx:else class="empty-state">
+      <text class="empty-text">暂无预约记录</text>
+    </view>
   </view>
-  
 </view>
