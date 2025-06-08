@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from model import db, User, Schedule, Reservation, ReservationStatusEnum, RoleEnum, Penalty, Route, RouteNameEnum
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from sqlalchemy import and_, or_, func
 import logging
 import re
@@ -298,13 +298,13 @@ def mark_absent():
         db.session.rollback()
         return jsonify({'error': '系统错误'}), 500
 
-@reservation_bp.route('/cancel/<int:reservation_id>', methods=['POST'])
+@reservation_bp.route('/cancel', methods=['POST'])
 @jwt_required()
-def cancel_reservation(reservation_id):
+def cancel_reservation():
     """
     取消预约
-    Args:
-        reservation_id: 预约ID
+    请求体:
+        schedule_id: 班次ID
     返回:
         成功:
             message: 取消成功信息
@@ -320,9 +320,14 @@ def cancel_reservation(reservation_id):
     """
     try:
         current_user_id = get_jwt_identity()
+        schedue_id = request.json.get('schedule_id')
         
         # 查找预约记录
-        reservation = Reservation.query.get(reservation_id)
+        reservation = Reservation.query.filter_by(
+            user_id=current_user_id,
+            schedule_id=schedue_id,
+            status=ReservationStatusEnum.active
+        ).first()
         if not reservation:
             return jsonify({'error': '预约记录不存在'}), 404
 
@@ -338,7 +343,7 @@ def cancel_reservation(reservation_id):
         cancel_count = Reservation.query.filter(
             and_(
                 Reservation.user_id == current_user_id,
-                Reservation.reserved_at > datetime.date.today(),
+                Reservation.reserved_at > date.today(),
                 Reservation.status == ReservationStatusEnum.canceled
             )
         ).count()

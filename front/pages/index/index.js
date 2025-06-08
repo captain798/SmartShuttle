@@ -70,20 +70,16 @@ Page({
 
   // 处理班次预约/取消预约
   handleSchedule: function(event) {
-    const id = event.currentTarget.id;  // 修改为获取id属性
+    const id = event.currentTarget.id;  // 获取班次id
     const schedule = this.data.schedules.find(item => item.id === id); 
-    
-    console.log('点击的班次',schedule.id);
-    console.log('accessToken',app.globalData.accessToken);
-    
-    
+
     if (schedule.is_booked) {
       // 取消预约
       wx.request({
         url: `${baseUrl}/reservations/cancel`,
         method: 'POST',
         header: {
-          'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+          'Authorization': 'Bearer ' + app.globalData.accessToken,
           'Content-Type': 'application/json'
         },
         data: {
@@ -95,11 +91,7 @@ Page({
               title: '取消预约成功',
               icon: 'success'
             });
-            const newSchedules = [...this.data.schedules];
-            newSchedules[index].isBooked = false;
-            this.setData({
-              schedules: newSchedules
-            });
+            this.fetchSchedulesData(); // 新增：取消成功后刷新数据
           } else {
             wx.showToast({
               title: res.data.error || '取消预约失败',
@@ -132,11 +124,7 @@ Page({
               title: '预约成功',
               icon: 'success'
             });
-            const newSchedules = [...this.data.schedules];
-            newSchedules[index].is_booked = true;  // 使用后端返回的字段名is_booked
-            this.setData({
-              schedules: newSchedules
-            });
+            this.fetchSchedulesData(); // 新增：预约成功后刷新数据
           } else {
             wx.showToast({
               title: res.data.error || '预约失败',
