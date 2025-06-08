@@ -84,10 +84,6 @@ def create_reservation():
         schedule_id = request.json.get('schedule_id')
         if not schedule_id:
             return jsonify({'error': '缺少班次ID'}), 400
-            
-        # 验证班次ID格式
-        if not re.match(SCHEDULE_ID_PATTERN, schedule_id):
-            return jsonify({'error': '班次ID格式不正确'}), 400
 
         # 检查班次是否存在且有效
         schedule = Schedule.query.get(schedule_id)
