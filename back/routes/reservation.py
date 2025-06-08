@@ -374,7 +374,7 @@ def list_reservations():
     """
     获取用户的预约列表
     查询参数:
-        status: 预约状态筛选（可选）
+        status: 预约状态筛选（可选，null时返回所有状态）
     返回:
         成功:
             reservations: [
@@ -405,7 +405,7 @@ def list_reservations():
         # 构建查询
         query = Reservation.query.filter_by(user_id=current_user_id)
         
-        if status:
+        if status and status.lower() != 'null':  # 只有当status有值且不为'null'时才进行筛选
             query = query.filter_by(status=ReservationStatusEnum[status])
 
         # 获取所有预约

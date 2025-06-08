@@ -18,17 +18,14 @@ Page({
     isLoading: true, // 请求数据时显示加载中
     reservationList: [],
     status: null,
-    statusList: ['违约', '待完成', '已完成', '已取消'], 
+    statusList: ['active', 'checked_in', 'canceled', 'absent'], // 后端状态值
+    statusDisplayList: ['待完成', '已完成', '已取消', '违约'], // 前端显示的中文状态
     selectedStatusIndex: -1
   },
 
-  /**
-   * 当用户选择状态时触发的函数
-   * @param {Object} e - 事件对象，包含用户选择的状态索引
-   */
   bindStatusChange: function(e) {
     const index = e.detail.value;
-    const status = this.data.statusList[index];
+    const status = this.data.statusList[index]; // 使用英文状态值
     this.setData({
       selectedStatusIndex: index,
       status: status
@@ -49,16 +46,41 @@ Page({
     });
 
     wx.request({
-      url: `${baseUrl}/reservation/list`, 
-      method: 'GET', // 根据后端接口要求选择合适的请求方法
+      url: `${baseUrl}/reservations/list`, 
+      method: 'GET',
+      header: {
+        'Authorization': 'Bearer ' + app.globalData.accessToken,
+        'Content-Type': 'application/json'
+      },
       data : {
         status : this.data.status, 
       },
       success: function(res) {
         if (res.statusCode === 200) {
-          // 请求成功，更新预约列表数据
+          // 请求成功，处理返回的reservations数组
+          const reservations = res.data.reservations || [];
+          // 格式化数据供前端显示
+          // 状态映射关系
+          const statusMap = {
+            'active': '待完成',
+            'checked_in': '已完成',
+            'canceled': '已取消',
+            'absent': '违约'
+          };
+          
+          // 在格式化数据时使用映射
+          const formattedList = reservations.map(item => ({
+            id: item.id,
+            scheduleId: item.schedule_id,
+            seatNumber: item.seat_number,
+            status: statusMap[item.status] || item.status, // 将英文状态转为中文
+            reservationTime: item.reserved_at ? new Date(item.reserved_at).toLocaleString() : '未知时间',
+            canceledTime: item.canceled_at ? new Date(item.canceled_at).toLocaleString() : null,
+            isTeacherPriority: item.priority_used
+          }));
+          
           that.setData({
-            reservationList: res.data,
+            reservationList: formattedList, // 使用格式化后的数据
             isLoading: false
           });
         } else {

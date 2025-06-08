@@ -2,20 +2,23 @@
 <view class="my-reservation-bg">
   <!-- 自定义导航栏 -->
   <navigation-bar title="预约记录" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+  
+  <!-- 状态选择器 -->
+  <view class="status-filter-container">
+    <picker 
+      mode="selector" 
+      range="{{statusDisplayList}}"
+      value="{{selectedStatusIndex}}"
+      bindchange="bindStatusChange"
+    >
+      <view class="status-filter">
+        <text class="filter-text">{{statusDisplayList[selectedStatusIndex] || '全部状态'}}</text>
+        <image class="filter-icon" src="/assets/images/arrow-down.png"></image>
+      </view>
+    </picker>
+  </view>
 
-  <!-- 预约状态选择器 -->
-  <picker
-    range="{{statusList}}"  
-    value="{{selectedStatusIndex}}"
-    bindchange="bindStatusChange"
-    class="status-picker"
-  >
-    <view class="status-picker-display">
-      <text class="status-picker-icon">📋</text>
-      <text>{{status || '请选择预约状态'}}</text>
-      <text class="status-picker-arrow">▼</text>
-    </view>
-  </picker>
+
 
   <!-- 预约记录内容容器 -->
   <view class="my-reservation-container content-scroll">
@@ -34,6 +37,10 @@
               <text class="reservation-date-icon">⏰</text>
               <text class="reservation-date-text">{{item.reservationTime}}</text>
             </view>
+            <!-- 新增状态显示 -->
+            <view class="reservation-status">
+              <text>状态: {{item.status}}</text> <!-- 这里会自动显示映射后的中文状态 -->
+            </view>
           </view>
           <!-- 卡片主体 -->
           <view class="card-body">
@@ -41,6 +48,21 @@
               <view class="timeline-dot start"></view>
               <view class="timeline-line"></view>
               <view class="timeline-dot end"></view>
+            </view>
+            <!-- 新增班次和座位信息 -->
+            <view class="schedule-info">
+              <view class="info-row">
+                <text class="info-label">班次ID:</text>
+                <text class="info-content">{{item.scheduleId}}</text>
+              </view>
+              <view class="info-row">
+                <text class="info-label">座位号:</text>
+                <text class="info-content">{{item.seatNumber}}</text>
+              </view>
+              <view class="info-row" wx:if="{{item.priority_used}}">
+                <text class="info-label">教师优先:</text>
+                <text class="info-content">是</text>
+              </view>
             </view>
             <!-- 出发地和目的地 -->
             <view class="location-info">
