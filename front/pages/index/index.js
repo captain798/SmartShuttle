@@ -73,7 +73,7 @@ Page({
     const id = event.currentTarget.id;  // 修改为获取id属性
     const schedule = this.data.schedules.find(item => item.id === id); 
     
-    console.log('点击的班次',schedule);
+    console.log('点击的班次',schedule.id);
     console.log('accessToken',app.globalData.accessToken);
     
     
