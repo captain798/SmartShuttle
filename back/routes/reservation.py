@@ -82,12 +82,13 @@ def create_reservation():
             }), 403
 
         schedule_id = request.json.get('schedule_id')
+        print(f"schedule_id类型: {type(schedule_id)}")  # 添加类型打印
         if not schedule_id:
             return jsonify({'error': '缺少班次ID'}), 400
 
         # 检查班次是否存在且有效
         schedule = Schedule.query.get(schedule_id)
-        if not schedule or schedule.status != 'normal':
+        if not schedule or schedule.status.value != 'normal':
             return jsonify({'error': '班次不存在或已取消'}), 400
 
         # 检查是否已经预约过该班次
