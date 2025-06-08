@@ -48,7 +48,7 @@ def create_reservation():
     """
     创建班车预约
     请求体:
-        schedule_id: 班次ID (格式: 年月日+路线编号+序号，如: 20240315A001)
+        schedule_id: 班次ID 
     返回:
         成功:
             message: 预约成功
