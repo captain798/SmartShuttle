@@ -85,6 +85,7 @@ def list_schedules():
         return jsonify({
             'schedules': [{
                 'id': schedule.id,
+                'route_id' : schedule.route_id,
                 'route_name': schedule.route.name.value,
                 'departure_time': schedule.departure_datetime.strftime('%Y-%m-%d %H:%M'),
                 'start_point': schedule.route.start_point,
@@ -229,6 +230,7 @@ def update_schedule(schedule_id):
         db.session.rollback()
         return jsonify({'error': '系统错误'}), 500
 
+# 已对接
 @admin_bp.route('/schedules/<string:schedule_id>', methods=['DELETE'])
 @admin_required
 def delete_schedule(schedule_id):
@@ -269,6 +271,7 @@ def delete_schedule(schedule_id):
         db.session.rollback()
         return jsonify({'error': '系统错误'}), 500
 
+# 已对接
 @admin_bp.route('/export/reservations', methods=['GET'])
 @admin_required
 def export_reservations():
