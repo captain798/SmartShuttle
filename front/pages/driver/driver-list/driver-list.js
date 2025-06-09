@@ -4,8 +4,8 @@ Page({
 
   // 页面初始数据
   data: {
-    driverName : '网小安',
-    driverId : '001'
+    driverName : '',
+    driverId : ''
   },
 
   onShow: function () {
@@ -14,6 +14,12 @@ Page({
         selected: 1
       })
     };
+  },
+
+  onLoad() {
+    const driverName = app.globalData.userInfo?.user.name || null;
+    const driverId = app.globalData.userInfo?.user.school_id || null;
+    this.setData({ driverName, driverId });
   },
   
 })

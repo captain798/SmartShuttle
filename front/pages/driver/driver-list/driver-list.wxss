@@ -24,9 +24,11 @@
   display: flex;
   align-items: center;
   padding: 42rpx 38rpx;
-  width: 92vw;
+  width: 85vw;
   margin: 0 auto 18rpx auto;
   background: linear-gradient(90deg, rgba(145,231,227,0.75) 0%, rgba(182,226,252,0.70) 100%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);  /* 添加阴影效果 */
+  margin: 15px;  /* 增加外边距 */
   border-radius: 30rpx;
   box-shadow: 0 10rpx 32rpx 0 rgba(39, 174, 255, 0.14), 0 2rpx 8rpx 0 rgba(110, 217, 255, 0.10);
   backdrop-filter: blur(8rpx);
