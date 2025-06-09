@@ -19,13 +19,35 @@
 
 .schedule-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: 20rpx;
   margin-bottom: 20rpx;
   background-color: #fff;
   border-radius: 10rpx;
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+}
+
+.schedule-info, .schedule-stats {
+  margin-bottom: 10rpx;
+}
+
+.schedule-info text, .schedule-stats text {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.schedule-info text:first-child {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10rpx;
 }
 
 .action-buttons button {

@@ -1,5 +1,10 @@
 <!-- pages/export/export.wxml -->
 <view class="container">
+  <!-- 添加返回按钮 -->
+  <view class="back-button" bindtap="navigateBack">
+    <text>← 返回</text>
+  </view>
+  
   <view class="date-picker">
     <text>起始日期：</text>
     <picker mode="date" bindchange="bindStartDateChange">

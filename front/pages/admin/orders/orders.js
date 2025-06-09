@@ -1,11 +1,13 @@
 // pages/admin/orders/orders.js
+const app =getApp();
+const baseUrl = app.globalData.baseUrl;
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    currentDate: '2023-01-01', // 当前选中日期
+    currentDate: new Date().toISOString().split('T')[0], // 改为今天日期，格式为YYYY-MM-DD
     schedules: [] // 班次列表数据
   },
 
@@ -21,14 +23,47 @@ Page({
    * 加载当前日期的班次数据
    */
   loadSchedules: function() {
-    // 这里应该是从服务器获取数据的逻辑
-    // 模拟数据
-    const mockData = [
-      { id: 1, time: '08:00', seats: 40 },
-      { id: 2, time: '12:00', seats: 40 },
-      { id: 3, time: '18:00', seats: 40 }
-    ];
-    this.setData({ schedules: mockData });
+    const that = this;
+    wx.request({
+      url: `${baseUrl}/admin/schedules`, 
+      method: 'GET',
+      header: {
+        'Authorization': 'Bearer ' + app.globalData.accessToken,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        date: this.data.currentDate
+      },
+      success(res) {
+        if (res.statusCode === 200 && res.data && res.data.schedules) {  // 添加数据验证
+          const schedules = res.data.schedules.map(item => ({
+            id: item.id,
+            time: item.departure_time.split(' ')[1],  // 提取时间部分
+            route: item.route_name,
+            start: item.start_point,
+            end: item.end_point,
+            seats: item.capacity,
+            reserved: item.reserved_count,
+            plate: item.vehicle_plate,
+            driver: item.driver_name,
+            status: item.status
+          }));
+          that.setData({ schedules });
+        } else {
+          wx.showToast({
+            title: res.data.error || '获取班次失败',  // 显示后端错误信息
+            icon: 'none'
+          });
+          that.setData({ schedules: [] });  // 设置空数组避免undefined
+        }
+      },
+      fail() {
+        wx.showToast({
+          title: '网络错误',
+          icon: 'none'
+        });
+      }
+    });
   },
 
   /**

@@ -1,1 +1,9 @@
 /* pages/admin/export/export.wxss */
+
+/* 返回按钮样式 */
+.back-button {
+  padding: 20rpx;
+  font-size: 32rpx;
+  color: #576b95;
+  margin-bottom: 20rpx;
+}

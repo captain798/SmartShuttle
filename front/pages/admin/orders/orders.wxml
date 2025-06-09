@@ -1,3 +1,5 @@
+<!-- 自定义导航栏 -->
+<navigation-bar title="预约情况" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 <!-- 顶部日期选择器 -->
 <view class="date-picker">
   <picker mode="date" fields="day" start="2023-01-01" end="2030-12-31" bindchange="onDateChange">
@@ -9,8 +11,17 @@
 <view class="schedule-list">
   <block wx:for="{{schedules}}" wx:key="id">
     <view class="schedule-item">
-      <text>{{item.time}} 班次</text>
-      <text>座位: {{item.seats}}</text>
+      <view class="schedule-info">
+        <text>{{item.time}} {{item.route}}</text>
+        <text>{{item.start}} → {{item.end}}</text>
+        <text>车牌: {{item.plate || '未分配'}}</text>
+        <text>司机: {{item.driver || '未分配'}}</text>
+      </view>
+      <view class="schedule-stats">
+        <text>座位: {{item.seats}}</text>
+        <text>已预约: {{item.reserved}}</text>
+        <text>状态: {{item.status}}</text>
+      </view>
       <view class="action-buttons">
         <button size="mini" bindtap="editSchedule" data-id="{{item.id}}">编辑</button>
         <button size="mini" bindtap="deleteSchedule" data-id="{{item.id}}">删除</button>
@@ -23,4 +34,3 @@
 <view class="add-button">
   <button type="primary" bindtap="addSchedule">添加班次</button>
 </view>
-<text>pages/admin/orders/orders.wxml</text>
