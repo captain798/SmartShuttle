@@ -42,6 +42,7 @@ def generate_qr_code(reservation_id):
     img.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
 
+# 已实现
 @reservation_bp.route('/create', methods=['POST'])
 @jwt_required()
 def create_reservation():
@@ -298,6 +299,7 @@ def mark_absent():
         db.session.rollback()
         return jsonify({'error': '系统错误'}), 500
 
+# 已实现
 @reservation_bp.route('/cancel', methods=['POST'])
 @jwt_required()
 def cancel_reservation():
@@ -368,6 +370,7 @@ def cancel_reservation():
         db.session.rollback()
         return jsonify({'error': '系统错误'}), 500
 
+# 已实现
 @reservation_bp.route('/list', methods=['GET'])
 @jwt_required()
 def list_reservations():
@@ -429,6 +432,7 @@ def list_reservations():
         logging.error(f"获取预约列表失败: {str(e)}")
         return jsonify({'error': '系统错误'}), 500
 
+# 已实现
 @reservation_bp.route('/available-schedules', methods=['GET'])
 # @jwt_required()
 def get_available_schedules():

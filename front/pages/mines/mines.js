@@ -4,11 +4,11 @@ const app = getApp() // 获取全局应用实例对象
 
 Page({
   
-  onShow: function () {
-    if (typeof this.getTabBar === 'function' &&  this.getTabBar()) {
-    this.getTabBar().setData({
-       selected: 2
-      })
+  onShow: function() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({
+        selected: 2  // 设置当前选中tab
+      });
     }
   },
 
@@ -23,7 +23,7 @@ Page({
   onLoad() {
     const userName = app.globalData.userInfo?.name || null; 
     const userCard = app.globalData.userInfo?.school_id || null; 
-    const userRole = app.glaobalData.userInfo?.role || null;
+    const userRole = app.globalData.userInfo?.role || null; 
     this.setData({ userName, userCard, userRole });
   },
 
@@ -118,7 +118,13 @@ Page({
         console.log(res);
         app.globalData.accessToken = res.data.access_token;
         app.globalData.userInfo = res.data;
-        this.setData({ userName: res.data.user.name, userCard: res.data.user.school_id });
+        console.log(app.globalData);
+        this.setData({ userName: res.data.user.name, userCard: res.data.user.school_id, userRole: res.data.user.role });
+        
+        // 新增：认证成功后立即刷新底部导航
+        if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+            this.getTabBar().updateTabbarList();
+        }
         console.log('accessToken:', app.globalData.accessToken);
         wx.showToast({
           title: '认证成功',

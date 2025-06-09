@@ -1,38 +1,36 @@
-import { USER_PAGE } from "../config/common"
+import { USER_PAGE } from "../config/common"  // 导入配置常量
+
 Component({
     data: {
-      selected: 0,
-      color: "#7A7E83",
-      selectedColor: "#3cc51f",
-      "list": []
+        selected: 0,  // 当前选中项索引
+        color: "#7A7E83",  // 默认颜色
+        selectedColor: "#3cc51f",  // 选中颜色
+        list: []  // 导航菜单列表
     },
     
+    // 组件生命周期函数
     attached() {
-        const userInfo = wx.getStorageSync('userInfo'); 
-        const role = userInfo?.role; 
-        
-        // 根据角色类型设置底部导航菜单
-        if (role === 'student') { 
-            this.setData({ list: USER_PAGE[`studentTabbarList`] });
-        } 
-        else if (role === 'manager') { 
-            this.setData({ list: USER_PAGE[`adminTabbarList`] });
-        } 
-        else if (role === 'driver') { 
-            this.setData({ list: USER_PAGE[`driverTabbarList`] });
-        } else {
-          this.setData({list : USER_PAGE['studentTabbarList']})
-        }
+        this.updateTabbarList();  // 初始化加载菜单
     },
 
     methods: {
-      switchTab(e) {
-        const data = e.currentTarget.dataset
-        const url = data.path
-        wx.switchTab({ url })
-        this.setData({
-          selected: data.index
-        })
-      }
+        // 切换标签页
+        switchTab(e) {
+            const data = e.currentTarget.dataset;
+            const url = data.path;
+            wx.switchTab({ url });  // 跳转到对应页面
+            this.setData({
+                selected: data.index  // 更新选中状态
+            });
+        },
+
+        // 更新导航菜单列表
+        updateTabbarList() {
+            const role = getApp().globalData.userInfo?.user.role || 'student';  // 默认学生角色
+            console.log('当前角色:', role);  // 调试日志
+            this.setData({ 
+                list: USER_PAGE[`${role}TabbarList`] || []  // 根据角色设置菜单
+            });
+        }
     }
-  });
+});

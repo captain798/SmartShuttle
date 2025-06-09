@@ -1,23 +1,48 @@
-/* pages/scan/scan.wxss */
-/* 新增父容器样式，让按钮竖直排列 */
-.button-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  button {
-    /* 修正语法错误，去掉多余逗号 */
-    color: white;
-    /* 添加背景颜色 */
-    background-color: #b3b3dd;
-    /* 添加圆角 */
-    border-radius: 8rpx;
-    /* 添加内边距 */
-    padding: 20rpx;
-    /* 添加外边距 */
-    margin: 20rpx;
-    /* 确保按钮宽度合适 */
-    width: 80%;
-  }
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.loading image {
+  width: 80rpx;
+  height: 80rpx;
+}
+
+.scan-btn {
+  width: 80%;
+  height: 100rpx;
+  line-height: 100rpx;
+  background: #07C160;
+  color: white;
+  border-radius: 50rpx;
+  margin-top: 60rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.scan-btn image {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 20rpx;
+}
+
+.btn-hover {
+  opacity: 0.8;
+}
+
+.result {
+  margin-top: 40rpx;
+  font-size: 28rpx;
+  color: #666;
+}
   

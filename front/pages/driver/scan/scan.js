@@ -6,7 +6,7 @@ Page({
   onShow: function () {
     if (typeof this.getTabBar === 'function' &&  this.getTabBar()) {
     this.getTabBar().setData({
-       selected: 2
+       selected: 0
       })
     }
   },
@@ -15,59 +15,56 @@ Page({
    * 页面的初始数据
    */
   data: {
-
+    isLoading: false,  // 添加加载状态
+    scanResult: null    // 存储扫码结果
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad(options) {
-
-  },
-
-  /**
-   * 扫码函数
-   */
   scanCode: function() {
+    this.setData({ isLoading: true });  // 开始加载
+    
     wx.scanCode({
-      onlyFromCamera: true, // 只允许从相机扫码
-      scanType: ['qrCode'], // 只允许扫二维码
+      onlyFromCamera: true,
+      scanType: ['qrCode'],
       success: (res) => {
         console.log('扫码结果:', res.result);
+        this.setData({ scanResult: res.result });
         
         wx.request({
-          url: 'https://127.0.0.1/api/check-in/' + encodeURIComponent(res.result),
+          url: app.globalData.baseUrl + '/api/check-in/' + encodeURIComponent(res.result),
           method: 'POST',
           header: {
             'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+            'Content-Type': 'application/json'
           },
-          success: function(response) {
-            if (response.statusCode === 200 && response.data.message) {
+          success: (response) => {
+            if (response.statusCode === 200) {
               wx.showToast({
-                title: response.data.message,
-                icon: 'success'
+                title: response.data.message || '签到成功',
+                icon: 'success',
+                duration: 2000
               });
+              // 可以在这里添加跳转或刷新逻辑
             } else {
               wx.showToast({
-                title: response.data.error || '扫码失败',
-                icon: 'none'
+                title: response.data.error || '签到失败',
+                icon: 'none',
+                duration: 2000
               });
             }
           },
-          fail: function() {
-            wx.showToast({
-              title: '网络错误',
-              icon: 'none'
-            });
+          complete: () => {
+            this.setData({ isLoading: false });  // 结束加载
           }
         });
       },
       fail: (err) => {
         console.error('扫码失败:', err);
         wx.showToast({
-          title: '扫码失败',
-          icon: 'none'
+          title: '扫码失败: ' + (err.errMsg || '未知错误'),
+          icon: 'none',
+          duration: 2000
         });
+        this.setData({ isLoading: false });  // 结束加载
       }
     });
   }
