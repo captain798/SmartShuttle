@@ -39,6 +39,7 @@ def admin_required(fn):
     wrapper.__name__ = fn.__name__
     return wrapper
 
+# 已对接
 @admin_bp.route('/schedules', methods=['GET'])
 @admin_required
 def list_schedules():
@@ -352,6 +353,7 @@ def export_reservations():
         logging.error(f"导出预约数据失败: {str(e)}")
         return jsonify({'error': '系统错误'}), 500
 
+# 已对接
 @admin_bp.route('/statistics', methods=['GET'])
 @admin_required
 def get_statistics():
