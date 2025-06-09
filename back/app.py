@@ -72,10 +72,12 @@ def create_app():
     from routes.auth import auth_bp
     from routes.reservation import reservation_bp
     from routes.driver import driver_bp
+    from routes.admin import admin_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(reservation_bp, url_prefix='/api/reservations')
     app.register_blueprint(driver_bp, url_prefix='/api/drivers')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
     # ----------------------------
     # 错误处理

@@ -1,0 +1,442 @@
+"""
+管理员模块
+提供班车管理、数据导出和统计功能
+"""
+
+from flask import Blueprint, jsonify, request, send_file
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from model import db, User, Schedule, Route, Reservation, RoleEnum, ReservationStatusEnum
+from datetime import datetime, timedelta
+from sqlalchemy import func
+import pandas as pd
+import io
+import logging
+
+# 创建蓝图
+admin_bp = Blueprint('admin', __name__)
+
+def admin_required(fn):
+    """
+    管理员权限检查装饰器
+    用于确保只有管理员角色可以访问特定接口
+    
+    Args:
+        fn: 被装饰的函数
+        
+    Returns:
+        wrapper: 包装后的函数
+        
+    Raises:
+        403: 如果用户不是管理员
+    """
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        if not user or user.role != RoleEnum.admin:
+            return jsonify({'error': '需要管理员权限'}), 403
+        return fn(*args, **kwargs)
+    wrapper.__name__ = fn.__name__
+    return wrapper
+
+@admin_bp.route('/schedules', methods=['GET'])
+@admin_required
+def list_schedules():
+    """
+    获取所有班次信息
+    
+    查询参数:
+        date: 日期 (YYYY-MM-DD)，默认为今天
+        
+    返回:
+        成功:
+            schedules: [
+                {
+                    id: 班次ID
+                    route_name: 路线名称
+                    departure_time: 发车时间
+                    start_point: 起点
+                    end_point: 终点
+                    capacity: 座位数
+                    vehicle_plate: 车牌号
+                    driver_name: 司机姓名
+                    status: 班次状态
+                    reserved_count: 已预约数量
+                }
+            ]
+        失败:
+            error: 错误信息
+    """
+    try:
+        date_str = request.args.get('date')
+        if date_str:
+            try:
+                query_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return jsonify({'error': '日期格式不正确'}), 400
+        else:
+            query_date = datetime.now().date()
+
+        schedules = Schedule.query.filter(
+            func.date(Schedule.departure_datetime) == query_date
+        ).all()
+
+        return jsonify({
+            'schedules': [{
+                'id': schedule.id,
+                'route_name': schedule.route.name.value,
+                'departure_time': schedule.departure_datetime.strftime('%Y-%m-%d %H:%M'),
+                'start_point': schedule.route.start_point,
+                'end_point': schedule.route.end_point,
+                'capacity': schedule.dynamic_capacity,
+                'vehicle_plate': schedule.vehicle_plate,
+                'driver_name': schedule.driver.name if schedule.driver else None,
+                'status': schedule.status.value,
+                'reserved_count': Reservation.query.filter_by(
+                    schedule_id=schedule.id,
+                    status=ReservationStatusEnum.active
+                ).count()
+            } for schedule in schedules]
+        })
+    except Exception as e:
+        logging.error(f"获取班次列表失败: {str(e)}")
+        return jsonify({'error': '系统错误'}), 500
+
+@admin_bp.route('/schedules', methods=['POST'])
+@admin_required
+def create_schedule():
+    """
+    创建新班次
+    
+    请求体:
+        route_id: 路线ID
+        departure_datetime: 发车时间 (YYYY-MM-DD HH:MM)
+        dynamic_capacity: 座位数
+        vehicle_plate: 车牌号（可选）
+        driver_id: 司机ID（可选）
+        
+    返回:
+        成功:
+            message: 创建成功信息
+            schedule: {
+                id: 班次ID
+                route_name: 路线名称
+                departure_time: 发车时间
+                capacity: 座位数
+            }
+        失败:
+            error: 错误信息
+    """
+    try:
+        data = request.json
+        required_fields = ['route_id', 'departure_datetime', 'dynamic_capacity']
+        if not all(field in data for field in required_fields):
+            return jsonify({'error': '缺少必要字段'}), 400
+
+        # 验证路线是否存在
+        route = Route.query.get(data['route_id'])
+        if not route:
+            return jsonify({'error': '路线不存在'}), 400
+
+        # 创建班次
+        schedule = Schedule(
+            route_id=data['route_id'],
+            departure_datetime=datetime.strptime(data['departure_datetime'], '%Y-%m-%d %H:%M'),
+            dynamic_capacity=data['dynamic_capacity'],
+            vehicle_plate=data.get('vehicle_plate'),
+            driver_id=data.get('driver_id'),
+            status='normal'
+        )
+
+        db.session.add(schedule)
+        db.session.commit()
+
+        return jsonify({
+            'message': '班次创建成功',
+            'schedule': {
+                'id': schedule.id,
+                'route_name': schedule.route.name.value,
+                'departure_time': schedule.departure_datetime.strftime('%Y-%m-%d %H:%M'),
+                'capacity': schedule.dynamic_capacity
+            }
+        })
+    except Exception as e:
+        logging.error(f"创建班次失败: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': '系统错误'}), 500
+
+@admin_bp.route('/schedules/<string:schedule_id>', methods=['PUT'])
+@admin_required
+def update_schedule(schedule_id):
+    """
+    更新班次信息
+    
+    路径参数:
+        schedule_id: 班次ID
+        
+    请求体:
+        departure_datetime: 发车时间 (YYYY-MM-DD HH:MM)（可选）
+        dynamic_capacity: 座位数（可选）
+        vehicle_plate: 车牌号（可选）
+        driver_id: 司机ID（可选）
+        status: 班次状态（可选）
+        
+    返回:
+        成功:
+            message: 更新成功信息
+            schedule: {
+                id: 班次ID
+                route_name: 路线名称
+                departure_time: 发车时间
+                capacity: 座位数
+                status: 班次状态
+            }
+        失败:
+            error: 错误信息
+    """
+    try:
+        schedule = Schedule.query.get(schedule_id)
+        if not schedule:
+            return jsonify({'error': '班次不存在'}), 404
+
+        data = request.json
+        if 'departure_datetime' in data:
+            schedule.departure_datetime = datetime.strptime(data['departure_datetime'], '%Y-%m-%d %H:%M')
+        if 'dynamic_capacity' in data:
+            schedule.dynamic_capacity = data['dynamic_capacity']
+        if 'vehicle_plate' in data:
+            schedule.vehicle_plate = data['vehicle_plate']
+        if 'driver_id' in data:
+            schedule.driver_id = data['driver_id']
+        if 'status' in data:
+            schedule.status = data['status']
+
+        db.session.commit()
+
+        return jsonify({
+            'message': '班次更新成功',
+            'schedule': {
+                'id': schedule.id,
+                'route_name': schedule.route.name.value,
+                'departure_time': schedule.departure_datetime.strftime('%Y-%m-%d %H:%M'),
+                'capacity': schedule.dynamic_capacity,
+                'status': schedule.status.value
+            }
+        })
+    except Exception as e:
+        logging.error(f"更新班次失败: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': '系统错误'}), 500
+
+@admin_bp.route('/schedules/<string:schedule_id>', methods=['DELETE'])
+@admin_required
+def delete_schedule(schedule_id):
+    """
+    删除班次
+    
+    路径参数:
+        schedule_id: 班次ID
+        
+    返回:
+        成功:
+            message: 删除成功信息
+        失败:
+            error: 错误信息
+            
+    业务规则:
+        1. 只能删除没有活跃预约的班次
+    """
+    try:
+        schedule = Schedule.query.get(schedule_id)
+        if not schedule:
+            return jsonify({'error': '班次不存在'}), 404
+
+        # 检查是否有活跃的预约
+        active_reservations = Reservation.query.filter_by(
+            schedule_id=schedule_id,
+            status=ReservationStatusEnum.active
+        ).count()
+        if active_reservations > 0:
+            return jsonify({'error': '该班次有活跃预约，无法删除'}), 400
+
+        db.session.delete(schedule)
+        db.session.commit()
+
+        return jsonify({'message': '班次删除成功'})
+    except Exception as e:
+        logging.error(f"删除班次失败: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': '系统错误'}), 500
+
+@admin_bp.route('/export/reservations', methods=['GET'])
+@admin_required
+def export_reservations():
+    """
+    导出预约数据
+    
+    查询参数:
+        start_date: 开始日期 (YYYY-MM-DD)
+        end_date: 结束日期 (YYYY-MM-DD)
+        
+    返回:
+        成功:
+            Excel文件，包含以下字段：
+            - 预约ID
+            - 用户姓名
+            - 学号
+            - 班次ID
+            - 路线
+            - 出发时间
+            - 起点
+            - 终点
+            - 座位号
+            - 状态
+            - 预约时间
+            - 签到时间
+            - 取消时间
+        失败:
+            error: 错误信息
+    """
+    try:
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+
+        if not start_date or not end_date:
+            return jsonify({'error': '请指定日期范围'}), 400
+
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({'error': '日期格式不正确'}), 400
+
+        # 查询预约数据
+        reservations = Reservation.query.join(Schedule).filter(
+            func.date(Schedule.departure_datetime).between(start_date, end_date)
+        ).all()
+
+        # 准备数据
+        data = []
+        for reservation in reservations:
+            data.append({
+                '预约ID': reservation.id,
+                '用户姓名': reservation.user.name,
+                '学号': reservation.user.school_id,
+                '班次ID': reservation.schedule_id,
+                '路线': reservation.schedule.route.name.value,
+                '出发时间': reservation.schedule.departure_datetime.strftime('%Y-%m-%d %H:%M'),
+                '起点': reservation.schedule.route.start_point,
+                '终点': reservation.schedule.route.end_point,
+                '座位号': reservation.seat_number,
+                '状态': reservation.status.value,
+                '预约时间': reservation.reserved_at.strftime('%Y-%m-%d %H:%M'),
+                '签到时间': reservation.checked_in_at.strftime('%Y-%m-%d %H:%M') if reservation.checked_in_at else None,
+                '取消时间': reservation.canceled_at.strftime('%Y-%m-%d %H:%M') if reservation.canceled_at else None
+            })
+
+        # 创建Excel文件
+        df = pd.DataFrame(data)
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='预约数据')
+
+        output.seek(0)
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=f'预约数据_{start_date}_{end_date}.xlsx'
+        )
+
+    except Exception as e:
+        logging.error(f"导出预约数据失败: {str(e)}")
+        return jsonify({'error': '系统错误'}), 500
+
+@admin_bp.route('/statistics', methods=['GET'])
+@admin_required
+def get_statistics():
+    """
+    获取统计数据
+    
+    查询参数:
+        date: 日期 (YYYY-MM-DD)，默认为今天
+        
+    返回:
+        成功:
+            date: 统计日期
+            statistics: [
+                {
+                    schedule_id: 班次ID
+                    route_name: 路线名称
+                    departure_time: 发车时间
+                    start_point: 起点
+                    end_point: 终点
+                    total_reservations: 总预约数
+                    active_reservations: 活跃预约数
+                    checked_in: 已签到数
+                    absent: 缺席数
+                    canceled: 取消数
+                    occupancy_rate: 上座率
+                }
+            ]
+        失败:
+            error: 错误信息
+    """
+    try:
+        date_str = request.args.get('date')
+        if date_str:
+            try:
+                query_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                return jsonify({'error': '日期格式不正确'}), 400
+        else:
+            query_date = datetime.now().date()
+
+        # 获取当天的班次
+        schedules = Schedule.query.filter(
+            func.date(Schedule.departure_datetime) == query_date
+        ).all()
+
+        statistics = []
+        for schedule in schedules:
+            # 获取该班次的预约统计
+            total_reservations = Reservation.query.filter_by(schedule_id=schedule.id).count()
+            active_reservations = Reservation.query.filter_by(
+                schedule_id=schedule.id,
+                status=ReservationStatusEnum.active
+            ).count()
+            checked_in = Reservation.query.filter_by(
+                schedule_id=schedule.id,
+                status=ReservationStatusEnum.checked_in
+            ).count()
+            absent = Reservation.query.filter_by(
+                schedule_id=schedule.id,
+                status=ReservationStatusEnum.absent
+            ).count()
+            canceled = Reservation.query.filter_by(
+                schedule_id=schedule.id,
+                status=ReservationStatusEnum.canceled
+            ).count()
+
+            statistics.append({
+                'schedule_id': schedule.id,
+                'route_name': schedule.route.name.value,
+                'departure_time': schedule.departure_datetime.strftime('%Y-%m-%d %H:%M'),
+                'start_point': schedule.route.start_point,
+                'end_point': schedule.route.end_point,
+                'total_reservations': total_reservations,
+                'active_reservations': active_reservations,
+                'checked_in': checked_in,
+                'absent': absent,
+                'canceled': canceled,
+                'occupancy_rate': f"{(active_reservations / schedule.dynamic_capacity * 100):.1f}%" if schedule.dynamic_capacity > 0 else "0%"
+            })
+
+        return jsonify({
+            'date': query_date.strftime('%Y-%m-%d'),
+            'statistics': statistics
+        })
+
+    except Exception as e:
+        logging.error(f"获取统计数据失败: {str(e)}")
+        return jsonify({'error': '系统错误'}), 500 
