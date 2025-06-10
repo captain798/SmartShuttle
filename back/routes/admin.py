@@ -109,7 +109,9 @@ def create_schedule():
     创建新班次
     
     请求体:
-        route_id: 路线ID
+        direction: 方向（A或B）
+        start_point: 始发站
+        end_point: 终点站
         departure_datetime: 发车时间 (YYYY-MM-DD HH:MM)
         dynamic_capacity: 座位数
         vehicle_plate: 车牌号（可选）
@@ -129,18 +131,32 @@ def create_schedule():
     """
     try:
         data = request.json
-        required_fields = ['route_id', 'departure_datetime', 'dynamic_capacity']
+        required_fields = ['direction', 'start_point', 'end_point', 'departure_datetime', 'dynamic_capacity']
         if not all(field in data for field in required_fields):
             return jsonify({'error': '缺少必要字段'}), 400
 
-        # 验证路线是否存在
-        route = Route.query.get(data['route_id'])
+        # 查找或创建路线
+        route = Route.query.filter_by(
+            name=data['direction'],
+            start_point=data['start_point'],
+            end_point=data['end_point'],
+            departure_time=datetime.strptime(data['departure_datetime'], '%Y-%m-%d %H:%M').time()
+        ).first()
+
         if not route:
-            return jsonify({'error': '路线不存在'}), 400
+            # 创建新路线
+            route = Route(
+                name=data['direction'],
+                start_point=data['start_point'],
+                end_point=data['end_point'],
+                departure_time=datetime.strptime(data['departure_datetime'], '%Y-%m-%d %H:%M').time()
+            )
+            db.session.add(route)
+            db.session.flush()  # 获取新创建的route_id
 
         # 创建班次
         schedule = Schedule(
-            route_id=data['route_id'],
+            route_id=route.id,
             departure_datetime=datetime.strptime(data['departure_datetime'], '%Y-%m-%d %H:%M'),
             dynamic_capacity=data['dynamic_capacity'],
             vehicle_plate=data.get('vehicle_plate'),
