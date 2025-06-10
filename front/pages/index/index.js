@@ -150,8 +150,8 @@ Page({
       success: (res) => {
         this.setData({
           startPoint: locations[res.tapIndex],
-          endPoint: '' // 重置终点
         });
+        this.fetchSchedulesData();
       },
       fail: (res) => {
         console.error(res.errMsg);

@@ -45,4 +45,22 @@
   font-size: 28rpx;
   color: #666;
 }
+
+.checkin-info {
+  margin-top: 40rpx;
+  width: 80%;
+  padding: 30rpx;
+  background: #f7f7f7;
+  border-radius: 20rpx;
+}
+
+.info-item {
+  margin-bottom: 20rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
   

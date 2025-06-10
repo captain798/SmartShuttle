@@ -17,4 +17,14 @@
   <view wx:if="{{scanResult}}" class="result">
     <text>最近扫码: {{scanResult}}</text>
   </view>
+  
+  <!-- 签到成功信息展示 -->
+  <view wx:if="{{checkInInfo}}" class="checkin-info">
+    <view class="info-item">
+      <text>用户姓名: {{checkInInfo.user_name}}</text>
+    </view>
+    <view class="info-item">
+      <text>座位号: {{checkInInfo.seat_number}}</text>
+    </view>
+  </view>
 </view>

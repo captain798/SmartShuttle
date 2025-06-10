@@ -15,12 +15,16 @@ Page({
    * 页面的初始数据
    */
   data: {
-    isLoading: false,  // 添加加载状态
-    scanResult: null    // 存储扫码结果
+    isLoading: false,  // 加载状态
+    scanResult: null, // 扫码结果
+    checkInInfo: null // 签到成功后的详细信息
   },
 
   scanCode: function() {
-    this.setData({ isLoading: true });  // 开始加载
+    this.setData({ 
+      isLoading: true,
+      checkInInfo: null  // 重置签到信息
+    });
     
     wx.scanCode({
       onlyFromCamera: true,
@@ -38,12 +42,14 @@ Page({
           },
           success: (response) => {
             if (response.statusCode === 200) {
+              this.setData({
+                checkInInfo: response.data.reservation // 保存签到信息
+              });
               wx.showToast({
                 title: response.data.message || '签到成功',
                 icon: 'success',
                 duration: 2000
               });
-              // 可以在这里添加跳转或刷新逻辑
             } else {
               wx.showToast({
                 title: response.data.error || '签到失败',
