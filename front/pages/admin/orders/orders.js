@@ -1,24 +1,59 @@
 // pages/admin/orders/orders.js
-const app = getApp();  // 获取小程序实例
-const baseUrl = app.globalData.baseUrl;  // 基础API地址
+const app = getApp();  
+const baseUrl = app.globalData.baseUrl;  
 
 Page({
-    data: {
-        currentDate: new Date().toISOString().split('T')[0],  // 默认显示当天日期
-        schedules: [],  // 班次列表数据
-        showDialog: false,  // 控制弹窗显示
-        dialogType: '',  // 弹窗类型: 'add'或'edit'
-        currentSchedule: null  // 当前操作的班次数据
-    },
+
     onShow: function () {
-      if (typeof this.getTabBar === 'function' &&  this.getTabBar()) {
-        this.getTabBar().setData({
-          selected: 2
-        })
-      };
-    },
+        if (typeof this.getTabBar === 'function' &&  this.getTabBar()) {
+          this.getTabBar().setData({
+            selected: 2
+          })
+        };
+      },
     onLoad(options) {
-        this.loadSchedules(); 
+          this.loadSchedules(); 
+      },
+
+    data: {
+        currentDate: new Date().toISOString().split('T')[0],  
+        schedules: [],  
+        showDialog: false,  
+        currentSchedule: null, 
+
+        dialogType: '',  
+        directionOptions: [
+            {id: 'A', name: 'A方向(本部→新校区)'},
+            {id: 'B', name: 'B方向(新校区→本部)'}
+        ],
+        directionIndex: 0,
+        startPointOptions: ['武大本部网安院', '武大本部当代楼附近校巴站', '新校区新珈楼', '新校区一食堂'],
+        startPointIndex: 0,
+        endPointOptions: ['新校区新珈楼门口', '新校区一食堂门口', '武大本部网安院', '武大本部当代楼附近校巴站'],
+        endPointIndex: 0,
+        
+        formData: {
+            direction: 'A',
+            start_point: '武大本部网安院',
+            end_point: '新校区新珈楼门口',
+            departure_datetime: '',
+            dynamic_capacity: '',
+            vehicle_plate: '',
+            driver_id: '',
+            status: 'normal'
+        },
+
+        selectDate : '',
+        selectTime : ''
+        
+    },
+
+    onDateChange: function(e) {
+        this.setData({ 
+            currentDate: e.detail.value,
+            schedules: [] // 清空列表等待加载新数据
+        });
+        this.loadSchedules();
     },
 
     loadSchedules: function() {
@@ -65,12 +100,98 @@ Page({
         });
     },
 
-    onDateChange: function(e) {
-        this.setData({ 
-            currentDate: e.detail.value,
-            schedules: [] // 清空列表等待加载新数据
+    selectStartPoint: function() {
+        const isDirectionA = this.data.directionOptions[this.data.directionIndex].id === 'A';
+        const locations = isDirectionA 
+            ? ['武大本部网安院', '武大本部当代楼附近校巴站']  // A方向起点选项
+            : ['新校区新珈楼', '新校区一食堂'];  // B方向起点选项
+        wx.showActionSheet({
+            itemList: locations,
+            success: (res) => {
+                this.setData({
+                    startPointIndex: res.tapIndex,
+                    'formData.start_point': locations[res.tapIndex],
+                    endPointIndex: 0,
+                    'formData.end_point': this.data.endPointOptions[0]
+                });
+            },
+            fail: (res) => {
+                console.error(res.errMsg);
+            }
         });
-        this.loadSchedules();
+    },
+
+    selectEndPoint: function() {
+        const isDirectionA = this.data.directionOptions[this.data.directionIndex].id === 'A';
+        const locations = isDirectionA 
+            ? ['新校区新珈楼门口', '新校区一食堂门口']  
+            : ['武大本部网安院', '武大本部当代楼附近校巴站'];  
+        wx.showActionSheet({
+            itemList: locations,
+            success: (res) => {
+                this.setData({
+                    endPointIndex: res.tapIndex,
+                    'formData.end_point': locations[res.tapIndex]
+                });
+            },
+            fail: (res) => {
+                console.error(res.errMsg);
+            }
+        });
+    },
+
+    onDirectionChange: function(e) {
+        const selectedId = this.data.directionOptions[e.detail.value].id;  // 获取选中项的id值
+        const isDirectionA = selectedId === 'A';  // 判断是否为A方向
+        
+        // 根据方向设置起点和终点选项
+        const startPoints = isDirectionA 
+            ? ['武大本部网安院', '武大本部当代楼附近校巴站']  // A方向起点选项
+            : ['新校区新珈楼', '新校区一食堂'];  // B方向起点选项
+            
+        const endPoints = isDirectionA 
+            ? ['新校区新珈楼门口', '新校区一食堂门口']  // A方向终点选项
+            : ['武大本部网安院', '武大本部当代楼附近校巴站'];  // B方向终点选项
+
+        this.setData({
+            directionIndex: e.detail.value,
+            startPointOptions: startPoints,  // 更新起点选项
+            endPointOptions: endPoints,     // 更新终点选项
+            startPointIndex: 0,             // 设置为第一个选项
+            endPointIndex: 0,               // 设置为第一个选项
+            'formData.direction': selectedId,
+            'formData.start_point': startPoints[0],  // 自动选择第一个起点
+            'formData.end_point': endPoints[0]      // 自动选择第一个终点
+        });
+    },
+
+    onSelectDateChange: function(e) {
+        this.setData({
+            selectDate: e.detail.value,
+        });
+    },
+
+    onSelectTimeChange: function(e) {
+        this.setData({
+            selectTime: e.detail.value,
+        });
+    },
+    
+    addSchedule: function() {
+        this.setData({
+            showDialog: true,
+            dialogType: 'add',
+            formData: {  // 初始化formData对象
+                direction: 'A',
+                start_point: '武大本部网安院',
+                end_point: '新校区新珈楼门口',
+                departure_datetime: '',  
+                vehicle_plate: '',
+                driver_id: '',
+                dynamic_capacity: 30,
+                status: 'normal'
+            }
+        });
     },
 
     deleteSchedule: function(e) {
@@ -114,42 +235,37 @@ Page({
         });
     },
 
-    /**
-     * 添加班次 - 改为弹窗方式
-     */
-    addSchedule: function() {
-        this.setData({
-            showDialog: true,
-            dialogType: 'add',
-            currentSchedule: {
-                date: this.data.currentDate  // 传递当前日期
-            }
-        });
-    },
-
-    /**
-     * 编辑班次 - 改为弹窗方式
-     */
     editSchedule: function(e) {
         const id = e.currentTarget.dataset.id;
         const schedule = this.data.schedules.find(item => item.id === id);
+        if (!schedule) {  // 检查班次是否存在
+            wx.showToast({title: '班次数据异常', icon: 'none'});
+            return;
+        }
+        
+        // 处理时间格式（后端返回的是单独的时间字段）
+        const time = schedule.time || '00:00';  // 默认值处理
+        const date = this.data.currentDate;  // 使用当前日期
+        
         this.setData({
             showDialog: true,
             dialogType: 'edit',
-            currentSchedule: schedule,  // 传递当前班次数据
+            currentSchedule: schedule,
+            selectDate: date,  // 设置日期
+            selectTime: time,  // 设置时间
             formData: {  // 初始化表单数据
-                route_id: schedule.route_id || '',  // 路线ID
-                departure_datetime: schedule.departure_time || '',  // 发车时间
-                dynamic_capacity: schedule.seats || '',  // 座位数
-                vehicle_plate: schedule.plate || '',  // 车牌号
-                driver_id: schedule.driver_id || ''  // 司机ID
+                direction: schedule.route.includes('本部→新校区') ? 'A' : 'B',  // 根据路线判断方向
+                departure_datetime: `${date} ${time}`,  
+                dynamic_capacity: schedule.seats || '',  
+                vehicle_plate: schedule.plate || '',  
+                driver_id: '',  // 司机ID为空
+                status: schedule.status || 'normal',
+                start_point: schedule.start || '武大本部网安院',
+                end_point: schedule.end || '新校区新珈楼门口'
             }
         });
     },
 
-    /**
-     * 关闭弹窗
-     */
     closeDialog: function() {
         this.setData({
             showDialog: false,
@@ -158,21 +274,37 @@ Page({
         });
     },
 
-    /**
-     * 提交表单 - 处理添加/编辑班次
-     */
-    submitForm: function(e) {
-        const formData = e.detail.value;
-        console.log("数据：",formData)
+    submitForm: function() {
+        const formData = this.data.formData;
+        console.log(formData)
+        if (!formData.start_point || !formData.end_point || !formData.dynamic_capacity) {
+            wx.showToast({title: '请填写所有必填字段', icon: 'none'});
+            return;
+        }
         const that = this;
+        const departure_datetime = `${this.data.selectDate} ${this.data.selectTime}`;
+
         const url = this.data.dialogType === 'add' 
             ? `${baseUrl}/admin/schedules`
             : `${baseUrl}/admin/schedules/${this.data.currentSchedule.id}`;
         const method = this.data.dialogType === 'add' ? 'POST' : 'PUT';
-    
-        // 添加status字段
-        formData.status = 'normal';  // 默认状态为normal
-    
+        
+        const requestData = {
+            direction: formData.direction,
+
+            departure_datetime: departure_datetime,
+            dynamic_capacity: formData.dynamic_capacity,
+            start_point: formData.start_point, 
+            end_point: formData.end_point,
+
+            status: formData.status || 'normal', 
+
+            driver_id: formData.driver_id,
+            vehicle_plate: formData.vehicle_plate
+        };
+
+        console.log(requestData);
+
         wx.request({
             url: url,
             method: method,
@@ -180,7 +312,7 @@ Page({
                 'Authorization': 'Bearer ' + app.globalData.accessToken,
                 'Content-Type': 'application/json'
             },
-            data: formData,
+            data: requestData,
             success(res) {
                 if (res.statusCode === 200) {
                     wx.showToast({
@@ -188,7 +320,7 @@ Page({
                         icon: 'success'
                     });
                     that.closeDialog();
-                    that.loadSchedules();  // 刷新列表
+                    that.loadSchedules();
                 } else {
                     wx.showToast({
                         title: res.data.error || '操作失败',
@@ -205,80 +337,9 @@ Page({
         });
     },
 
-    // 加载路线和司机选项
-    loadOptions: function() {
-        const that = this;
-        // 获取路线列表
-        wx.request({
-            url: `${baseUrl}/routes`,
-            method: 'GET',
-            success(res) {
-                if (res.statusCode === 200) {
-                    that.setData({
-                        routeOptions: res.data.routes.map(route => ({
-                            id: route.id,
-                            name: route.name
-                        }))
-                    });
-                }
-            }
-        });
-        
-        // 获取司机列表
-        wx.request({
-            url: `${baseUrl}/drivers`,
-            method: 'GET',
-            success(res) {
-                if (res.statusCode === 200) {
-                    that.setData({
-                        driverOptions: res.data.drivers.map(driver => ({
-                            id: driver.id,
-                            name: driver.name
-                        }))
-                    });
-                }
-            }
-        });
-    },
-
-    // 表单输入处理
-    onFormInput: function(e) {
-        const { field } = e.currentTarget.dataset;
-        const value = e.detail.value;
+    handleDynamicCapacityInput: function(e) {
         this.setData({
-            [`formData.${field}`]: value
+            'formData.dynamic_capacity': e.detail.value  // 直接更新座位数
         });
     },
-
-    // 提交表单
-    submitForm: function() {
-        const that = this;
-        const { dialogType, formData } = this.data;
-        const url = dialogType === 'add' 
-            ? `${baseUrl}/admin/schedules`
-            : `${baseUrl}/admin/schedules/${this.data.currentSchedule.id}`;
-        const method = dialogType === 'add' ? 'POST' : 'PUT';
-
-        wx.request({
-            url: url,
-            method: method,
-            header: {
-                'Authorization': 'Bearer ' + app.globalData.accessToken,
-                'Content-Type': 'application/json'
-            },
-            data: formData,
-            success(res) {
-                if (res.statusCode === 200) {
-                    wx.showToast({ title: '操作成功', icon: 'success' });
-                    that.closeDialog();
-                    that.loadSchedules();
-                } else {
-                    wx.showToast({ title: res.data.error || '操作失败', icon: 'none' });
-                }
-            },
-            fail() {
-                wx.showToast({ title: '网络错误', icon: 'none' });
-            }
-        });
-    }
 })

@@ -104,6 +104,7 @@ def list_schedules():
         logging.error(f"获取班次列表失败: {str(e)}")
         return jsonify({'error': '系统错误'}), 500
 
+# 已对接
 @admin_bp.route('/schedules', methods=['POST'])
 @admin_required
 def create_schedule():
@@ -156,8 +157,12 @@ def create_schedule():
             db.session.add(route)
             db.session.flush()  # 获取新创建的route_id
 
+        departure_time=datetime.strptime(data['departure_datetime'], '%Y-%m-%d %H:%M').time()
+        is_weekend = departure_time.strftime('%w') in ['0', '6']
+        schedule_id = f"{departure_time.strftime('%Y%m%d')}{data['start_point']}-->{data['end_point']}{departure_time.strftime('%H%M')}{is_weekend}"
         # 创建班次
         schedule = Schedule(
+            id = schedule_id,
             route_id=route.id,
             departure_datetime=datetime.strptime(data['departure_datetime'], '%Y-%m-%d %H:%M'),
             dynamic_capacity=data['dynamic_capacity'],
@@ -183,6 +188,7 @@ def create_schedule():
         db.session.rollback()
         return jsonify({'error': '系统错误'}), 500
 
+# 已对接
 @admin_bp.route('/schedules/<string:schedule_id>', methods=['PUT'])
 @admin_required
 def update_schedule(schedule_id):
