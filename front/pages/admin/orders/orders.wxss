@@ -12,20 +12,99 @@
   color: #333;
 }
 
+/* 弹窗样式 */
+.dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.dialog-content {
+  width: 80%;
+  background: #fff;
+  border-radius: 10rpx;
+  padding: 20rpx;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.close-btn {
+  border: none;
+  font-size: 40rpx;
+  background: none;
+  padding: 0;
+}
+
 /* 班次列表样式 */
 .schedule-list {
-  margin: 20rpx;
+  margin: 20rpx 0;
 }
 
 .schedule-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 20rpx;
-  margin-bottom: 20rpx;
-  background-color: #fff;
-  border-radius: 10rpx;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+  border-bottom: 1rpx solid #eee;
+}
+
+/* 表单样式 */
+.form-item {
+  margin: 20rpx 0;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.form-item text {
+  width: 100%;
+  margin-bottom: 10rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.form-item input {
+  width: 100%;
+  padding: 15rpx;
+  border: 1rpx solid #eee;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+}
+
+.schedule-info, .schedule-stats {
+  margin-bottom: 10rpx;
+}
+
+.schedule-info text, .schedule-stats text {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.schedule-info text:first-child {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10rpx;
 }
 
 .action-buttons button {

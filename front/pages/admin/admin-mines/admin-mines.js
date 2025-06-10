@@ -1,16 +1,25 @@
 Page({
-
-  data: {
-    adminName : "网小安"
+  onShow: function () {
+    if (typeof this.getTabBar === 'function' &&  this.getTabBar()) {
+      this.getTabBar().setData({
+        selected: 1
+      })
+    };
   },
 
-  /**
-   * 导航到数据导出页面
-   */
+  data: {
+    adminName : "管理员"
+  },
+
   navigateToExport: function() {
     wx.navigateTo({
       url: '/pages/admin/export/export'
     });
   },
+  navigateToReservationDetail: function() {
+    wx.navigateTo({
+      url: '/pages/admin/reservationDetail/reservationDetail'
+    });
+  }
 
 })

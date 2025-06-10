@@ -24,11 +24,18 @@ export const USER_PAGE = {
     adminTabbarList: [
       // 管理员菜单
       {
-        "pagePath":"/pages/manager/manager",
+        "pagePath":"/pages/admin/orders/orders",
+        "text":"预约情况",
+        "iconPath": "/images/VehicleBus.png",
+        "selectedIconPath": "/images/Selected_VehicleBus.png"
+      },
+      {
+        "pagePath":"/pages/admin/admin-mines/admin-mines",
         "text":"管理",
         "iconPath":"/images/manager.png",
         "selectedIconPath":"/images/manager_selected.png"
       }
+      
     ],
     driverTabbarList: [
       // 司机菜单

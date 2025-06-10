@@ -61,24 +61,54 @@ Page({
     
     this.setData({ loading: true });
     
-    // 调用后端API
-    wx.request({
-      url: `${baseUrl}`,
-      method: 'POST',
-      data: {
-        start_date: startDate,
-        end_date: endDate
-      },
+    // 调用后端API - 修改为直接下载文件
+    wx.downloadFile({
+      url: `${baseUrl}/admin/export/reservations?start_date=${startDate}&end_date=${endDate}`,
       header: {
-        'content-type': 'application/json',
-        'Authorization': 'Bearer ' + app.globalData.token
+        'Authorization': 'Bearer ' + app.globalData.accessToken
       },
       success: (res) => {
-        if (res.data.code === 0 && res.data.data.file_url) {
-          this.downloadExcel(res.data.data.file_url);
+        if (res.statusCode === 200) {
+          wx.hideLoading();
+          wx.showToast({
+            title: '下载成功',
+            icon: 'success',
+            duration: 2000
+          });
+          // 使用文件系统API保存文件
+          const fs = wx.getFileSystemManager();
+          fs.saveFile({
+            tempFilePath: res.tempFilePath,
+            success: (saveRes) => {
+              console.log('文件保存成功', saveRes.savedFilePath);
+              wx.showToast({
+                title: '文件保存成功',
+                icon: 'success',
+                duration: 2000
+              });
+              // 添加打开文档功能
+              wx.openDocument({
+                filePath: saveRes.savedFilePath,
+                fileType: 'xlsx',
+                success: (res) => {
+                  console.log('文件打开成功');
+                },
+                fail: (err) => {
+                  wx.showToast({
+                    title: '文件打开失败，请安装WPS或Office',
+                    icon: 'none',
+                    duration: 2000
+                  });
+                }
+              });
+            },
+            fail: (saveErr) => {
+              console.error('文件保存失败', saveErr);
+            }
+          });
         } else {
           wx.showToast({
-            title: res.data.message || '导出失败，请稍后重试',
+            title: '下载失败: ' + res.statusCode,
             icon: 'none',
             duration: 2000
           });
@@ -145,6 +175,11 @@ Page({
           duration: 2000
         });
       }
+    });
+  },
+  navigateBack: function() {
+    wx.navigateBack({
+      delta: 1  // 返回上一页
     });
   }
 });

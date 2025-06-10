@@ -11,7 +11,8 @@
     
     "pages/admin/orders/orders",
     "pages/admin/admin-mines/admin-mines",
-    "pages/admin/export/export"
+    "pages/admin/export/export",
+    "pages/admin/reservationDetail/reservationDetail"
   ],
   "window": {
     "navigationBarTextStyle": "black",
