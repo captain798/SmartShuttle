@@ -153,8 +153,8 @@ def create_reservation():
             'schedule_id': reservation.schedule_id,
             'seat_number': reservation.seat_number,
             'status': reservation.status.value,
-            'qr_code': qr_code,
-            'qr_image': qr_image
+            'reserved_at': reservation.reserved_at,
+            'qr_code': qr_code
         }
         redis_client.setex(
             RedisKeys.RESERVATION.format(reservation.id),
@@ -771,3 +771,81 @@ def init_app(app):
 def update_schedule_cache(schedule_id, user_id=None):
     """更新班次相关的所有缓存"""
     cache_manager.update_schedule_cache(schedule_id, user_id)
+
+
+@reservation_bp.route('/detail', methods=['GET'])
+@jwt_required()
+def get_reservation_detail():
+    """
+    获取单条预约详情
+    
+    查询参数:
+        id: 预约ID
+        
+    返回:
+        成功:
+            {
+                id: 预约ID
+                schedule_id: 班次ID
+                seat_number: 座位号
+                status: 预约状态
+                reserved_at: 预约时间
+                qr_code: 预约二维码
+            }
+        失败:
+            error: 错误信息
+            
+    权限要求:
+        需要JWT认证
+        只能查看自己的预约记录
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        reservation_id = request.args.get('id')
+        
+        if not reservation_id:
+            return jsonify({'error': '缺少预约ID参数'}), 400
+            
+        # 尝试从Redis缓存获取预约详情
+        cache_key = RedisKeys.RESERVATION.format(reservation_id)
+        cached_data = redis_client.get(cache_key)
+        
+        if cached_data:
+            reservation_data = json.loads(cached_data)
+            # 检查是否是当前用户的预约
+            if reservation_data.get('user_id') != current_user_id:
+                return jsonify({'error': '无权查看该预约'}), 403
+            return jsonify(reservation_data)
+            
+        # 从数据库获取预约信息
+        reservation = Reservation.query.get(reservation_id)
+        
+        if not reservation:
+            return jsonify({'error': '预约不存在'}), 404
+            
+        # 检查权限
+        if reservation.user_id != current_user_id:
+            return jsonify({'error': '无权查看该预约'}), 403
+            
+        # 构建返回数据
+        reservation_data = {
+            'id': reservation.id,
+            'schedule_id': reservation.schedule_id,
+            'seat_number': reservation.seat_number,
+            'status': reservation.status.value,
+            'reserved_at': reservation.reserved_at.isoformat(),
+            'qr_code': reservation.qr_code
+        }
+        
+        # 缓存预约详情（1小时过期）
+        redis_client.setex(
+            cache_key,
+            3600,
+            json.dumps(reservation_data)
+        )
+            
+        return jsonify(reservation_data)
+        
+    except Exception as e:
+        logging.error(f"获取预约详情失败: {str(e)}")
+        return jsonify({'error': '系统错误'}), 500
