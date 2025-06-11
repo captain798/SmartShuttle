@@ -147,6 +147,7 @@ def create_reservation():
         # 缓存预约信息
         reservation_data = {
             'id': reservation.id,
+            'user_id': current_user_id,
             'schedule_id': reservation.schedule_id,
             'seat_number': reservation.seat_number,
             'status': reservation.status.value,
@@ -827,6 +828,7 @@ def get_reservation_detail():
         # 构建返回数据
         reservation_data = {
             'id': reservation.id,
+            'user_id': current_user_id,
             'schedule_id': reservation.schedule_id,
             'seat_number': reservation.seat_number,
             'status': reservation.status.value,
