@@ -25,66 +25,71 @@
       wx:if="{{reservationList.length > 0}}"
       class="reservation-scroll"
       scroll-y="true"
-      style="height: calc(100vh - 320rpx); -webkit-overflow-scrolling: touch;"
+      scroll-with-animation="true"
+      enable-back-to-top="true"
+      enhanced="true"
+      show-scrollbar="false"
+      style="height: calc(100vh - 280rpx); padding-bottom: 60rpx; -webkit-overflow-scrolling: touch;"
     >
       <block wx:for="{{reservationList}}" wx:key="id">
         <view 
           class="reservation-card" 
-          style="animation-delay: {{index * 120}}ms;"
-          bindtap="handleCardTap" 
-          data-id="{{item.id}}"  
-          data-qr-code="{{item.qrCode}}"  
-          data-index="{{index}}">  <!-- 传递索引 -->
-          <!-- 卡片头部 -->
+          style="animation-delay: {{index * 120}}ms; transform: translateZ(0);"  
+          bindtap="handleModalButtonTap" 
+          data-schedule-id="{{item.scheduleId}}"
+          data-status="{{item.status}}"
+          data-seat-number="{{item.seatNumber}}"
+          data-reservation-time="{{item.reservationTime}}"
+          data-priority-used="{{item.priority_used}}"
+        >
+          
+          <!-- 卡片头部 - 时间+状态 -->
           <view class="card-header">
             <view class="reservation-date-row">
               <text class="reservation-date-icon">⏰</text>
               <text class="reservation-date-text">{{item.reservationTime}}</text>
             </view>
-            <!-- 新增状态显示 -->
             <view class="reservation-status">
-              <text>状态: {{item.status}}</text> <!-- 这里会自动显示映射后的中文状态 -->
+              <text>{{item.status}}</text>
             </view>
           </view>
-          <!-- 卡片主体 -->
+          
+          <!-- 卡片主体 - 行程信息 -->
           <view class="card-body">
-            <view class="card-timeline">
-              <view class="timeline-dot start"></view>
-              <view class="timeline-line"></view>
-              <view class="timeline-dot end"></view>
-            </view>
-            <!-- 新增班次和座位信息 -->
-            <view class="schedule-info">
-              <view class="info-row">
-                <text class="info-label">座位号:</text>
-                <text class="info-content">{{item.seatNumber}}</text>
-              </view>
-              <view class="info-row" wx:if="{{item.priority_used}}">
-                <text class="info-label">教师优先:</text>
-                <text class="info-content">是</text>
-              </view>
-            </view>
-            <!-- 出发地和目的地 -->
-            <view class="location-info">
-              <view class="location-row">
-                <text class="location-label start-label">出发地</text>
+            <!-- 行程路线 -->
+            <view class="route-container">
+              <view class="route-point">
+                <view class="timeline-dot start"></view>
                 <text class="location-content">{{item.startLocation}}</text>
               </view>
-              <view class="location-row">
-                <text class="location-label end-label">目的地</text>
+              <view class="timeline-line"></view>
+              <view class="route-point">
+                <view class="timeline-dot end"></view>
                 <text class="location-content">{{item.endLocation}}</text>
               </view>
             </view>
-            <!-- 新增取消按钮 -->
-            <view wx:if="{{item.status === '待完成'}}" class="cancel-btn-container">
-              <button 
-                class="cancel-btn"
-                bindtap="handleCancelReservation"
-                data-schedule-id="{{item.scheduleId}}"
-              >
-                取消预约
-              </button>
+          
+            <!-- 详细信息 -->
+            <view class="detail-container">
+              <view class="detail-item">
+                <text class="detail-label">座位号:</text>
+                <text class="detail-value">{{item.seatNumber}}</text>
+              </view>
+              <view class="detail-item" wx:if="{{item.priority_used}}">
+                <text class="detail-label">教师优先:</text>
+                <text class="detail-value">是</text>
+              </view>
             </view>
+          </view>
+          
+          <!-- 操作按钮 -->
+          <view wx:if="{{item.status === '待完成'}}" class="action-container">
+            <button 
+              class="cancel-btn"
+              bindtap="handleCancelReservation"
+              data-schedule-id="{{item.scheduleId}}">
+              取消预约
+            </button>
           </view>
         </view>
       </block>
@@ -95,3 +100,5 @@
     </view>
   </view>
 </view>
+
+

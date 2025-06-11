@@ -18,7 +18,7 @@ Page({
     status: null,
     statusList: ['null', 'active', 'checked_in', 'canceled', 'absent'], // 后端状态值
     statusDisplayList: ['全部状态', '待完成', '已完成', '已取消', '违约'], // 前端显示的中文状态
-    selectedStatusIndex: -1
+    selectedStatusIndex: -1,
   },
 
   bindStatusChange: function(e) {
@@ -102,32 +102,6 @@ Page({
     });
   },
 
-  handleCardTap:function(e){
-    // 获取二维码数据
-    const qrCode = e.currentTarget.dataset.qrCode;
-    if (qrCode) {
-      // 预览二维码图片
-      wx.previewImage({
-        urls: [`data:image/png;base64,${qrCode}`],
-        current: `data:image/png;base64,${qrCode}`,
-        success: function() {
-          console.log('预览二维码成功');
-        },
-        fail: function() {
-          wx.showToast({
-            title: '无法显示二维码',
-            icon: 'none'
-          });
-        }
-      });
-    } else {
-      wx.showToast({
-        title: '二维码不存在',
-        icon: 'none'
-      });
-    }
-  },
-
   // 新增：处理取消预约
   handleCancelReservation: function(e) {
     const scheduleId = e.currentTarget.dataset.scheduleId;
@@ -175,5 +149,6 @@ Page({
         }
       }
     });
-  }
+  },
+
 })
