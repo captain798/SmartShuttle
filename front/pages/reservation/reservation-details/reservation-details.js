@@ -1,38 +1,49 @@
-// 获取应用实例
 const app = getApp()
-
+const  baseUrl  = app.globalData.baseUrl
 Page({
   data: {
-    // 预约详情数据
-    reservation: {
-      id: '',
-      scheduleId: '',
-      seatNumber: '',
-      status: '',
-      reservationTime: '',
-      canceledTime: '',
-      isTeacherPriority: false,
-      qrCode: ''
+    reservationDetail: {
+      id: '', // 预约ID
+      schedule_id: '', // 班次ID
+      seat_number: '', // 座位号
+      status: '', // 预约状态
+      reserved_at: '', // 预约时间
+      qr_code: '' // 预约二维码
     }
   },
-
   onLoad(options) {
-    // 从路由参数获取预约ID
-    const reservationId = options.id
-    this.loadReservationDetail(reservationId)
+    const { id } = options;
+    this.getReservationDetail(id);
   },
-
-  // 加载预约详情
-  loadReservationDetail(reservationId) {
+  getReservationDetail(id) {
     wx.request({
-      url: `${app.globalData.baseUrl}/reservations/detail`,
+      url: `${baseUrl}/reservations/detail`,
       method: 'GET',
-      data: { id: reservationId },
+      header: {
+        'Authorization': 'Bearer ' + app.globalData.accessToken,
+        'Content-Type': 'application/json'
+      },
+      data: { id },
       success: (res) => {
-        if (res.statusCode === 200) {
-          this.setData({ reservation: res.data })
+        if (res.data) {
+          console.log('获取数据成功:', res.data);
+          this.setData({ 
+            reservationDetail: {
+              id: res.data.id,
+              schedule_id: res.data.schedule_id,
+              seat_number: res.data.seat_number,
+              status: res.data.status,
+              reserved_at: res.data.reserved_at,
+              qr_code: res.data.qr_code
+            }
+          });
+        } else {
+          console.error('返回数据为空');
         }
+      },
+      fail: (err) => {
+        console.error('请求失败:', err);
       }
-    })
+    });
   }
-})
+});

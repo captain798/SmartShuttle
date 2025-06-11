@@ -151,4 +151,11 @@ Page({
     });
   },
 
+  handleModalButtonTap(e) {
+    const { id } = e.currentTarget.id;  // 使用解构赋值获取id
+    console.log(id);
+    wx.navigateTo({
+      url: `/pages/reservation/reservation-details/reservation-details?id=${id}`,
+    });
+  }
 })
