@@ -1,35 +1,56 @@
-<navigation-bar title="我的" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<navigation-bar title="我的班次" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 <view class="page-bg">
   <view class="container">
     <!-- 司机信息卡片 -->
     <view class="driver-card driver-row" style="background-color: #1D953F; color: white; border-radius: 8px; padding: 15px;">
-      <image class="avatar" src="/images/mine.png"></image>
+      <image class="avatar" src="/images/driver.png"></image>
       <view class="driver-info">
-        <text class="info-item" style="color: white;">姓名：{{driverName || '暂无姓名'}}</text>
+        <text class="info-item" style="color: white;">司机：{{driverName || '暂无姓名'}}</text>
         <text class="info-item" style="color: white;">工号：{{driverId || '暂无工号'}}</text>
       </view>
     </view>
-    <!-- 间隔 -->
-    <view class="spacer"></view>
-    <!-- 功能菜单卡片 -->
-    <view class="form-card">
-      <view class="action-list">
-        <view class="action-item" hover-class="action-hover">
-          <image class="action-icon" src="/images/Selected_VehicleBus.png"></image>
-          <text class="action-text">我的班车</text>
-          <image class="arrow-icon" src="/images/arrow-right.png"></image>
+    
+    <!-- 班次列表 -->
+    <view class="schedule-list">
+      <block wx:for="{{schedules}}" wx:key="id">
+        <view class="schedule-item" bindtap="navigateToScheduleDetail" data-id="{{item.id}}">
+          <view class="schedule-header">
+            <text class="route-name">{{item.route_name}}</text>
+            <text class="status {{item.status}}">{{item.status === 'normal' ? '正常' : item.status === 'canceled' ? '已取消' : '延误'}}</text>
+          </view>
+          <view class="schedule-info">
+            <text>{{item.start_point}} → {{item.end_point}}</text>
+            <text>发车时间: {{item.departure_time}}</text>
+          </view>
+          <view class="schedule-footer">
+            <text>座位: {{item.checked_in_seats}}/{{item.total_seats}}</text>
+            <image class="arrow-icon" src="/images/arrow-right.png"></image>
+          </view>
         </view>
-        <view class="action-item" hover-class="action-hover">
-          <image class="action-icon" src="/images/pen.png"></image>
-          <text class="action-text">班车调整</text>
-          <image class="arrow-icon" src="/images/arrow-right.png"></image>
-        </view>
-        <view class="action-item" hover-class="action-hover">
-          <image class="action-icon" src="/images/reserve.png"></image>
-          <text class="action-text">预约情况</text>
-          <image class="arrow-icon" src="/images/arrow-right.png"></image>
-        </view>
+      </block>
+      
+      <!-- 加载更多提示 -->
+      <view wx:if="{{isLoading}}" class="loading-more">
+        <text>加载中...</text>
       </view>
+      <view wx:if="{{!hasMore && !isLoading}}" class="no-more">
+        <text>没有更多班次了</text>
+      </view>
+    </view>
+  </view>
+</view>
+<view class="spacer"></view>
+<view class="form-card">
+  <view class="action-list">
+    <view class="action-item" hover-class="action-hover">
+      <image class="action-icon" src="/images/Selected_VehicleBus.png"></image>
+      <text class="action-text">我的班车</text>
+      <image class="arrow-icon" src="/images/arrow-right.png"></image>
+    </view>
+    <view class="action-item" hover-class="action-hover">
+      <image class="action-icon" src="/images/reserve.png"></image>
+      <text class="action-text">预约情况</text>
+      <image class="arrow-icon" src="/images/arrow-right.png"></image>
     </view>
   </view>
 </view>
