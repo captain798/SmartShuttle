@@ -199,6 +199,9 @@ def create_schedule():
         db.session.add(schedule)
         db.session.commit()
 
+        # 更新缓存
+        cache_manager.update_schedule_cache(schedule_id)
+
         return jsonify({
             'message': '班次创建成功',
             'schedule': {
@@ -538,7 +541,7 @@ def get_statistics():
                 'checked_in': checked_in,
                 'absent': absent,
                 'canceled': canceled,
-                'occupancy_rate': f"{(active / schedule.dynamic_capacity * 100):.1f}%" if schedule.dynamic_capacity > 0 else "0%"
+                'occupancy_rate': f"{(checked_in / schedule.dynamic_capacity * 100):.1f}%" if schedule.dynamic_capacity > 0 else "0%"
             })
 
         result = {
