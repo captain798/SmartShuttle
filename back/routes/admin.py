@@ -16,6 +16,7 @@ import json
 from config import Config
 from cache import cache_manager
 from constants import RedisKeys
+from services import ai_service
 
 # 创建蓝图
 admin_bp = Blueprint('admin', __name__)
@@ -309,13 +310,12 @@ def delete_schedule(schedule_id):
 
         # 检查是否有活跃的预约
         active_reservations = Reservation.query.filter_by(
-            schedule_id=schedule_id,
-            status=ReservationStatusEnum.active
+            schedule_id=schedule_id
         ).count()
         if active_reservations > 0:
-            return jsonify({'error': '该班次有活跃预约，无法删除'}), 400
+            return jsonify({'error': '该班次有预约，无法删除'}), 400
 
-                # 更新缓存
+        # 更新缓存
         cache_manager.update_schedule_cache(schedule_id)
         
         db.session.delete(schedule)
@@ -456,8 +456,19 @@ def get_statistics():
                     absent: 缺席数
                     canceled: 取消数
                     occupancy_rate: 上座率
+                    total_seats: 总座位数
                 }
             ]
+            analysis: {
+                summary: {
+                    total_schedules: 总班次数
+                    total_reservations: 总预约数
+                    total_checked_in: 总签到数
+                    total_seats: 总座位数
+                    avg_occupancy_rate: 平均上座率
+                }
+                suggestions: 班次调度建议
+            }
         失败:
             error: 错误信息
     """
@@ -541,12 +552,17 @@ def get_statistics():
                 'checked_in': checked_in,
                 'absent': absent,
                 'canceled': canceled,
-                'occupancy_rate': f"{(checked_in / schedule.dynamic_capacity * 100):.1f}%" if schedule.dynamic_capacity > 0 else "0%"
+                'occupancy_rate': f"{(checked_in / schedule.dynamic_capacity * 100):.1f}%" if schedule.dynamic_capacity > 0 else "0%",
+                'total_seats': schedule.dynamic_capacity
             })
+
+        # 获取AI分析
+        analysis = ai_service.get_analysis(statistics, query_date.strftime('%Y-%m-%d'))
 
         result = {
             'date': query_date.strftime('%Y-%m-%d'),
-            'statistics': statistics
+            'statistics': statistics,
+            'analysis': analysis
         }
 
         # 存入缓存，设置5分钟过期

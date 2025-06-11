@@ -18,4 +18,7 @@ class RedisKeys:
     USER_RESERVATIONS = 'user:reservations:{}'  # 用户预约列表
     AVAILABLE_SCHEDULES = 'available:schedules:{}:{}'  # 可预约班次列表
     USER_CANCEL_COUNT = 'user:cancel:count:{}:{}'  # 用户每日取消次数
-    SCHEDULE_AVAILABLE_SEATS = 'schedule:available_seats:{}'  # 班次可用座位数
+    SCHEDULE_AVAILABLE_SEATS = 'schedule:available_seats:{}' 
+    
+    # AI相关
+    AI_ANALYSIS = 'ai:analysis:{}'
