@@ -87,7 +87,7 @@
             <button 
               class="cancel-btn"
               bindtap="handleCancelReservation"
-              data-schedule-id="{{item.scheduleId}}">
+              id="{{item.id}}">
               取消预约
             </button>
           </view>
