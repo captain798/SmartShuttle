@@ -199,6 +199,9 @@ def create_schedule():
         db.session.add(schedule)
         db.session.commit()
 
+        # 更新缓存
+        cache_manager.update_schedule_cache(schedule_id)
+
         return jsonify({
             'message': '班次创建成功',
             'schedule': {
