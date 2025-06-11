@@ -18,18 +18,26 @@ Component({
         switchTab(e) {
             const data = e.currentTarget.dataset;
             const url = data.path;
-            wx.switchTab({ url });  // 跳转到对应页面
+            wx.switchTab({ url });
             this.setData({
-                selected: data.index  // 更新选中状态
+                selected: data.index
+            });
+        },
+
+        // 新增：角色变更时更新tabBar
+        onRoleChange() {
+            this.updateTabbarList();
+            this.setData({
+                selected: 0  // 重置选中项
             });
         },
 
         // 更新导航菜单列表
         updateTabbarList() {
-            const role = getApp().globalData.userInfo?.user.role || 'student';  // 默认学生角色
-            console.log('当前角色:', role);  // 调试日志
+            const role = getApp().globalData.userInfo?.user.role || 'student';
+            console.log('当前角色:', role);
             this.setData({ 
-                list: USER_PAGE[`${role}TabbarList`] || []  // 根据角色设置菜单
+                list: USER_PAGE[`${role}TabbarList`] || []
             });
         }
     }

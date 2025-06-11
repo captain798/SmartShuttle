@@ -36,6 +36,7 @@
           class="reservation-card" 
           style="animation-delay: {{index * 120}}ms; transform: translateZ(0);"  
           bindtap="handleModalButtonTap" 
+          data-id="{{item.id}}"
           data-schedule-id="{{item.scheduleId}}"
           data-status="{{item.status}}"
           data-seat-number="{{item.seatNumber}}"
@@ -87,7 +88,7 @@
             <button 
               class="cancel-btn"
               bindtap="handleCancelReservation"
-              id="{{item.id}}">
+              >
               取消预约
             </button>
           </view>

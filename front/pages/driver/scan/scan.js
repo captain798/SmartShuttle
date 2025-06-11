@@ -36,17 +36,22 @@ Page({
         // 在请求前后添加加载状态
         this.setData({ isLoading: true });
         wx.request({
-          url: app.globalData.baseUrl + '/api/check-in/' + encodeURIComponent(res.result),
+          url: app.globalData.baseUrl + '/reservations/check-in/' + encodeURIComponent(res.result),
           method: 'POST',
           header: {
-            'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+            'Authorization': 'Bearer ' + app.globalData.accessToken,
             'Content-Type': 'application/json'
           },
           success: (response) => {
             if (response.statusCode === 200) {
               this.setData({
-                checkInInfo: response.data.reservation // 保存签到信息
+                checkInInfo: {
+                  id: response.data.reservation.id,  // 预约ID
+                  userName: response.data.reservation.user_name,  // 用户姓名
+                  seatNumber: response.data.seat_number  // 座位号
+                }
               });
+              console.log(checkInInfo);
               wx.showToast({
                 title: response.data.message || '签到成功',
                 icon: 'success',

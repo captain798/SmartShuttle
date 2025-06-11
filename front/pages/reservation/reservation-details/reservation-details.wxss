@@ -84,3 +84,51 @@
   width: 200rpx;
   height: 200rpx;
 }
+
+
+/* 预约日期文本样式 */
+.reservation-date-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 状态文本样式 */
+.reservation-status {
+  padding: 6rpx 12rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+}
+
+/* 根据不同状态设置不同颜色 */
+.reservation-status[status="canceled"] {
+  background-color: #f8f8f8;
+  color: #999;
+}
+
+.reservation-status[status="confirmed"] {
+  background-color: #e8f5e9;
+  color: #07c160;
+}
+
+/* 位置内容样式 */
+.location-content {
+  font-size: 28rpx;
+  color: #333;
+  margin-left: 10rpx;
+}
+
+/* 详情值样式 */
+.detail-value {
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 二维码容器动画效果 */
+.qr-code-container {
+  transition: all 0.3s ease;
+}
+
+.qr-code-container:active {
+  transform: scale(1.05);
+}

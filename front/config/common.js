@@ -21,11 +21,32 @@ export const USER_PAGE = {
         "selectedIconPath": "/images/Selected_mine.png"
       }
     ],
+    teacherTabbarList: [
+      // 普通用户菜单
+      {
+        "pagePath": "/pages/index/index",
+        "text": "班车预约",
+        "iconPath": "/images/VehicleBus.png",
+        "selectedIconPath": "/images/Selected_VehicleBus.png"
+      },
+      {
+        "pagePath": "/pages/reservation/reservation-list/reservation-list",
+        "text": "我的预约",
+        "iconPath": "/images/reserve.png",
+        "selectedIconPath": "/images/reserve.png"
+      },
+      {
+        "pagePath": "/pages/mines/mines", 
+        "text": "我的",
+        "iconPath": "/images/mine.png",
+        "selectedIconPath": "/images/Selected_mine.png"
+      }
+    ],
     adminTabbarList: [
       // 管理员菜单
       {
         "pagePath":"/pages/admin/orders/orders",
-        "text":"预约情况",
+        "text":"班次情况",
         "iconPath": "/images/VehicleBus.png",
         "selectedIconPath": "/images/Selected_VehicleBus.png"
       },

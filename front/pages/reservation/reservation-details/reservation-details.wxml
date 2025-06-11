@@ -8,10 +8,10 @@
     <!-- 卡片头部 -->
     <view class="card-header">
       <view class="reservation-date-row">
-        <text class="reservation-date-text">{{reservation.reservationTime}}</text>
+        <text class="reservation-date-text">{{reservationDetail.reserved_at}}</text>  <!-- 修改为reservationDetail.reserved_at -->
       </view>
       <view class="reservation-status">
-        <text>{{reservation.status}}</text>
+        <text>{{reservationDetail.status}}</text>  <!-- 修改为reservationDetail.status -->
       </view>
     </view>
     
@@ -19,12 +19,7 @@
     <view class="route-container">
       <view class="route-point">
         <view class="timeline-dot start"></view>
-        <text class="location-content">{{reservation.startLocation}}</text>
-      </view>
-      <view class="timeline-line"></view>
-      <view class="route-point">
-        <view class="timeline-dot end"></view>
-        <text class="location-content">{{reservation.endLocation}}</text>
+        <text class="location-content">{{reservationDetail.schedule_id}}</text>  <!-- 修改为reservationDetail.schedule_id -->
       </view>
     </view>
     
@@ -32,44 +27,13 @@
     <view class="detail-container">
       <view class="detail-item">
         <text class="detail-label">座位号:</text>
-        <text class="detail-value">{{reservation.seatNumber}}</text>
-      </view>
-      <view class="detail-item" wx:if="{{reservation.priority_used}}">
-        <text class="detail-label">教师优先:</text>
-        <text class="detail-value">是</text>
+        <text class="detail-value">{{reservationDetail.seat_number}}</text>  <!-- 修改为reservationDetail.seat_number -->
       </view>
     </view>
     
-    <!-- 二维码 -->
-    <view class="qr-code-container" wx:if="{{reservation.qrCode}}">
-      <image class="qr-code" src="{{reservation.qrCode}}" mode="aspectFit"></image>
+    <view class="qrcode-container">
+      <canvas canvas-id="qrcodeCanvas" style="width: 300px; height: 300px;"></canvas>
+      <button bindtap="saveQRCode">保存二维码</button>
     </view>
-  </view>
-</view>
-<view class="container">
-  <view class="header">
-    <text class="title">预约详情</text>
-  </view>
-  
-  <view class="card">
-    <view class="item">
-      <text>预约时间：</text>
-      <text>{{reservationDetail.time}}</text>
-    </view>
-    <view class="item">
-      <text>状态：</text>
-      <text class="status-{{reservationDetail.status}}">{{reservationDetail.statusText}}</text>
-    </view>
-    <view class="item">
-      <text>路线：</text>
-      <text>{{reservationDetail.route}}</text>
-    </view>
-    <view class="item">
-      <text>座位号：</text>
-      <text>{{reservationDetail.seatNumber}}</text>
-    </view>
-  </view>
-  
-  <view class="qr-code">
   </view>
 </view>
