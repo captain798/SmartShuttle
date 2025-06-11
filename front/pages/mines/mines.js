@@ -143,11 +143,4 @@ Page({
       }
     });
   },
-
-  onQrTap(e) {
-    // 二维码点击事件（如需自定义功能在此处理，否则可为空）
-    // 阻止冒泡到父级 info-card-cug
-    // 例如预览二维码等
-    // wx.previewImage({ urls: ['/images/QR-code.png'] });
-  }
 });

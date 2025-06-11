@@ -1,7 +1,5 @@
-// 页面的初始数据
-
 const app = getApp();
-const baseUrl = app.globalData.baseUrl; // 后端 API 的基础 URL，从全局变量中获取
+const baseUrl = app.globalData.baseUrl; 
 
 Page({
   onShow: function () {
@@ -18,8 +16,8 @@ Page({
     isLoading: true, // 请求数据时显示加载中
     reservationList: [],
     status: null,
-    statusList: ['active', 'checked_in', 'canceled', 'absent'], // 后端状态值
-    statusDisplayList: ['待完成', '已完成', '已取消', '违约'], // 前端显示的中文状态
+    statusList: ['null', 'active', 'checked_in', 'canceled', 'absent'], // 后端状态值
+    statusDisplayList: ['全部状态', '待完成', '已完成', '已取消', '违约'], // 前端显示的中文状态
     selectedStatusIndex: -1
   },
 
@@ -34,10 +32,6 @@ Page({
     this.getReservationList();
   },
 
-  /**
-   * 获取预约列表的函数
-   * 此函数使用 wx.request 向指定的后端 API 发送请求，获取预约列表数据
-   */
   getReservationList: function() {
     const that = this;
     // 设置加载状态为 true
@@ -105,5 +99,24 @@ Page({
         });
       }
     });
+  },
+
+  handleCardTap:function(e){
+    const id = e.currentTarget.dataset.id;
+    wx.request({
+      url : `${baseUrl}/reservations/${id}/qrcode`,
+      method : 'POST',
+      header: {
+        'Authorization': 'Bearer'+ app.globalData.accessToken,
+        'Content-Type': 'application/json'
+      },
+      success: function(res){
+        if(res.statusCode === 200){
+          
+        }
+      }
+    })
+
+    
   }
 })

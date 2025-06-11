@@ -14,6 +14,11 @@ Page({
     }
   },
 
+  onPullDownRefresh() {
+    this.fetchSchedulesData();
+    wx.stopPullDownRefresh();
+  },
+
   data: {
     startPoint: '武大本部网安院',
     endPoint: '新校区新珈楼门口',

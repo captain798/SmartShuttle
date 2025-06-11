@@ -171,3 +171,9 @@ button[type="warn"] {
   background-color: #f5222d;   /* 警告红色 */
   color: #feffff; 
 }
+
+/* 按钮点击反馈 */
+button:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}

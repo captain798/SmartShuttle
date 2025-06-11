@@ -143,3 +143,12 @@
 .action-item:active .arrow-icon, .action-hover .arrow-icon {
   transform: translateX(4rpx) scale(1.06);
 }
+
+/* 添加按钮悬停动画 */
+.action-item {
+  transition: all 0.3s ease;
+}
+.action-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}

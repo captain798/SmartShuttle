@@ -18,8 +18,6 @@
     </picker>
   </view>
 
-
-
   <!-- 预约记录内容容器 -->
   <view class="my-reservation-container content-scroll">
     <!-- 如果有预约记录 -->
@@ -30,7 +28,12 @@
       style="height: calc(100vh - 320rpx); -webkit-overflow-scrolling: touch;"
     >
       <block wx:for="{{reservationList}}" wx:key="id">
-        <view class="reservation-card" style="animation-delay: {{index * 120}}ms;">  <!-- 延迟动画 -->
+        <view 
+          class="reservation-card" 
+          style="animation-delay: {{index * 120}}ms;"
+          bindtap="handleCardTap" 
+          data-id="{{item.id}}"  <!-- 传递预约ID -->
+          data-index="{{index}}">  <!-- 传递索引 -->
           <!-- 卡片头部 -->
           <view class="card-header">
             <view class="reservation-date-row">

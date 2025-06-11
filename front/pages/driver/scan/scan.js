@@ -33,6 +33,8 @@ Page({
         console.log('扫码结果:', res.result);
         this.setData({ scanResult: res.result });
         
+        // 在请求前后添加加载状态
+        this.setData({ isLoading: true });
         wx.request({
           url: app.globalData.baseUrl + '/api/check-in/' + encodeURIComponent(res.result),
           method: 'POST',
@@ -59,7 +61,7 @@ Page({
             }
           },
           complete: () => {
-            this.setData({ isLoading: false });  // 结束加载
+            this.setData({ isLoading: false });
           }
         });
       },
