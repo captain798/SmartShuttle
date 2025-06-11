@@ -80,8 +80,6 @@ def list_driver_schedules():
     查询参数:
         date: 日期（可选，格式：YYYY-MM-DD）
         status: 班次状态（可选，normal/canceled/delayed）
-        page: 页码（默认1）
-        per_page: 每页数量（默认10）
     返回:
         成功:
             schedules: [
@@ -99,9 +97,6 @@ def list_driver_schedules():
                     checked_in_seats: 已签到座位数
                 }
             ]
-            total: 总记录数
-            pages: 总页数
-            current_page: 当前页码
         失败:
             error: 错误信息
     权限要求:
@@ -118,8 +113,6 @@ def list_driver_schedules():
         # 获取查询参数
         date = request.args.get('date')
         status = request.args.get('status')
-        page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 10))
 
         # 尝试从缓存获取数据
         if date:
@@ -139,17 +132,11 @@ def list_driver_schedules():
         if status:
             query = query.filter_by(status=status)
 
-        # 分页查询
-        pagination = query.order_by(Schedule.departure_datetime.desc()).paginate(
-            page=page, per_page=per_page, error_out=False
-        )
+        # 获取所有班次
+        schedules = query.order_by(Schedule.departure_datetime.desc()).all()
 
-        schedules = []
-        for schedule in pagination.items:
-            # 获取预约统计（使用缓存）
-            stats = get_reservation_stats(schedule.id)
-            
-            schedules.append({
+        result = {
+            'schedules': [{
                 'id': schedule.id,
                 'route_name': schedule.route.name.value,
                 'start_point': schedule.route.start_point,
@@ -159,15 +146,9 @@ def list_driver_schedules():
                 'vehicle_plate': schedule.vehicle_plate,
                 'status': schedule.status.value,
                 'total_seats': schedule.dynamic_capacity,
-                'reserved_seats': stats['total'],
-                'checked_in_seats': stats['checked_in']
-            })
-
-        result = {
-            'schedules': schedules,
-            'total': pagination.total,
-            'pages': pagination.pages,
-            'current_page': page
+                'reserved_seats': get_reservation_stats(schedule.id)['total'],
+                'checked_in_seats': get_reservation_stats(schedule.id)['checked_in']
+            } for schedule in schedules]
         }
 
         # 缓存结果
@@ -290,7 +271,6 @@ def get_passenger_list(schedule_id):
                     seat_number: 座位号
                     status: 预约状态
                     checked_in_at: 签到时间
-                    phone: 联系电话（加密）
                 }
             ]
         失败:
@@ -331,15 +311,14 @@ def get_passenger_list(schedule_id):
         if status:
             query = query.filter_by(status=ReservationStatusEnum[status])
 
-        # 获取预约信息
+        # 获取所有预约信息
         reservations = query.all()
         passenger_list = [{
             'id': r.id,
             'user_name': r.user.name,
             'seat_number': r.seat_number,
             'status': r.status.value,
-            'checked_in_at': r.checked_in_at.isoformat() if r.checked_in_at else None,
-            'phone': r.user.phone  # 注意：这里返回的是加密后的电话号码
+            'checked_in_at': r.checked_in_at.isoformat() if r.checked_in_at else None
         } for r in reservations]
 
         result = {

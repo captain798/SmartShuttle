@@ -300,31 +300,52 @@ def delete_schedule(schedule_id):
         失败:
             error: 错误信息
             
+    权限要求:
+        需要管理员权限
+        
     业务规则:
-        1. 只能删除没有活跃预约的班次
+        只能删除没有活跃（active）和已签到（checked_in）预约的班次
     """
     try:
+        # 获取班次信息
         schedule = Schedule.query.get(schedule_id)
         if not schedule:
             return jsonify({'error': '班次不存在'}), 404
 
-        # 检查是否有活跃的预约
-        active_reservations = Reservation.query.filter_by(
-            schedule_id=schedule_id
+        # 检查是否有活跃或已签到的预约
+        active_reservations = Reservation.query.filter(
+            Reservation.schedule_id == schedule_id,
+            Reservation.status.in_([ReservationStatusEnum.active, ReservationStatusEnum.checked_in])
         ).count()
-        if active_reservations > 0:
-            return jsonify({'error': '该班次有预约，无法删除'}), 400
-
-        # 更新缓存
-        cache_manager.update_schedule_cache(schedule_id)
         
+        if active_reservations > 0:
+            return jsonify({'error': '该班次有活跃或已签到的预约，无法删除'}), 400
+
+        # 获取其他状态的预约（已取消或缺席的预约）
+        other_reservations = Reservation.query.filter(
+            Reservation.schedule_id == schedule_id,
+            Reservation.status.in_([ReservationStatusEnum.canceled, ReservationStatusEnum.absent])
+        ).all()
+
+        # 删除其他状态的预约
+        if other_reservations:
+            for reservation in other_reservations:
+                db.session.delete(reservation)
+                # 删除相关缓存
+                cache_manager.delete_reservation_cache(reservation.id)
+
+        # 删除班次
         db.session.delete(schedule)
         db.session.commit()
 
+        # 更新缓存
+        cache_manager.update_schedule_cache(schedule_id)
+
         return jsonify({'message': '班次删除成功'})
+
     except Exception as e:
-        logging.error(f"删除班次失败: {str(e)}")
         db.session.rollback()
+        logging.error(f"删除班次失败: {str(e)}")
         return jsonify({'error': '系统错误'}), 500
 
 # 已对接
