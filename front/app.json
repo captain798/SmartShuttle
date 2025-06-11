@@ -8,6 +8,7 @@
 
     "pages/reservation/reservation-list/reservation-list",
     "pages/reservation/reservation-notice/reservation-notice",
+    "pages/reservation/reservation-details/reservation-details",
     
     "pages/admin/orders/orders",
     "pages/admin/admin-mines/admin-mines",

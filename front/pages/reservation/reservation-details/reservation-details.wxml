@@ -1,0 +1,50 @@
+<!-- 导航栏 -->
+<navigation-bar title="预约详情" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+
+<!-- 页面内容 -->
+<view class="page-container">
+  <!-- 预约卡片 -->
+  <view class="reservation-card">
+    <!-- 卡片头部 -->
+    <view class="card-header">
+      <view class="reservation-date-row">
+        <text class="reservation-date-icon">⏰</text>
+        <text class="reservation-date-text">{{reservation.reservationTime}}</text>
+      </view>
+      <view class="reservation-status">
+        <text>{{reservation.status}}</text>
+      </view>
+    </view>
+    
+    <!-- 行程信息 -->
+    <view class="route-container">
+      <view class="route-point">
+        <view class="timeline-dot start"></view>
+        <text class="location-content">{{reservation.startLocation}}</text>
+      </view>
+      <view class="timeline-line"></view>
+      <view class="route-point">
+        <view class="timeline-dot end"></view>
+        <text class="location-content">{{reservation.endLocation}}</text>
+      </view>
+    </view>
+    
+    <!-- 详细信息 -->
+    <view class="detail-container">
+      <view class="detail-item">
+        <text class="detail-label">座位号:</text>
+        <text class="detail-value">{{reservation.seatNumber}}</text>
+      </view>
+      <view class="detail-item" wx:if="{{reservation.priority_used}}">
+        <text class="detail-label">教师优先:</text>
+        <text class="detail-value">是</text>
+      </view>
+    </view>
+    
+    <!-- 二维码 -->
+    <view class="qr-code-container" wx:if="{{reservation.qrCode}}">
+      <image class="qr-code" src="{{reservation.qrCode}}" mode="aspectFit"></image>
+    </view>
+  </view>
+</view>
+<text>pages/reservation/reservation-details/reservation-details.wxml</text>
