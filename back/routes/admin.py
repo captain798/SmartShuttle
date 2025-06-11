@@ -538,7 +538,7 @@ def get_statistics():
                 'checked_in': checked_in,
                 'absent': absent,
                 'canceled': canceled,
-                'occupancy_rate': f"{(active / schedule.dynamic_capacity * 100):.1f}%" if schedule.dynamic_capacity > 0 else "0%"
+                'occupancy_rate': f"{(checked_in / schedule.dynamic_capacity * 100):.1f}%" if schedule.dynamic_capacity > 0 else "0%"
             })
 
         result = {
