@@ -141,9 +141,6 @@ def create_reservation():
         db.session.add(reservation)
         db.session.commit()
 
-        # 生成二维码图片
-        qr_image = generate_qr_code(reservation.id)
-
         # 更新缓存
         update_schedule_cache(schedule_id, current_user_id)
         
@@ -153,7 +150,7 @@ def create_reservation():
             'schedule_id': reservation.schedule_id,
             'seat_number': reservation.seat_number,
             'status': reservation.status.value,
-            'reserved_at': reservation.reserved_at,
+            'reserved_at': reservation.reserved_at.isoformat(),
             'qr_code': qr_code
         }
         redis_client.setex(
