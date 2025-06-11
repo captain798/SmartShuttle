@@ -20,6 +20,11 @@ Page({
     wx.navigateTo({
       url: '/pages/admin/reservationDetail/reservationDetail'
     });
+  },
+  navigateToBusAdjust:function() {
+    wx.switchTab({
+      url: '/pages/admin/orders/orders'
+    });
   }
 
 })
