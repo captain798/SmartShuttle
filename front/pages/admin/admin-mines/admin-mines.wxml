@@ -12,16 +12,6 @@
     <!-- 功能菜单卡片 -->
     <view class="form-card">
       <view class="action-list">
-        <view class="action-item" hover-class="action-hover" bindtap="navigateToDriverList">
-          <image class="action-icon" src="/images/driver.png"></image>
-          <text class="action-text">司机列表</text>
-          <image class="arrow-icon" src="/images/arrow-right.png"></image>
-        </view>
-        <view class="action-item" hover-class="action-hover" bindtap="navigateToStudentList">
-          <image class="action-icon" src="/images/student.png"></image>
-          <text class="action-text">学生名单</text>
-          <image class="arrow-icon" src="/images/arrow-right.png"></image>
-        </view>
         <view class="action-item" hover-class="action-hover" bindtap="navigateToReservationDetail">
           <image class="action-icon" src="/images/reserve.png"></image>
           <text class="action-text">预约详情</text>

@@ -1,5 +1,5 @@
 <!--pages/admin/reservationDetail/reservationDetail.wxml-->
- <navigation-bar title="预约详情" back="{{true}}" color="black" background="#FFF"></navigation-bar>
+<navigation-bar title="预约详情" back="{{true}}" color="black" background="#FFF"></navigation-bar>
 <view class="container">
   <!-- 日期选择器 -->
   <picker mode="date" value="{{date}}" start="2020-01-01" end="2030-12-31" bindchange="onDateChange">
