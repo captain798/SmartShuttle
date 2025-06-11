@@ -122,9 +122,17 @@ Page({
         console.log(app.globalData);
         this.setData({ userName: res.data.user.name, userCard: res.data.user.school_id, userRole: res.data.user.role });
         
-        // 新增：认证成功后立即刷新底部导航
+        // 修改：认证成功后重置页面
         if (typeof this.getTabBar === 'function' && this.getTabBar()) {
             this.getTabBar().updateTabbarList();
+            // 根据角色跳转到对应首页
+            if(res.data.user.role === 'driver') {
+                wx.switchTab({ url: '/pages/driver/driver-list/driver-list' });
+            } else if(res.data.user.role === 'admin') {
+                wx.switchTab({ url: '/pages/admin/admin-mines/admin-mines' });
+            } else {
+                wx.switchTab({ url: '/pages/index/index' });
+            }
         }
         console.log('accessToken:', app.globalData.accessToken);
         wx.showToast({
