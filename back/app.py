@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import config
-from extensions import db, jwt
+from extensions import db, jwt, redis_client, init_extensions
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 import logging
 from logging.handlers import RotatingFileHandler
@@ -59,11 +59,16 @@ def create_app():
     logging.getLogger('sqlalchemy.orm').setLevel(logging.ERROR)
 
     # 初始化扩展
-    db.init_app(app)
-    jwt.init_app(app)
+    init_extensions(app)
+
+    # 配置 JWT 黑名单
+    @jwt.token_in_blocklist_loader
+    def check_if_token_in_blacklist(jwt_header, jwt_payload):
+        jti = jwt_payload["jti"]
+        return redis_client.get(f"jwt_blacklist:{jti}") is not None
 
     # 启用 CORS（解决微信小程序跨域问题）
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
 
     # ----------------------------
     # 注册蓝图（模块化路由）

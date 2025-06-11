@@ -11,9 +11,18 @@ from sqlalchemy import func
 import pandas as pd
 import io
 import logging
+from extensions import redis_client
+import json
+from config import Config
 
 # 创建蓝图
 admin_bp = Blueprint('admin', __name__)
+
+class RedisKeys:
+    ADMIN_SCHEDULES = 'admin:schedules:{}'  # 管理员班次列表
+    ADMIN_STATISTICS = 'admin:statistics:{}'  # 管理员统计数据
+    ADMIN_EXPORT = 'admin:export:reservations:{}:{}'  # 导出数据缓存
+    SCHEDULE_RESERVATIONS = 'schedule:reservations:{}:{}'  # 班次预约统计
 
 def admin_required(fn):
     """
@@ -78,14 +87,23 @@ def list_schedules():
         else:
             query_date = datetime.now().date()
 
+        # 构建缓存键
+        cache_key = RedisKeys.ADMIN_SCHEDULES.format(query_date.strftime('%Y-%m-%d'))
+        
+        # 尝试从缓存获取数据
+        cached_data = redis_client.get(cache_key)
+        if cached_data:
+            return jsonify(json.loads(cached_data))
+
+        # 缓存未命中，从数据库获取
         schedules = Schedule.query.filter(
             func.date(Schedule.departure_datetime) == query_date
         ).all()
 
-        return jsonify({
+        result = {
             'schedules': [{
                 'id': schedule.id,
-                'route_id' : schedule.route_id,
+                'route_id': schedule.route_id,
                 'route_name': schedule.route.name.value,
                 'departure_time': schedule.departure_datetime.strftime('%Y-%m-%d %H:%M'),
                 'start_point': schedule.route.start_point,
@@ -99,10 +117,16 @@ def list_schedules():
                     status=ReservationStatusEnum.active
                 ).count()
             } for schedule in schedules]
-        })
+        }
+    
+        # 存入缓存，设置5分钟过期
+        redis_client.setex(cache_key, 300, json.dumps(result))
+        return jsonify(result)
+    
     except Exception as e:
         logging.error(f"获取班次列表失败: {str(e)}")
         return jsonify({'error': '系统错误'}), 500
+    
 
 # 已对接
 @admin_bp.route('/schedules', methods=['POST'])
@@ -241,6 +265,9 @@ def update_schedule(schedule_id):
 
         db.session.commit()
 
+        # 更新缓存
+        update_schedule_cache(schedule_id)
+
         return jsonify({
             'message': '班次更新成功',
             'schedule': {
@@ -291,6 +318,9 @@ def delete_schedule(schedule_id):
         db.session.delete(schedule)
         db.session.commit()
 
+        # 更新缓存
+        update_schedule_cache(schedule_id)
+
         return jsonify({'message': '班次删除成功'})
     except Exception as e:
         logging.error(f"删除班次失败: {str(e)}")
@@ -339,6 +369,19 @@ def export_reservations():
             end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
         except ValueError:
             return jsonify({'error': '日期格式不正确'}), 400
+        
+        # 构建缓存键
+        cache_key = RedisKeys.ADMIN_EXPORT.format(start_date, end_date)
+        
+        # 尝试从缓存获取数据
+        cached_data = redis_client.get(cache_key)
+        if cached_data:
+            return send_file(
+                io.BytesIO(cached_data),
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                as_attachment=True,
+                download_name=f'预约数据_{start_date}_{end_date}.xlsx'
+            )
 
         # 查询预约数据
         reservations = Reservation.query.join(Schedule).filter(
@@ -371,8 +414,13 @@ def export_reservations():
             df.to_excel(writer, index=False, sheet_name='预约数据')
 
         output.seek(0)
+        excel_data = output.getvalue()
+
+        # 存入缓存，设置1小时过期
+        redis_client.setex(cache_key, 3600, excel_data)
+
         return send_file(
-            output,
+            io.BytesIO(excel_data),
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             as_attachment=True,
             download_name=f'预约数据_{start_date}_{end_date}.xlsx'
@@ -423,31 +471,64 @@ def get_statistics():
         else:
             query_date = datetime.now().date()
 
-        # 获取当天的班次
+        # 构建缓存键
+        cache_key = RedisKeys.ADMIN_STATISTICS.format(query_date.strftime('%Y-%m-%d'))
+        
+        # 尝试从缓存获取数据
+        cached_data = redis_client.get(cache_key)
+        if cached_data:
+            return jsonify(json.loads(cached_data))
+
+        # 缓存未命中，从数据库获取
         schedules = Schedule.query.filter(
             func.date(Schedule.departure_datetime) == query_date
         ).all()
 
         statistics = []
         for schedule in schedules:
-            # 获取该班次的预约统计
-            total_reservations = Reservation.query.filter_by(schedule_id=schedule.id).count()
-            active_reservations = Reservation.query.filter_by(
-                schedule_id=schedule.id,
-                status=ReservationStatusEnum.active
-            ).count()
-            checked_in = Reservation.query.filter_by(
-                schedule_id=schedule.id,
-                status=ReservationStatusEnum.checked_in
-            ).count()
-            absent = Reservation.query.filter_by(
-                schedule_id=schedule.id,
-                status=ReservationStatusEnum.absent
-            ).count()
-            canceled = Reservation.query.filter_by(
-                schedule_id=schedule.id,
-                status=ReservationStatusEnum.canceled
-            ).count()
+            # 使用 Redis 管道批量获取预约统计
+            pipe = redis_client.pipeline()
+            for status in ['total', 'active', 'checked_in', 'absent', 'canceled']:
+                pipe.get(RedisKeys.SCHEDULE_RESERVATIONS.format(schedule.id, status))
+            results = pipe.execute()
+
+            # 如果缓存中没有数据，从数据库获取并更新缓存
+            if not all(results):
+                total = Reservation.query.filter_by(schedule_id=schedule.id).count()
+                active = Reservation.query.filter_by(
+                    schedule_id=schedule.id,
+                    status=ReservationStatusEnum.active
+                ).count()
+                checked_in = Reservation.query.filter_by(
+                    schedule_id=schedule.id,
+                    status=ReservationStatusEnum.checked_in
+                ).count()
+                absent = Reservation.query.filter_by(
+                    schedule_id=schedule.id,
+                    status=ReservationStatusEnum.absent
+                ).count()
+                canceled = Reservation.query.filter_by(
+                    schedule_id=schedule.id,
+                    status=ReservationStatusEnum.canceled
+                ).count()
+
+                # 更新缓存
+                pipe = redis_client.pipeline()
+                for status, value in [
+                    ('total', total),
+                    ('active', active),
+                    ('checked_in', checked_in),
+                    ('absent', absent),
+                    ('canceled', canceled)
+                ]:
+                    pipe.setex(
+                        RedisKeys.SCHEDULE_RESERVATIONS.format(schedule.id, status),
+                        300,
+                        str(value)
+                    )
+                pipe.execute()
+            else:
+                total, active, checked_in, absent, canceled = [int(r) if r else 0 for r in results]
 
             statistics.append({
                 'schedule_id': schedule.id,
@@ -455,19 +536,39 @@ def get_statistics():
                 'departure_time': schedule.departure_datetime.strftime('%Y-%m-%d %H:%M'),
                 'start_point': schedule.route.start_point,
                 'end_point': schedule.route.end_point,
-                'total_reservations': total_reservations,
-                'active_reservations': active_reservations,
+                'total_reservations': total,
+                'active_reservations': active,
                 'checked_in': checked_in,
                 'absent': absent,
                 'canceled': canceled,
-                'occupancy_rate': f"{(active_reservations / schedule.dynamic_capacity * 100):.1f}%" if schedule.dynamic_capacity > 0 else "0%"
+                'occupancy_rate': f"{(active / schedule.dynamic_capacity * 100):.1f}%" if schedule.dynamic_capacity > 0 else "0%"
             })
 
-        return jsonify({
+        result = {
             'date': query_date.strftime('%Y-%m-%d'),
             'statistics': statistics
-        })
+        }
+
+        # 存入缓存，设置5分钟过期
+        redis_client.setex(cache_key, 300, json.dumps(result))
+        return jsonify(result)
 
     except Exception as e:
         logging.error(f"获取统计数据失败: {str(e)}")
-        return jsonify({'error': '系统错误'}), 500 
+        return jsonify({'error': '系统错误'}), 500
+
+def update_schedule_cache(schedule_id):
+    """更新班次相关的所有缓存"""
+    # 获取班次信息
+    schedule = Schedule.query.get(schedule_id)
+    if not schedule:
+        return
+
+    # 删除相关缓存
+    date_str = schedule.departure_datetime.strftime('%Y-%m-%d')
+    redis_client.delete(RedisKeys.ADMIN_SCHEDULES.format(date_str))
+    redis_client.delete(RedisKeys.ADMIN_STATISTICS.format(date_str))
+    
+    # 删除班次预约统计缓存
+    for status in ['total', 'active', 'checked_in', 'absent', 'canceled']:
+        redis_client.delete(RedisKeys.SCHEDULE_RESERVATIONS.format(schedule_id, status))

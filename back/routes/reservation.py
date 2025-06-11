@@ -9,6 +9,8 @@ import uuid
 import qrcode
 import io
 import base64
+from extensions import redis_client
+import json
 
 reservation_bp = Blueprint('reservation', __name__)
 
@@ -19,6 +21,13 @@ TEACHER_PRIORITY_SEATS = 5  # 教师优先座位数
 
 # 班次ID格式：年月日+路线编号+序号，例如：20240315A001
 SCHEDULE_ID_PATTERN = r'^\d{8}[A-Z]\d{3}$'
+
+class RedisKeys:
+    RESERVATION = 'reservation:{}'  # 预约信息
+    USER_RESERVATIONS = 'user:reservations:{}'  # 用户预约列表
+    SCHEDULE_RESERVATIONS = 'schedule:reservations:{}'  # 班次预约列表
+    AVAILABLE_SCHEDULES = 'available:schedules:{}'  # 可预约班次列表
+    USER_CANCEL_COUNT = 'user:cancel:count:{}:{}'  # 用户每日取消次数
 
 def generate_qr_code(reservation_id):
     """
@@ -83,7 +92,6 @@ def create_reservation():
             }), 403
 
         schedule_id = request.json.get('schedule_id')
-        print(f"schedule_id类型: {type(schedule_id)}")  # 添加类型打印
         if not schedule_id:
             return jsonify({'error': '缺少班次ID'}), 400
 
@@ -144,16 +152,32 @@ def create_reservation():
         # 生成二维码图片
         qr_image = generate_qr_code(reservation.id)
 
+        # 缓存预约信息
+        reservation_data = {
+            'id': reservation.id,
+            'schedule_id': reservation.schedule_id,
+            'seat_number': reservation.seat_number,
+            'status': reservation.status.value,
+            'qr_code': qr_code,
+            'qr_image': qr_image
+        }
+        redis_client.setex(
+            RedisKeys.RESERVATION.format(reservation.id),
+            3600,  # 1小时过期
+            json.dumps(reservation_data)
+        )
+
+        # 更新用户预约列表缓存
+        user_reservations_key = RedisKeys.USER_RESERVATIONS.format(current_user_id)
+        redis_client.delete(user_reservations_key)
+
+        # 更新班次预约列表缓存
+        schedule_reservations_key = RedisKeys.SCHEDULE_RESERVATIONS.format(schedule_id)
+        redis_client.delete(schedule_reservations_key)
+
         return jsonify({
             'message': '预约成功',
-            'reservation': {
-                'id': reservation.id,
-                'schedule_id': reservation.schedule_id,
-                'seat_number': reservation.seat_number,
-                'status': reservation.status.value,
-                'qr_code': qr_code,
-                'qr_image': qr_image
-            }
+            'reservation': reservation_data
         })
 
     except Exception as e:
@@ -322,48 +346,45 @@ def cancel_reservation():
     """
     try:
         current_user_id = get_jwt_identity()
-        schedue_id = request.json.get('schedule_id')
+        schedule_id = request.json.get('schedule_id')
         
-        # 查找预约记录
-        reservation = Reservation.query.filter_by(
-            user_id=current_user_id,
-            schedule_id=schedue_id,
-            status=ReservationStatusEnum.active
-        ).first()
-        if not reservation:
-            return jsonify({'error': '预约记录不存在'}), 404
-
-        # 检查是否是自己的预约
-        if reservation.user_id != current_user_id:
-            return jsonify({'error': '无权操作此预约'}), 403
-
-        # 检查预约状态
-        if reservation.status != ReservationStatusEnum.active:
-            return jsonify({'error': '该预约已取消或无效'}), 400
-
-        # 检查取消次数(每天可取消5次)
-        cancel_count = Reservation.query.filter(
-            and_(
-                Reservation.user_id == current_user_id,
-                Reservation.reserved_at > date.today(),
-                Reservation.status == ReservationStatusEnum.canceled
-            )
-        ).count()
+        # 检查取消次数
+        today = date.today().isoformat()
+        cancel_count_key = RedisKeys.USER_CANCEL_COUNT.format(current_user_id, today)
+        cancel_count = int(redis_client.get(cancel_count_key) or 0)
 
         if cancel_count >= MAX_CANCEL_TIMES:
             return jsonify({'error': '您已达到最大取消次数'}), 400
 
-        else:
-            # 更新预约状态
-            reservation.status = ReservationStatusEnum.canceled
-            reservation.canceled_at = datetime.utcnow()
-            
-            db.session.commit()
+        # 查找预约记录
+        reservation = Reservation.query.filter_by(
+            user_id=current_user_id,
+            schedule_id=schedule_id,
+            status=ReservationStatusEnum.active
+        ).first()
+        
+        if not reservation:
+            return jsonify({'error': '预约记录不存在'}), 404
 
-            return jsonify({
-                'message': '取消预约成功',
-                'cancel_count': cancel_count + 1
-            })
+        # 更新预约状态
+        reservation.status = ReservationStatusEnum.canceled
+        reservation.canceled_at = datetime.utcnow()
+        
+        db.session.commit()
+
+        # 更新取消次数
+        redis_client.incr(cancel_count_key)
+        redis_client.expire(cancel_count_key, 86400)  # 24小时过期
+
+        # 清除相关缓存
+        redis_client.delete(RedisKeys.USER_RESERVATIONS.format(current_user_id))
+        redis_client.delete(RedisKeys.SCHEDULE_RESERVATIONS.format(schedule_id))
+        redis_client.delete(RedisKeys.RESERVATION.format(reservation.id))
+
+        return jsonify({
+            'message': '取消预约成功',
+            'cancel_count': cancel_count + 1
+        })
 
     except Exception as e:
         logging.error(f"取消预约失败: {str(e)}")
@@ -406,6 +427,16 @@ def list_reservations():
         # 获取查询参数
         status = request.args.get('status')
 
+        # 尝试从缓存获取预约列表
+        cache_key = RedisKeys.USER_RESERVATIONS.format(current_user_id)
+        cached_data = redis_client.get(cache_key)
+        
+        if cached_data:
+            reservations = json.loads(cached_data)
+            if status and status.lower() != 'null':
+                reservations = [r for r in reservations if r['status'] == status]
+            return jsonify({'reservations': reservations})
+
         # 构建查询
         query = Reservation.query.filter_by(user_id=current_user_id)
         
@@ -425,6 +456,9 @@ def list_reservations():
             'priority_used': r.priority_used,
             'qr_code': r.qr_code
         } for r in reservation_data]
+
+        # 缓存预约列表
+        redis_client.setex(cache_key, 300, json.dumps(reservations))  # 5分钟过期
 
         return jsonify({
             'reservations': reservations,
@@ -478,7 +512,15 @@ def get_available_schedules():
         start_point = request.args.get('start_point')
         end_point = request.args.get('end_point')
 
-        print(f"请求参数: date={date_str}, start={start_point}, end={end_point}")
+        # 构建缓存键
+        cache_key = RedisKeys.AVAILABLE_SCHEDULES.format(
+            f"{date_str}:{start_point}:{end_point}"
+        )
+
+        # 尝试从缓存获取数据
+        cached_data = redis_client.get(cache_key)
+        if cached_data:
+            return jsonify(json.loads(cached_data))
 
         # 验证日期格式
         try:
@@ -550,9 +592,13 @@ def get_available_schedules():
                 'is_booked': schedule.id in user_booked_schedule_ids
             })
 
-        return jsonify({
+        # 缓存结果
+        result = {
             'schedules': schedules,
-        })
+        }
+        redis_client.setex(cache_key, 300, json.dumps(result))
+
+        return jsonify(result)
 
     except Exception as e:
         logging.error(f"获取可预约班次列表失败: {str(e)}")

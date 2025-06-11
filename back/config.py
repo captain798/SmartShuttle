@@ -21,8 +21,15 @@ class Config:
     WECHAT_SECRET = os.environ.get('WECHAT_SECRET', 'your-wechat-secret')
     
     # 缓存配置
-    CACHE_TYPE = 'simple'
+    CACHE_TYPE = 'redis'
+    CACHE_REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+    CACHE_REDIS_PORT = int(os.environ.get('REDIS_PORT', 6379))
+    CACHE_REDIS_DB = int(os.environ.get('REDIS_DB', 0))
+    CACHE_REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', None)
     CACHE_DEFAULT_TIMEOUT = 300
+    
+    # Redis 配置
+    REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
     
     # 跨域配置
     CORS_ORIGINS = ['*']  # 在生产环境中应该设置具体的域名

@@ -4,8 +4,78 @@ from model import db, User, Schedule, Reservation, ReservationStatusEnum, RoleEn
 from datetime import datetime, timedelta
 from sqlalchemy import and_, or_
 import logging
+from extensions import redis_client
+import json
 
 driver_bp = Blueprint('driver', __name__)
+
+# Redis 键前缀
+class RedisKeys:
+    DRIVER_SCHEDULES = 'driver:schedules:{}:{}'  # driver:schedules:{driver_id}:{date}
+    SCHEDULE_DETAIL = 'schedule:detail:{}'  # schedule:detail:{schedule_id}
+    PASSENGER_LIST = 'schedule:passengers:{}:{}'  # schedule:passengers:{schedule_id}:{status}
+    RESERVATION_STATS = 'schedule:stats:{}'  # schedule:stats:{schedule_id}
+
+def get_cached_schedules(driver_id, date, status=None):
+    """获取缓存的班次列表"""
+    key = RedisKeys.DRIVER_SCHEDULES.format(driver_id, date)
+    if status:
+        key = f"{key}:{status}"
+    return redis_client.get(key)
+
+def cache_schedules(driver_id, date, data, status=None):
+    """缓存班次列表"""
+    key = RedisKeys.DRIVER_SCHEDULES.format(driver_id, date)
+    if status:
+        key = f"{key}:{status}"
+    redis_client.setex(key, 300, json.dumps(data))  # 缓存5分钟
+
+def get_cached_schedule_detail(schedule_id):
+    """获取缓存的班次详情"""
+    key = RedisKeys.SCHEDULE_DETAIL.format(schedule_id)
+    return redis_client.get(key)
+
+def cache_schedule_detail(schedule_id, data):
+    """缓存班次详情"""
+    key = RedisKeys.SCHEDULE_DETAIL.format(schedule_id)
+    redis_client.setex(key, 300, json.dumps(data))  # 缓存5分钟
+
+def get_cached_passenger_list(schedule_id, status=None):
+    """获取缓存的乘客名单"""
+    key = RedisKeys.PASSENGER_LIST.format(schedule_id, status or 'all')
+    return redis_client.get(key)
+
+def cache_passenger_list(schedule_id, data, status=None):
+    """缓存乘客名单"""
+    key = RedisKeys.PASSENGER_LIST.format(schedule_id, status or 'all')
+    redis_client.setex(key, 300, json.dumps(data))  # 缓存5分钟
+
+def get_reservation_stats(schedule_id):
+    """获取预约统计信息"""
+    key = RedisKeys.RESERVATION_STATS.format(schedule_id)
+    stats = redis_client.get(key)
+    if stats:
+        return json.loads(stats)
+    
+    # 从数据库获取统计信息
+    total = Reservation.query.filter_by(
+        schedule_id=schedule_id,
+        status=ReservationStatusEnum.active
+    ).count()
+    
+    checked_in = Reservation.query.filter_by(
+        schedule_id=schedule_id,
+        status=ReservationStatusEnum.checked_in
+    ).count()
+    
+    stats = {
+        'total': total,
+        'checked_in': checked_in
+    }
+    
+    # 缓存统计信息
+    redis_client.setex(key, 300, json.dumps(stats))
+    return stats
 
 @driver_bp.route('/schedules', methods=['GET'])
 @jwt_required()
@@ -56,16 +126,21 @@ def list_driver_schedules():
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 10))
 
+        # 尝试从缓存获取数据
+        if date:
+            try:
+                target_date = datetime.strptime(date, '%Y-%m-%d').date()
+                cached_data = get_cached_schedules(current_user_id, date, status)
+                if cached_data:
+                    return jsonify(json.loads(cached_data))
+            except ValueError:
+                return jsonify({'error': '日期格式不正确'}), 400
+
         # 构建查询
         query = Schedule.query.filter_by(driver_id=current_user_id)
         
         if date:
-            try:
-                target_date = datetime.strptime(date, '%Y-%m-%d').date()
-                query = query.filter(db.func.date(Schedule.departure_datetime) == target_date)
-            except ValueError:
-                return jsonify({'error': '日期格式不正确'}), 400
-
+            query = query.filter(db.func.date(Schedule.departure_datetime) == target_date)
         if status:
             query = query.filter_by(status=status)
 
@@ -76,17 +151,9 @@ def list_driver_schedules():
 
         schedules = []
         for schedule in pagination.items:
-            # 获取预约统计
-            total_reservations = Reservation.query.filter_by(
-                schedule_id=schedule.id,
-                status=ReservationStatusEnum.active
-            ).count()
+            # 获取预约统计（使用缓存）
+            stats = get_reservation_stats(schedule.id)
             
-            checked_in_reservations = Reservation.query.filter_by(
-                schedule_id=schedule.id,
-                status=ReservationStatusEnum.checked_in
-            ).count()
-
             schedules.append({
                 'id': schedule.id,
                 'route_name': schedule.route.name.value,
@@ -97,16 +164,22 @@ def list_driver_schedules():
                 'vehicle_plate': schedule.vehicle_plate,
                 'status': schedule.status.value,
                 'total_seats': schedule.dynamic_capacity,
-                'reserved_seats': total_reservations,
-                'checked_in_seats': checked_in_reservations
+                'reserved_seats': stats['total'],
+                'checked_in_seats': stats['checked_in']
             })
 
-        return jsonify({
+        result = {
             'schedules': schedules,
             'total': pagination.total,
             'pages': pagination.pages,
             'current_page': page
-        })
+        }
+
+        # 缓存结果
+        if date:
+            cache_schedules(current_user_id, date, result, status)
+
+        return jsonify(result)
 
     except Exception as e:
         logging.error(f"获取司机班次列表失败: {str(e)}")
@@ -156,6 +229,11 @@ def get_schedule_detail(schedule_id):
         if user.role != RoleEnum.driver:
             return jsonify({'error': '只有司机可以查看班次信息'}), 403
 
+        # 尝试从缓存获取数据
+        cached_data = get_cached_schedule_detail(schedule_id)
+        if cached_data:
+            return jsonify(json.loads(cached_data))
+
         # 获取班次信息
         schedule = Schedule.query.get(schedule_id)
         if not schedule:
@@ -175,7 +253,7 @@ def get_schedule_detail(schedule_id):
             'checked_in_at': r.checked_in_at.isoformat() if r.checked_in_at else None
         } for r in reservations]
 
-        return jsonify({
+        result = {
             'schedule': {
                 'id': schedule.id,
                 'route_name': schedule.route.name.value,
@@ -188,7 +266,12 @@ def get_schedule_detail(schedule_id):
                 'total_seats': schedule.dynamic_capacity,
                 'reservations': reservation_list
             }
-        })
+        }
+
+        # 缓存结果
+        cache_schedule_detail(schedule_id, result)
+
+        return jsonify(result)
 
     except Exception as e:
         logging.error(f"获取班次详情失败: {str(e)}")
@@ -231,6 +314,14 @@ def get_passenger_list(schedule_id):
         if user.role != RoleEnum.driver:
             return jsonify({'error': '只有司机可以查看乘客名单'}), 403
 
+        # 获取查询参数
+        status = request.args.get('status')
+
+        # 尝试从缓存获取数据
+        cached_data = get_cached_passenger_list(schedule_id, status)
+        if cached_data:
+            return jsonify(json.loads(cached_data))
+
         # 获取班次信息
         schedule = Schedule.query.get(schedule_id)
         if not schedule:
@@ -239,9 +330,6 @@ def get_passenger_list(schedule_id):
         # 检查是否是自己的班次
         if schedule.driver_id != current_user_id:
             return jsonify({'error': '无权查看此班次信息'}), 403
-
-        # 获取查询参数
-        status = request.args.get('status')
 
         # 构建查询
         query = Reservation.query.filter_by(schedule_id=schedule_id)
@@ -259,9 +347,14 @@ def get_passenger_list(schedule_id):
             'phone': r.user.phone  # 注意：这里返回的是加密后的电话号码
         } for r in reservations]
 
-        return jsonify({
+        result = {
             'passengers': passenger_list
-        })
+        }
+
+        # 缓存结果
+        cache_passenger_list(schedule_id, result, status)
+
+        return jsonify(result)
 
     except Exception as e:
         logging.error(f"获取乘客名单失败: {str(e)}")
