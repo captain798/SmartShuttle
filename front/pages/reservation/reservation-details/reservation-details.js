@@ -1,5 +1,9 @@
+// 引入二维码生成库
+import drawQrcode from '../../../utils/weapp.qrcode.min.js'
+
 const app = getApp()
-const  baseUrl  = app.globalData.baseUrl
+const baseUrl = app.globalData.baseUrl
+
 Page({
   data: {
     reservationDetail: {
@@ -9,12 +13,15 @@ Page({
       status: '', // 预约状态
       reserved_at: '', // 预约时间
       qr_code: '' // 预约二维码
-    }
+    },
+    qrcodePath: '' // 二维码临时路径
   },
+
   onLoad(options) {
     const { id } = options;
     this.getReservationDetail(id);
   },
+
   getReservationDetail(id) {
     wx.request({
       url: `${baseUrl}/reservations/detail`,
@@ -36,6 +43,8 @@ Page({
               reserved_at: res.data.reserved_at,
               qr_code: res.data.qr_code
             }
+          }, () => {
+            this.generateQRCode(); // 数据加载完成后生成二维码
           });
         } else {
           console.error('返回数据为空');
@@ -45,5 +54,36 @@ Page({
         console.error('请求失败:', err);
       }
     });
+  },
+
+  // 生成二维码
+  generateQRCode() {
+    const qrCodeText = this.data.reservationDetail.qr_code || 'https://example.com';
+    drawQrcode({
+      width: 300,
+      height: 300,
+      canvasId: 'qrcodeCanvas',
+      text: qrCodeText,
+      callback: () => {
+        wx.canvasToTempFilePath({
+          canvasId: 'qrcodeCanvas',
+          success: (res) => {
+            this.setData({ qrcodePath: res.tempFilePath })
+          },
+          fail: (err) => {
+            console.error('生成二维码失败:', err)
+          }
+        }, this)
+      }
+    })
+  },
+
+  // 保存二维码到相册
+  saveQRCode() {
+    wx.saveImageToPhotosAlbum({
+      filePath: this.data.qrcodePath,
+      success: () => wx.showToast({ title: '保存成功' }),
+      fail: () => wx.showToast({ title: '保存失败', icon: 'error' })
+    })
   }
 });

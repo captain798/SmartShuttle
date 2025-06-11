@@ -1,5 +1,5 @@
 <!-- 自定义导航栏 -->
-<navigation-bar title="预约情况" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<navigation-bar title="班次情况" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 <!-- 顶部日期选择器 -->
 <view class="date-picker">
   <picker mode="date" value="{{currentDate}}" bindchange="onDateChange">

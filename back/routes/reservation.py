@@ -209,7 +209,7 @@ def check_in(qr_code):
 
         # 检查预约状态
         if reservation.status != ReservationStatusEnum.active:
-            return jsonify({'error': '该预约已取消或无效'}), 400
+            return jsonify({'error': '该预约已失效'}), 400
 
         # 检查班次时间
         schedule = Schedule.query.get(reservation.schedule_id)

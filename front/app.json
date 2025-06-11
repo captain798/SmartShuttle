@@ -53,7 +53,7 @@
       },
       {
         "pagePath":"pages/admin/orders/orders",
-        "text":"预约情况"
+        "text":"班次情况"
       },
       {
         "pagePath":"pages/admin/admin-mines/admin-mines",

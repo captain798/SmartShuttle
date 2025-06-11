@@ -25,7 +25,7 @@ export const USER_PAGE = {
       // 管理员菜单
       {
         "pagePath":"/pages/admin/orders/orders",
-        "text":"预约情况",
+        "text":"班次情况",
         "iconPath": "/images/VehicleBus.png",
         "selectedIconPath": "/images/Selected_VehicleBus.png"
       },
