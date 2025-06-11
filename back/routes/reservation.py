@@ -11,6 +11,8 @@ import io
 import base64
 from extensions import redis_client
 import json
+from cache import cache_manager
+from constants import RedisKeys
 
 reservation_bp = Blueprint('reservation', __name__)
 
@@ -18,16 +20,6 @@ reservation_bp = Blueprint('reservation', __name__)
 MAX_CANCEL_TIMES = 5  # 每天最大取消次数
 PENALTY_DAYS = 7  # 惩罚天数
 TEACHER_PRIORITY_SEATS = 5  # 教师优先座位数
-
-# 班次ID格式：年月日+路线编号+序号，例如：20240315A001
-SCHEDULE_ID_PATTERN = r'^\d{8}[A-Z]\d{3}$'
-
-class RedisKeys:
-    RESERVATION = 'reservation:{}'  # 预约信息
-    USER_RESERVATIONS = 'user:reservations:{}'  # 用户预约列表
-    AVAILABLE_SCHEDULES = 'available:schedules:{}:{}'  # 可预约班次列表，格式：date:start:end:user_id
-    USER_CANCEL_COUNT = 'user:cancel:count:{}:{}'  # 用户每日取消次数
-    SCHEDULE_AVAILABLE_SEATS = 'schedule:available_seats:{}'  # 班次可用座位数
 
 def generate_qr_code(reservation_id):
     """
@@ -225,6 +217,8 @@ def check_in(qr_code):
         schedule = Schedule.query.get(reservation.schedule_id)
         if datetime.utcnow() > schedule.departure_datetime:
             return jsonify({'error': '该班次已发车，无法签到'}), 400
+        
+        cache_manager.update_reservation_cache(reservation.schedule_id, reservation.user_id)
 
         # 更新预约状态
         reservation.status = ReservationStatusEnum.checked_in
@@ -307,6 +301,8 @@ def mark_absent():
             absent_user.penalty_until = penalty.penalty_until
 
         db.session.commit()
+
+        cache_manager.update_reservation_cache(schedule_id, current_user_id)
 
         return jsonify({
             'message': f'已标记 {len(absent_reservations)} 个预约为缺席',
@@ -773,35 +769,5 @@ def init_app(app):
             raise e
 
 def update_schedule_cache(schedule_id, user_id=None):
-    """
-    更新班次相关的所有缓存
-    Args:
-        schedule_id: 班次ID
-        user_id: 用户ID（可选）
-    """
-    schedule = Schedule.query.get(schedule_id)
-    if not schedule:
-        return
-
-    # 更新可用座位数缓存
-    available_seats = schedule.dynamic_capacity - Reservation.query.filter_by(
-        schedule_id=schedule_id,
-        status=ReservationStatusEnum.active
-    ).count()
-    redis_client.setex(
-        RedisKeys.SCHEDULE_AVAILABLE_SEATS.format(schedule_id),
-        300,
-        str(available_seats)
-    )
-
-    # 清除班次列表缓存
-    pattern = RedisKeys.AVAILABLE_SCHEDULES.format(
-        f"{schedule.departure_datetime.strftime('%Y-%m-%d')}:*",
-        '*'
-    )
-    for key in redis_client.scan_iter(match=pattern):
-        redis_client.delete(key)
-
-    # 如果指定了用户ID，清除该用户的预约列表缓存
-    if user_id:
-        redis_client.delete(RedisKeys.USER_RESERVATIONS.format(user_id))
+    """更新班次相关的所有缓存"""
+    cache_manager.update_schedule_cache(schedule_id, user_id)

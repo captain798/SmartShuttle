@@ -14,15 +14,12 @@ import logging
 from extensions import redis_client
 import json
 from config import Config
+from cache import cache_manager
+from constants import RedisKeys
 
 # 创建蓝图
 admin_bp = Blueprint('admin', __name__)
 
-class RedisKeys:
-    ADMIN_SCHEDULES = 'admin:schedules:{}'  # 管理员班次列表
-    ADMIN_STATISTICS = 'admin:statistics:{}'  # 管理员统计数据
-    ADMIN_EXPORT = 'admin:export:reservations:{}:{}'  # 导出数据缓存
-    SCHEDULE_RESERVATIONS = 'schedule:reservations:{}:{}'  # 班次预约统计
 
 def admin_required(fn):
     """
@@ -266,7 +263,7 @@ def update_schedule(schedule_id):
         db.session.commit()
 
         # 更新缓存
-        update_schedule_cache(schedule_id)
+        cache_manager.update_schedule_cache(schedule_id)
 
         return jsonify({
             'message': '班次更新成功',
@@ -319,7 +316,7 @@ def delete_schedule(schedule_id):
         db.session.commit()
 
         # 更新缓存
-        update_schedule_cache(schedule_id)
+        cache_manager.update_schedule_cache(schedule_id)
 
         return jsonify({'message': '班次删除成功'})
     except Exception as e:
@@ -556,19 +553,3 @@ def get_statistics():
     except Exception as e:
         logging.error(f"获取统计数据失败: {str(e)}")
         return jsonify({'error': '系统错误'}), 500
-
-def update_schedule_cache(schedule_id):
-    """更新班次相关的所有缓存"""
-    # 获取班次信息
-    schedule = Schedule.query.get(schedule_id)
-    if not schedule:
-        return
-
-    # 删除相关缓存
-    date_str = schedule.departure_datetime.strftime('%Y-%m-%d')
-    redis_client.delete(RedisKeys.ADMIN_SCHEDULES.format(date_str))
-    redis_client.delete(RedisKeys.ADMIN_STATISTICS.format(date_str))
-    
-    # 删除班次预约统计缓存
-    for status in ['total', 'active', 'checked_in', 'absent', 'canceled']:
-        redis_client.delete(RedisKeys.SCHEDULE_RESERVATIONS.format(schedule_id, status))
