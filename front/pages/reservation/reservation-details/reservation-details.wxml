@@ -8,7 +8,6 @@
     <!-- 卡片头部 -->
     <view class="card-header">
       <view class="reservation-date-row">
-        <text class="reservation-date-icon">⏰</text>
         <text class="reservation-date-text">{{reservation.reservationTime}}</text>
       </view>
       <view class="reservation-status">
@@ -47,4 +46,30 @@
     </view>
   </view>
 </view>
-<text>pages/reservation/reservation-details/reservation-details.wxml</text>
+<view class="container">
+  <view class="header">
+    <text class="title">预约详情</text>
+  </view>
+  
+  <view class="card">
+    <view class="item">
+      <text>预约时间：</text>
+      <text>{{reservationDetail.time}}</text>
+    </view>
+    <view class="item">
+      <text>状态：</text>
+      <text class="status-{{reservationDetail.status}}">{{reservationDetail.statusText}}</text>
+    </view>
+    <view class="item">
+      <text>路线：</text>
+      <text>{{reservationDetail.route}}</text>
+    </view>
+    <view class="item">
+      <text>座位号：</text>
+      <text>{{reservationDetail.seatNumber}}</text>
+    </view>
+  </view>
+  
+  <view class="qr-code">
+  </view>
+</view>
