@@ -200,7 +200,7 @@ def create_schedule():
         db.session.commit()
 
         # 更新缓存
-        cache_manager.update_schedule_cache(schedule_id)
+        cache_manager.update_schedule_cache(schedule.id)
 
         return jsonify({
             'message': '班次创建成功',
@@ -315,11 +315,11 @@ def delete_schedule(schedule_id):
         if active_reservations > 0:
             return jsonify({'error': '该班次有活跃预约，无法删除'}), 400
 
+                # 更新缓存
+        cache_manager.update_schedule_cache(schedule_id)
+        
         db.session.delete(schedule)
         db.session.commit()
-
-        # 更新缓存
-        cache_manager.update_schedule_cache(schedule_id)
 
         return jsonify({'message': '班次删除成功'})
     except Exception as e:
