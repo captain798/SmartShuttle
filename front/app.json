@@ -5,6 +5,8 @@
 
     "pages/driver/scan/scan",
     "pages/driver/driver-list/driver-list",
+    "pages/driver/schedule-detail/schedule-detail",
+  
 
     "pages/reservation/reservation-list/reservation-list",
     "pages/reservation/reservation-notice/reservation-notice",

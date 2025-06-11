@@ -1,6 +1,15 @@
 <navigation-bar title="我的班次" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 <view class="page-bg">
   <view class="container">
+    <!-- 新增筛选区域 -->
+    <view class="filter-container">
+      <picker mode="date" bindchange="onDateChange">
+        <view class="filter-item">日期: {{selectedDate || '请选择日期'}}</view>
+      </picker>
+      <picker mode="selector" range="statusOptions" range-key="label" bindchange="onStatusChange">
+        <view class="filter-item">状态: {{selectedStatus || '请选择状态'}}</view>
+      </picker>
+    </view>
     <!-- 司机信息卡片 -->
     <view class="driver-card driver-row" style="background-color: #1D953F; color: white; border-radius: 8px; padding: 15px;">
       <image class="avatar" src="/images/driver.png"></image>
@@ -13,6 +22,7 @@
     <!-- 班次列表 -->
     <view class="schedule-list">
       <block wx:for="{{schedules}}" wx:key="id">
+        <!-- 修改班次卡片，添加点击事件绑定 -->
         <view class="schedule-item" bindtap="navigateToScheduleDetail" data-id="{{item.id}}">
           <view class="schedule-header">
             <text class="route-name">{{item.route_name}}</text>

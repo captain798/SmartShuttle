@@ -42,31 +42,51 @@ const getDriverSchedules = (date, status, page = 1, perPage = 10) => {
 // 在Page中使用示例
 Page({
   data: {
-    schedules: [], // 班次列表数据
-    isLoading: false, // 加载状态
-    currentPage: 1, // 当前页码
-    hasMore: true // 是否有更多数据
+    schedules: [],
+    isLoading: false,
+    currentPage: 1,
+    hasMore: true,
+    // 新增筛选相关数据
+    selectedDate: null,
+    selectedStatus: null,
+    statusOptions: [
+      {label: '全部', value: null},
+      {label: '正常', value: 'normal'},
+      {label: '已取消', value: 'canceled'},
+      {label: '延误', value: 'delayed'}
+    ]
   },
 
-  onShow: function () {
-    if (typeof this.getTabBar === 'function' &&  this.getTabBar()) {
-      this.getTabBar().setData({
-        selected: 1
-      })
-    };
+  // 新增日期选择处理
+  onDateChange: function(e) {
+    this.setData({
+      selectedDate: e.detail.value,
+      schedules: [],
+      currentPage: 1,
+      hasMore: true
+    });
+    this.loadSchedules();
   },
-  onLoad() {
-    const driverName = app.globalData.userInfo?.user.name || null;
-    const driverId = app.globalData.userInfo?.user.school_id || null;
-    this.setData({ driverName, driverId });
+
+  // 新增状态选择处理
+  onStatusChange: function(e) {
+    const status = this.data.statusOptions[e.detail.value].value;
+    this.setData({
+      selectedStatus: status,
+      schedules: [],
+      currentPage: 1,
+      hasMore: true
+    });
+    this.loadSchedules();
   },
-  // 加载班次列表
+
+  // 修改loadSchedules方法
   loadSchedules: function() {
     if (this.data.isLoading || !this.data.hasMore) return;
     
     this.setData({ isLoading: true });
     
-    getDriverSchedules(null, null, this.data.currentPage)
+    getDriverSchedules(this.data.selectedDate, this.data.selectedStatus, this.data.currentPage)
       .then(data => {
         this.setData({
           schedules: this.data.schedules.concat(data.schedules),
@@ -101,5 +121,13 @@ Page({
   // 页面显示时加载数据
   onShow: function() {
     this.loadSchedules();
+  },
+
+  // 新增导航到班次详情页的方法
+  navigateToScheduleDetail: function(e) {
+    const scheduleId = e.currentTarget.dataset.id // 获取班次ID
+    wx.navigateTo({
+      url: `/pages/driver/schedule-detail/schedule-detail?scheduleId=${scheduleId}` // 跳转并传递参数
+    })
   }
 });
