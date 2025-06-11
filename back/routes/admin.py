@@ -459,11 +459,13 @@ def get_statistics():
     获取统计数据
     
     查询参数:
-        date: 日期 (YYYY-MM-DD)，默认为今天
+        start_date: 开始日期 (YYYY-MM-DD)，默认为今天
+        end_date: 结束日期 (YYYY-MM-DD)，默认为开始日期
         
     返回:
         成功:
-            date: 统计日期
+            start_date: 开始日期
+            end_date: 结束日期
             statistics: [
                 {
                     schedule_id: 班次ID
@@ -494,17 +496,37 @@ def get_statistics():
             error: 错误信息
     """
     try:
-        date_str = request.args.get('date')
-        if date_str:
-            try:
-                query_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-            except ValueError:
-                return jsonify({'error': '日期格式不正确'}), 400
-        else:
-            query_date = datetime.now().date()
+        # 获取日期参数
+        start_date_str = request.args.get('start_date')
+        end_date_str = request.args.get('end_date')
+        
+        # 处理日期参数
+        try:
+            if start_date_str:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            else:
+                start_date = datetime.now().date()
+                
+            if end_date_str:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            else:
+                end_date = start_date
+                
+            if end_date < start_date:
+                return jsonify({'error': '结束日期不能早于开始日期'}), 400
+                
+            # 限制查询时间范围不超过14天
+            if (end_date - start_date).days > 365:
+                return jsonify({'error': '查询时间范围不能超过365天'}), 400
+                
+        except ValueError:
+            return jsonify({'error': '日期格式不正确'}), 400
 
         # 构建缓存键
-        cache_key = RedisKeys.ADMIN_STATISTICS.format(query_date.strftime('%Y-%m-%d'))
+        cache_key = RedisKeys.ADMIN_STATISTICS.format(
+            start_date.strftime('%Y-%m-%d'),
+            end_date.strftime('%Y-%m-%d')
+        )
         
         # 尝试从缓存获取数据
         cached_data = redis_client.get(cache_key)
@@ -513,7 +535,7 @@ def get_statistics():
 
         # 缓存未命中，从数据库获取
         schedules = Schedule.query.filter(
-            func.date(Schedule.departure_datetime) == query_date
+            func.date(Schedule.departure_datetime).between(start_date, end_date)
         ).all()
 
         statistics = []
@@ -578,10 +600,15 @@ def get_statistics():
             })
 
         # 获取AI分析
-        analysis = ai_service.get_analysis(statistics, query_date.strftime('%Y-%m-%d'))
+        analysis = ai_service.get_analysis(
+            statistics,
+            start_date.strftime('%Y-%m-%d'),
+            end_date.strftime('%Y-%m-%d')
+        )
 
         result = {
-            'date': query_date.strftime('%Y-%m-%d'),
+            'start_date': start_date.strftime('%Y-%m-%d'),
+            'end_date': end_date.strftime('%Y-%m-%d'),
             'statistics': statistics,
             'analysis': analysis
         }
