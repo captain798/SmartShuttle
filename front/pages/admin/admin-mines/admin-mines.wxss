@@ -141,3 +141,108 @@
   .action-item:active .arrow-icon, .action-hover .arrow-icon {
     transform: translateX(4rpx) scale(1.06);
   }
+
+/* 日期选择器样式 */
+.date-picker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20rpx 0;
+  padding: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.date-item {
+  padding: 12rpx 24rpx;
+  background: #f5f7fa;
+  border-radius: 8rpx;
+  margin: 0 10rpx;
+}
+
+/* AI分析卡片 */
+.analysis-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+  color: #333;
+}
+
+.analysis-content {
+  padding: 16rpx;
+  background: #f8f9fa;
+  border-radius: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+.summary-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 统计数据列表 */
+.stats-list {
+  margin-bottom: 24rpx;
+}
+
+.list-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+  color: #333;
+}
+
+.stats-item {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.route-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.route-name {
+  font-size: 30rpx;
+  font-weight: bold;
+}
+
+.departure-time {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.stats-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 保留原有样式 */
+.page-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e9f6ff 0%, #f5f7fa 100%);
+}
+
+.container {
+  padding: 36rpx 0 90rpx 0;
+  max-width: 98vw;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
