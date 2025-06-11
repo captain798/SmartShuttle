@@ -470,7 +470,7 @@ def list_reservations():
 
 # 已实现
 @reservation_bp.route('/available-schedules', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_available_schedules():
     """
     获取可预约的班次列表
@@ -505,8 +505,16 @@ def get_available_schedules():
         4. 支持分页
     """
     try:
-        current_user_id = 1
-        # current_user_id = get_jwt_identity()
+        current_user_id = get_jwt_identity()
+        if not current_user_id:
+            # 添加错误日志记录
+            app.logger.warning('未认证用户尝试访问预约接口')
+            # 统一错误响应格式
+            return jsonify({
+                'code': 4001,  # 自定义错误码
+                'error': '未认证', 
+                'message': '请前往我的界面验证身份'
+            }), 400
         # 获取查询参数
         date_str = request.args.get('date')
         start_point = request.args.get('start_point')

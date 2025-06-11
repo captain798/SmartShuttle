@@ -32,7 +32,8 @@
           class="reservation-card" 
           style="animation-delay: {{index * 120}}ms;"
           bindtap="handleCardTap" 
-          data-id="{{item.id}}"  <!-- 传递预约ID -->
+          data-id="{{item.id}}"  
+          data-qr-code="{{item.qrCode}}"  
           data-index="{{index}}">  <!-- 传递索引 -->
           <!-- 卡片头部 -->
           <view class="card-header">
@@ -55,10 +56,6 @@
             <!-- 新增班次和座位信息 -->
             <view class="schedule-info">
               <view class="info-row">
-                <text class="info-label">班次ID:</text>
-                <text class="info-content">{{item.scheduleId}}</text>
-              </view>
-              <view class="info-row">
                 <text class="info-label">座位号:</text>
                 <text class="info-content">{{item.seatNumber}}</text>
               </view>
@@ -77,6 +74,16 @@
                 <text class="location-label end-label">目的地</text>
                 <text class="location-content">{{item.endLocation}}</text>
               </view>
+            </view>
+            <!-- 新增取消按钮 -->
+            <view wx:if="{{item.status === '待完成'}}" class="cancel-btn-container">
+              <button 
+                class="cancel-btn"
+                bindtap="handleCancelReservation"
+                data-schedule-id="{{item.scheduleId}}"
+              >
+                取消预约
+              </button>
             </view>
           </view>
         </view>

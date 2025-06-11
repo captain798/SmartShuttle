@@ -9,6 +9,22 @@ Page({
         selected: 0
       })
     };
+
+    if (!app.globalData.accessToken) {
+      wx.showModal({
+        title : '未认证',
+        content : '请先完成身份认证',
+        confirmText : '去认证',
+        success(res) {
+          if(res.confirm) {
+            wx.switchTab({
+              url: '/pages/mines/mines'
+            })
+          }
+        }
+      })
+    };
+
     if (this.data.startPoint && this.data.endPoint) {
       this.fetchSchedulesData();
     }
@@ -34,12 +50,11 @@ Page({
   fetchSchedulesData: function () {
     const baseUrl = app.globalData.baseUrl;
     const {startPoint , endPoint, selectedDate} = this.data;
-    console.log('查询参数',startPoint, endPoint, selectedDate);
     wx.request({
       url: `${baseUrl}/reservations/available-schedules`,
       method: 'GET',
       header: {
-        'Authorization': 'Bearer ' + wx.getStorageSync('token'),
+        'Authorization': 'Bearer ' + app.globalData.accessToken,  
         'Content-Type': 'application/json'
       },
       data: {
@@ -96,7 +111,15 @@ Page({
               title: '取消预约成功',
               icon: 'success'
             });
-            this.fetchSchedulesData(); // 新增：取消成功后刷新数据
+            // 立即更新本地数据状态
+            const schedules = this.data.schedules.map(item => {
+              if (item.id === schedule.id) {
+                return {...item, is_booked: false};
+              }
+              return item;
+            });
+            this.setData({ schedules });
+            this.fetchSchedulesData(); // 仍然保留API调用确保数据同步
           } else {
             wx.showToast({
               title: res.data.error || '取消预约失败',

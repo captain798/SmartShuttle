@@ -70,7 +70,8 @@ Page({
             status: statusMap[item.status] || item.status, // 将英文状态转为中文
             reservationTime: item.reserved_at ? new Date(item.reserved_at).toLocaleString() : '未知时间',
             canceledTime: item.canceled_at ? new Date(item.canceled_at).toLocaleString() : null,
-            isTeacherPriority: item.priority_used
+            isTeacherPriority: item.priority_used,
+            qrCode: item.qr_code // 添加二维码字段
           }));
           
           that.setData({
@@ -102,21 +103,77 @@ Page({
   },
 
   handleCardTap:function(e){
-    const id = e.currentTarget.dataset.id;
-    wx.request({
-      url : `${baseUrl}/reservations/${id}/qrcode`,
-      method : 'POST',
-      header: {
-        'Authorization': 'Bearer'+ app.globalData.accessToken,
-        'Content-Type': 'application/json'
-      },
-      success: function(res){
-        if(res.statusCode === 200){
-          
+    // 获取二维码数据
+    const qrCode = e.currentTarget.dataset.qrCode;
+    if (qrCode) {
+      // 预览二维码图片
+      wx.previewImage({
+        urls: [`data:image/png;base64,${qrCode}`],
+        current: `data:image/png;base64,${qrCode}`,
+        success: function() {
+          console.log('预览二维码成功');
+        },
+        fail: function() {
+          wx.showToast({
+            title: '无法显示二维码',
+            icon: 'none'
+          });
+        }
+      });
+    } else {
+      wx.showToast({
+        title: '二维码不存在',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 新增：处理取消预约
+  handleCancelReservation: function(e) {
+    const scheduleId = e.currentTarget.dataset.scheduleId;
+    const that = this;
+
+    // 显示确认对话框
+    wx.showModal({
+      title: '确认取消',
+      content: '确定要取消该预约吗？',
+      success: function(res) {
+        if (res.confirm) {
+          // 用户点击确定，发送取消请求
+          wx.request({
+            url: `${baseUrl}/reservations/cancel`,
+            method: 'POST',
+            header: {
+              'Authorization': 'Bearer ' + app.globalData.accessToken,
+              'Content-Type': 'application/json'
+            },
+            data: {
+              schedule_id: scheduleId
+            },
+            success: (res) => {
+              if (res.statusCode === 200 && res.data.message) {
+                wx.showToast({
+                  title: '取消预约成功',
+                  icon: 'success'
+                });
+                // 刷新预约列表
+                that.getReservationList();
+              } else {
+                wx.showToast({
+                  title: res.data.error || '取消预约失败',
+                  icon: 'none'
+                });
+              }
+            },
+            fail: () => {
+              wx.showToast({
+                title: '网络错误',
+                icon: 'none'
+              });
+            }
+          });
         }
       }
-    })
-
-    
+    });
   }
 })

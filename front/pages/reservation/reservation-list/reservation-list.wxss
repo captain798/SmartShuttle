@@ -193,6 +193,20 @@
   gap: 24rpx;
   min-width: 0;
 }
+
+.cancel-btn-container {
+  margin-top: 20rpx;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  background-color: #ff4d4f;
+  color: white;
+  border-radius: 8rpx;
+  padding: 8rpx 20rpx;
+  font-size: 26rpx;
+}
 .location-label {
   font-size: 36rpx;
   font-weight: 600;

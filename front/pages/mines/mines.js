@@ -4,14 +4,22 @@ const app = getApp() // 获取全局应用实例对象
 
 Page({
   
+  // 在onShow生命周期中添加认证检查
   onShow: function() {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({
-        selected: 2  // 设置当前选中tab
-      });
-    }
+      if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+          this.getTabBar().setData({
+              selected: 2
+          });
+      }
+      // 调试日志
+      console.log('当前accessToken:', app.globalData.accessToken);
+      // 新增：检查用户是否认证，未认证则自动弹出认证窗口
+      if (!app.globalData.accessToken) {
+          console.log('检测到未认证，触发认证流程');
+          this.checkAuthentication();
+      }
   },
-
+  
   data: {
     userName : null,
     userCard : null,
@@ -51,38 +59,31 @@ Page({
     });
   },
 
-  /**
-   * 检查用户是否认证，若未认证则弹出认证窗口
-   */
-  checkAuthentication() {
-    if (!app.globalData.accessToken) {
-      console.log("正在验证");
-      this.setData({
-        showInputModal: true
-      });
-      wx.login({
-        success: (res) => {
-          console.log(res);
-          if (res.code) {
-            this.setData({ code: res.code });
-          } else {
-            console.error('登录失败！' + res.errMsg);
-          }
-        }
-      });
-    } else {
-      wx.showToast({
-        title: '您已认证',
-        icon: 'success',
-        duration: 2000
-      });
-    }
+
+  checkAuthentication: function() {
+      console.log('执行认证检查，当前showInputModal值:', this.data.showInputModal);
+      if (!app.globalData.accessToken) {
+          this.setData({
+              showInputModal: true
+          }, () => {
+              console.log('设置showInputModal为true后:', this.data.showInputModal);
+          });
+          wx.login({
+              success: (res) => {
+                  if (res.code) {
+                      this.setData({ code: res.code });
+                  } else {
+                      console.error('登录失败！' + res.errMsg);
+                      wx.showToast({
+                          title: '登录失败，请重试',
+                          icon: 'none'
+                      });
+                  }
+              }
+          });
+      }
   },
 
-  /**
-   * 确认输入信息
-   * @param {Object} e - 事件对象，包含输入的姓名和学号
-   */
   confirmInput(e) {
     const { name, card } = e.detail;
     const code = this.data.code;
