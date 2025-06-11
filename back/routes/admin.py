@@ -160,6 +160,10 @@ def create_schedule():
         departure_time=datetime.strptime(data['departure_datetime'], '%Y-%m-%d %H:%M').time()
         is_weekend = departure_time.strftime('%w') in ['0', '6']
         schedule_id = f"{departure_time.strftime('%Y%m%d')}{data['start_point']}-->{data['end_point']}{departure_time.strftime('%H%M')}{is_weekend}"
+        existing_schedule = Schedule.query.get(schedule_id)
+        if existing_schedule:
+            return jsonify({'error': '班次已存在'}), 400
+        
         # 创建班次
         schedule = Schedule(
             id = schedule_id,

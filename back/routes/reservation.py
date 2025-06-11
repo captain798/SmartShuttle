@@ -389,6 +389,7 @@ def list_reservations():
                     reserved_at: 预约时间
                     canceled_at: 取消时间（如果有）
                     priority_used: 是否使用教师优先
+                    qr_code: 预约二维码
                 }
             ]
         失败:
@@ -421,7 +422,8 @@ def list_reservations():
             'status': r.status.value,
             'reserved_at': r.reserved_at.isoformat(),
             'canceled_at': r.canceled_at.isoformat() if r.canceled_at else None,
-            'priority_used': r.priority_used
+            'priority_used': r.priority_used,
+            'qr_code': r.qr_code
         } for r in reservation_data]
 
         return jsonify({
