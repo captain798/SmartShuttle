@@ -11,6 +11,8 @@ import io
 import base64
 from extensions import redis_client
 import json
+from cache import cache_manager
+from constants import RedisKeys
 
 reservation_bp = Blueprint('reservation', __name__)
 
@@ -18,16 +20,6 @@ reservation_bp = Blueprint('reservation', __name__)
 MAX_CANCEL_TIMES = 5  # 每天最大取消次数
 PENALTY_DAYS = 7  # 惩罚天数
 TEACHER_PRIORITY_SEATS = 5  # 教师优先座位数
-
-# 班次ID格式：年月日+路线编号+序号，例如：20240315A001
-SCHEDULE_ID_PATTERN = r'^\d{8}[A-Z]\d{3}$'
-
-class RedisKeys:
-    RESERVATION = 'reservation:{}'  # 预约信息
-    USER_RESERVATIONS = 'user:reservations:{}'  # 用户预约列表
-    SCHEDULE_RESERVATIONS = 'schedule:reservations:{}'  # 班次预约列表
-    AVAILABLE_SCHEDULES = 'available:schedules:{}'  # 可预约班次列表
-    USER_CANCEL_COUNT = 'user:cancel:count:{}:{}'  # 用户每日取消次数
 
 def generate_qr_code(reservation_id):
     """
@@ -152,28 +144,23 @@ def create_reservation():
         # 生成二维码图片
         qr_image = generate_qr_code(reservation.id)
 
+        # 更新缓存
+        update_schedule_cache(schedule_id, current_user_id)
+        
         # 缓存预约信息
         reservation_data = {
             'id': reservation.id,
             'schedule_id': reservation.schedule_id,
             'seat_number': reservation.seat_number,
             'status': reservation.status.value,
-            'qr_code': qr_code,
-            'qr_image': qr_image
+            'reserved_at': reservation.reserved_at,
+            'qr_code': qr_code
         }
         redis_client.setex(
             RedisKeys.RESERVATION.format(reservation.id),
-            3600,  # 1小时过期
+            3600,
             json.dumps(reservation_data)
         )
-
-        # 更新用户预约列表缓存
-        user_reservations_key = RedisKeys.USER_RESERVATIONS.format(current_user_id)
-        redis_client.delete(user_reservations_key)
-
-        # 更新班次预约列表缓存
-        schedule_reservations_key = RedisKeys.SCHEDULE_RESERVATIONS.format(schedule_id)
-        redis_client.delete(schedule_reservations_key)
 
         return jsonify({
             'message': '预约成功',
@@ -230,6 +217,8 @@ def check_in(qr_code):
         schedule = Schedule.query.get(reservation.schedule_id)
         if datetime.utcnow() > schedule.departure_datetime:
             return jsonify({'error': '该班次已发车，无法签到'}), 400
+        
+        cache_manager.update_reservation_cache(reservation.schedule_id, reservation.user_id)
 
         # 更新预约状态
         reservation.status = ReservationStatusEnum.checked_in
@@ -313,6 +302,8 @@ def mark_absent():
 
         db.session.commit()
 
+        cache_manager.update_reservation_cache(schedule_id, current_user_id)
+
         return jsonify({
             'message': f'已标记 {len(absent_reservations)} 个预约为缺席',
             'absent_count': len(absent_reservations)
@@ -372,14 +363,12 @@ def cancel_reservation():
         
         db.session.commit()
 
+        # 更新缓存
+        update_schedule_cache(schedule_id, current_user_id)
+        
         # 更新取消次数
         redis_client.incr(cancel_count_key)
         redis_client.expire(cancel_count_key, 86400)  # 24小时过期
-
-        # 清除相关缓存
-        redis_client.delete(RedisKeys.USER_RESERVATIONS.format(current_user_id))
-        redis_client.delete(RedisKeys.SCHEDULE_RESERVATIONS.format(schedule_id))
-        redis_client.delete(RedisKeys.RESERVATION.format(reservation.id))
 
         return jsonify({
             'message': '取消预约成功',
@@ -507,22 +496,20 @@ def get_available_schedules():
     try:
         current_user_id = get_jwt_identity()
         if not current_user_id:
-            # 添加错误日志记录
-            app.logger.warning('未认证用户尝试访问预约接口')
-            # 统一错误响应格式
             return jsonify({
-                'code': 4001,  # 自定义错误码
+                'code': 4001,
                 'error': '未认证', 
                 'message': '请前往我的界面验证身份'
             }), 400
-        # 获取查询参数
+
         date_str = request.args.get('date')
         start_point = request.args.get('start_point')
         end_point = request.args.get('end_point')
 
         # 构建缓存键
         cache_key = RedisKeys.AVAILABLE_SCHEDULES.format(
-            f"{date_str}:{start_point}:{end_point}"
+            f"{date_str}:{start_point}:{end_point}",
+            current_user_id
         )
 
         # 尝试从缓存获取数据
@@ -584,8 +571,16 @@ def get_available_schedules():
         # 构建返回数据
         schedules = []
         for schedule, reserved_count in schedules_data:
-            available_seats = schedule.dynamic_capacity - reserved_count
-            is_full = available_seats <= 0
+            # 获取缓存的可用座位数
+            available_seats_key = RedisKeys.SCHEDULE_AVAILABLE_SEATS.format(schedule.id)
+            cached_available_seats = redis_client.get(available_seats_key)
+            
+            if cached_available_seats is not None:
+                available_seats = int(cached_available_seats)
+            else:
+                available_seats = schedule.dynamic_capacity - reserved_count
+                redis_client.setex(available_seats_key, 300, str(available_seats))
+
             schedules.append({
                 'id': schedule.id,
                 'route_name': schedule.route.name.value,
@@ -596,14 +591,12 @@ def get_available_schedules():
                 'driver_name': schedule.driver.name if schedule.driver else None,
                 'start_point': schedule.route.start_point,
                 'end_point': schedule.route.end_point,
-                'is_full': is_full,
+                'is_full': available_seats <= 0,
                 'is_booked': schedule.id in user_booked_schedule_ids
             })
 
         # 缓存结果
-        result = {
-            'schedules': schedules,
-        }
+        result = {'schedules': schedules}
         redis_client.setex(cache_key, 300, json.dumps(result))
 
         return jsonify(result)
@@ -774,3 +767,85 @@ def init_app(app):
         except Exception as e:
             logging.error(f"初始化数据失败: {str(e)}")
             raise e
+
+def update_schedule_cache(schedule_id, user_id=None):
+    """更新班次相关的所有缓存"""
+    cache_manager.update_schedule_cache(schedule_id, user_id)
+
+
+@reservation_bp.route('/detail', methods=['GET'])
+@jwt_required()
+def get_reservation_detail():
+    """
+    获取单条预约详情
+    
+    查询参数:
+        id: 预约ID
+        
+    返回:
+        成功:
+            {
+                id: 预约ID
+                schedule_id: 班次ID
+                seat_number: 座位号
+                status: 预约状态
+                reserved_at: 预约时间
+                qr_code: 预约二维码
+            }
+        失败:
+            error: 错误信息
+            
+    权限要求:
+        需要JWT认证
+        只能查看自己的预约记录
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        reservation_id = request.args.get('id')
+        
+        if not reservation_id:
+            return jsonify({'error': '缺少预约ID参数'}), 400
+            
+        # 尝试从Redis缓存获取预约详情
+        cache_key = RedisKeys.RESERVATION.format(reservation_id)
+        cached_data = redis_client.get(cache_key)
+        
+        if cached_data:
+            reservation_data = json.loads(cached_data)
+            # 检查是否是当前用户的预约
+            if reservation_data.get('user_id') != current_user_id:
+                return jsonify({'error': '无权查看该预约'}), 403
+            return jsonify(reservation_data)
+            
+        # 从数据库获取预约信息
+        reservation = Reservation.query.get(reservation_id)
+        
+        if not reservation:
+            return jsonify({'error': '预约不存在'}), 404
+            
+        # 检查权限
+        if reservation.user_id != current_user_id:
+            return jsonify({'error': '无权查看该预约'}), 403
+            
+        # 构建返回数据
+        reservation_data = {
+            'id': reservation.id,
+            'schedule_id': reservation.schedule_id,
+            'seat_number': reservation.seat_number,
+            'status': reservation.status.value,
+            'reserved_at': reservation.reserved_at.isoformat(),
+            'qr_code': reservation.qr_code
+        }
+        
+        # 缓存预约详情（1小时过期）
+        redis_client.setex(
+            cache_key,
+            3600,
+            json.dumps(reservation_data)
+        )
+            
+        return jsonify(reservation_data)
+        
+    except Exception as e:
+        logging.error(f"获取预约详情失败: {str(e)}")
+        return jsonify({'error': '系统错误'}), 500

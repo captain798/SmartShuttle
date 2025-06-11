@@ -6,15 +6,10 @@ from sqlalchemy import and_, or_
 import logging
 from extensions import redis_client
 import json
+from cache import cache_manager
+from constants import RedisKeys
 
 driver_bp = Blueprint('driver', __name__)
-
-# Redis 键前缀
-class RedisKeys:
-    DRIVER_SCHEDULES = 'driver:schedules:{}:{}'  # driver:schedules:{driver_id}:{date}
-    SCHEDULE_DETAIL = 'schedule:detail:{}'  # schedule:detail:{schedule_id}
-    PASSENGER_LIST = 'schedule:passengers:{}:{}'  # schedule:passengers:{schedule_id}:{status}
-    RESERVATION_STATS = 'schedule:stats:{}'  # schedule:stats:{schedule_id}
 
 def get_cached_schedules(driver_id, date, status=None):
     """获取缓存的班次列表"""
@@ -359,3 +354,8 @@ def get_passenger_list(schedule_id):
     except Exception as e:
         logging.error(f"获取乘客名单失败: {str(e)}")
         return jsonify({'error': '系统错误'}), 500
+
+
+def update_driver_cache(schedule_id):
+    """更新司机相关的所有缓存"""
+    cache_manager.update_schedule_cache(schedule_id)
