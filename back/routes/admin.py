@@ -334,12 +334,13 @@ def delete_schedule(schedule_id):
                 # 删除相关缓存
                 cache_manager.delete_reservation_cache(reservation.id)
 
+        # 更新缓存
+        cache_manager.update_schedule_cache(schedule_id)
+
         # 删除班次
         db.session.delete(schedule)
         db.session.commit()
 
-        # 更新缓存
-        cache_manager.update_schedule_cache(schedule_id)
 
         return jsonify({'message': '班次删除成功'})
 
