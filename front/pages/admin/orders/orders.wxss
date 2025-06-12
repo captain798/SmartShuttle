@@ -48,10 +48,11 @@
   padding: 0;
 }
 
-/* 班次列表样式 */
 .schedule-list {
   margin: 20rpx 0;
+  padding-bottom: 180rpx; /* 增加底部内边距 */
 }
+
 
 .schedule-item {
   display: flex;
