@@ -132,4 +132,4 @@ class AIService:
         }
 
 # 创建单例实例
-ai_service = AIService() 
+llm_service = AIService() 

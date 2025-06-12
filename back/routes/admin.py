@@ -16,7 +16,7 @@ import json
 from config import Config
 from cache import cache_manager
 from constants import RedisKeys
-from services import ai_service
+from services.ai_service import llm_service
 
 # 创建蓝图
 admin_bp = Blueprint('admin', __name__)
@@ -601,7 +601,7 @@ def get_statistics():
             })
 
         # 获取AI分析
-        analysis = ai_service.get_analysis(
+        analysis = llm_service.get_analysis(
             statistics,
             start_date.strftime('%Y-%m-%d'),
             end_date.strftime('%Y-%m-%d')
