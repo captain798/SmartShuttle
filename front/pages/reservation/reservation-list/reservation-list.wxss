@@ -36,11 +36,13 @@
 /* 预约记录容器 */
 .my-reservation-container {
   padding: 0 30rpx 20rpx;
+  padding-bottom: 100rpx; /* 添加底部内边距 */
 }
 
 /* 滚动视图样式 */
 .reservation-scroll {
   width: 100%;
+  height: calc(100vh - 300rpx); /* 调整高度计算 */
 }
 
 /* 预约卡片样式 */

@@ -45,7 +45,7 @@
     </view>
     
     <view class="qrcode-container">
-      <canvas canvas-id="qrcodeCanvas" style="width: 300px; height: 300px;"></canvas>
+      <canvas canvas-id="qrcodeCanvas" style="width: 340rpx; height: 340rpx;"></canvas>
       <button bindtap="saveQRCode">保存二维码</button>
     </view>
   </view>
