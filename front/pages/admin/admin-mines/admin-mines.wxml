@@ -1,32 +1,7 @@
 <navigation-bar title="管理界面" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 <view class="page-bg">
   <view class="container">
-    <!-- 日期选择器 -->
-    <view class="date-picker">
-      <picker mode="date" start="2023-01-01" end="2030-12-31" fields="day" 
-        value="{{dateRange[0]}}" bindchange="onDateChange">
-        <view class="date-item">{{dateRange[0]}}</view>
-      </picker>
-      <text>至</text>
-      <picker mode="date" start="2023-01-01" end="2030-12-31" fields="day" 
-        value="{{dateRange[1]}}" bindchange="onDateChange">
-        <view class="date-item">{{dateRange[1]}}</view>
-      </picker>
-    </view>
-
-    <!-- AI分析结果 -->
-    <view class="analysis-card" wx:if="{{analysis.summary}}">
-      <view class="card-title">AI分析建议</view>
-      <view class="analysis-content">
-        <text>{{analysis.suggestions}}</text>
-      </view>
-      <view class="summary-stats">
-        <view>总班次: {{analysis.summary.total_schedules}}</view>
-        <view>总预约: {{analysis.summary.total_reservations}}</view>
-        <view>平均上座率: {{analysis.summary.avg_occupancy_rate}}</view>
-      </view>
-    </view>
-
+    
     <!-- 统计数据列表 -->
     <view class="stats-list" wx:if="{{statistics.length > 0}}">
       <view class="list-title">班次统计数据</view>

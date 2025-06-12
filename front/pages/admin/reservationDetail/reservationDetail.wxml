@@ -2,10 +2,23 @@
 <navigation-bar title="预约详情" back="{{true}}" color="black" background="#FFF"></navigation-bar>
 <view class="container">
   <!-- 日期选择器 -->
-  <picker mode="date" value="{{date}}" start="2020-01-01" end="2030-12-31" bindchange="onDateChange">
-    <view class="date-picker">当前日期：{{date}}</view>
-  </picker>
+  <view class="date-pickers">
+    <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+      <view class="date-picker">起始日期：{{startDate}}</view>
+    </picker>
+    <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+      <view class="date-picker">终止日期：{{endDate}}</view>
+    </picker>
+  </view>
 
+  <!-- AI分析结果 -->
+  <view class="analysis-card" wx:if="{{analysis.summary}}">
+    <view class="card-title">AI分析建议</view>
+    <view class="analysis-content">
+      <text>{{analysis.suggestions}}</text>
+    </view>
+  </view>
+</view>
   <!-- 统计数据列表 -->
   <view wx:if="{{!loading && statistics.length > 0}}">
     <view wx:for="{{statistics}}" wx:key="schedule_id" class="stat-item">
@@ -31,4 +44,5 @@
   <view wx:if="{{!loading && statistics.length === 0}}" class="no-data">
     <text>暂无统计数据</text>
   </view>
-</view>
+
+

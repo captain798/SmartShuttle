@@ -10,23 +10,25 @@ Page({
   data: {
     statistics: [], // 统计数据
     loading: false, // 加载状态
-    date: '', // 当前查询日期
+    startDate: '', // 起始日期
+    endDate: '', // 终止日期
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad(options) {
-    this.setData({ date: this.formatDate(new Date()) });
-    this.fetchStatistics();
-  },
-
-  // 格式化日期为 YYYY-MM-DD
+  // 添加日期格式化方法
   formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`; // 返回YYYY-MM-DD格式
+  },
+
+  onLoad(options) {
+      const today = this.formatDate(new Date());
+      this.setData({ 
+        startDate: today,
+        endDate: today 
+      });
+      this.fetchStatistics();
   },
 
   // 获取统计数据
@@ -35,14 +37,19 @@ Page({
     wx.request({
       url: `${baseUrl}/admin/statistics`,
       method: 'GET',
+      data: { 
+        start_date: this.data.startDate,
+        end_date: this.data.endDate 
+      },
       header: {
         'Authorization': 'Bearer ' + app.globalData.accessToken,
         'Content-Type': 'application/json'
     },
-      data: { date: this.data.date },
       success: (res) => {
         if (res.data.statistics) {
-          this.setData({ statistics: res.data.statistics });
+          this.setData({ statistics: res.data.statistics,
+            analysis : res.data.analysis || {}
+           });
         }
       },
       complete: () => {
@@ -52,8 +59,13 @@ Page({
   },
 
   // 日期变化处理
-  onDateChange(e) {
-    this.setData({ date: e.detail.value });
+  onStartDateChange(e) {
+    this.setData({ startDate: e.detail.value });
+    this.fetchStatistics();
+  },
+
+  onEndDateChange(e) {
+    this.setData({ endDate: e.detail.value });
     this.fetchStatistics();
   },
 })
