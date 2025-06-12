@@ -76,7 +76,7 @@ class AIService:
                         3. 座位容量是否需要调整
                         4. 其他优化建议
 
-                        请用简洁的语言回答，直接给出具体建议，不要输出md格式。注意分析时间范围内的趋势变化。"""
+                        请用简洁的语言回答，直接给出具体建议。注意分析时间范围内的趋势变化。注意使用纯文本格式，不要使用markdown格式。"""
 
             # 调用通义千问API
             completion = self.client.chat.completions.create(
