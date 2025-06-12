@@ -512,7 +512,10 @@ def get_statistics():
                 end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
             else:
                 end_date = start_date
-                
+            
+            if start_date >= datetime.now().date():
+                return jsonify({'error': '起始日期不能早于今天'}), 400
+
             if end_date < start_date:
                 return jsonify({'error': '结束日期不能早于开始日期'}), 400
                 
@@ -614,8 +617,8 @@ def get_statistics():
             'analysis': analysis
         }
 
-        # 存入缓存，设置5分钟过期
-        redis_client.setex(cache_key, 300, json.dumps(result))
+        # 存入缓存，永久
+        redis_client.set(cache_key, json.dumps(result))
         return jsonify(result)
 
     except Exception as e:
