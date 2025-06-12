@@ -19,6 +19,8 @@ Page({
 
   onLoad(options) {
     const { id } = options;
+    // 先显示骨架屏或加载状态
+    this.setData({ isLoading: true });
     this.getReservationDetail(id);
   },
 
@@ -87,3 +89,4 @@ Page({
     })
   }
 });
+

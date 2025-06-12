@@ -1,76 +1,64 @@
-/* 页面容器样式 */
+/* 页面容器样式优化 */
 .page-container {
   padding: 20rpx;
-  background-color: #f5f5f5;
+  background-color: #f8f9fa; /* 更柔和的背景色 */
 }
 
-/* 预约卡片样式 */
+/* 预约卡片样式优化 */
 .reservation-card {
   background-color: #fff;
-  border-radius: 10rpx;
-  padding: 20rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+  border-radius: 16rpx; /* 更大的圆角 */
+  padding: 24rpx; /* 增加内边距 */
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08); /* 更柔和的阴影 */
 }
 
-/* 卡片头部样式 */
+/* 卡片头部样式优化 */
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #eee; /* 添加分割线 */
 }
 
-/* 行程信息容器 */
+/* 行程信息容器优化 */
 .route-container {
-  margin: 20rpx 0;
+  margin: 24rpx 0;
+  padding: 16rpx;
+  background-color: #f8f9fa;
+  border-radius: 12rpx;
 }
 
-/* 路线点样式 */
-.route-point {
-  display: flex;
-  align-items: center;
-  margin: 10rpx 0;
-}
-
-/* 时间线圆点 */
-.timeline-dot {
-  width: 16rpx;
-  height: 16rpx;
-  border-radius: 50%;
-  margin-right: 10rpx;
-}
-
-.timeline-dot.start {
-  background-color: #07c160; /* 起点绿色 */
-}
-
-.timeline-dot.end {
-  background-color: #e64340; /* 终点红色 */
-}
-
-/* 时间线 */
-.timeline-line {
-  height: 40rpx;
-  width: 2rpx;
-  background-color: #ccc;
-  margin-left: 7rpx;
-}
-
-/* 详细信息容器 */
-.detail-container {
-  margin-top: 20rpx;
-}
-
-/* 详情项样式 */
+/* 详情项样式优化 */
 .detail-item {
   display: flex;
-  margin: 10rpx 0;
+  margin: 16rpx 0;
+  padding: 12rpx 0;
+  border-bottom: 1rpx dashed #eee; /* 虚线分割线 */
 }
 
-.detail-label {
-  color: #999;
-  margin-right: 10rpx;
+/* 状态文本样式优化 */
+.reservation-status {
+  padding: 8rpx 16rpx;
+  border-radius: 24rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+/* 位置内容样式优化 */
+.location-content {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 详情值样式优化 */
+.detail-value {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
 }
 
 /* 二维码容器 */
@@ -78,6 +66,8 @@
   margin-top: 30rpx;
   display: flex;
   justify-content: center;
+  align-items: center; /* 新增垂直居中 */
+  height: 400rpx; /* 新增固定高度 */
 }
 
 .qr-code {

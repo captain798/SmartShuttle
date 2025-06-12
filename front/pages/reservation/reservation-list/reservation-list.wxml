@@ -13,7 +13,6 @@
     >
       <view class="status-filter">
         <text class="filter-text">{{statusDisplayList[selectedStatusIndex] || '全部状态'}}</text>
-        <image class="filter-icon" src="/assets/images/arrow-down.png"></image>
       </view>
     </picker>
   </view>
@@ -47,7 +46,7 @@
           <!-- 卡片头部 - 时间+状态 -->
           <view class="card-header">
             <view class="reservation-date-row">
-              <text class="reservation-date-icon">⏰</text>
+              <text class="reservation-date-icon">⏰预约时间</text>
               <text class="reservation-date-text">{{item.reservationTime}}</text>
             </view>
             <view class="reservation-status">
@@ -72,6 +71,10 @@
           
             <!-- 详细信息 -->
             <view class="detail-container">
+              <view class="detail-item">
+                <text class="detail-label">班次:</text>
+                <text class="detail-value">{{item.scheduleId}}</text>
+              </view>
               <view class="detail-item">
                 <text class="detail-label">座位号:</text>
                 <text class="detail-value">{{item.seatNumber}}</text>

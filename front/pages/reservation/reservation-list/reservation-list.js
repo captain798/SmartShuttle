@@ -65,7 +65,7 @@ Page({
           // 在格式化数据时使用映射
           const formattedList = reservations.map(item => ({
             id: item.id,
-            scheduleId: item.schedule_id,
+            scheduleId: item.schedule_id.replace(/[a-zA-Z]/g, ''), 
             seatNumber: item.seat_number,
             status: statusMap[item.status] || item.status, // 将英文状态转为中文
             reservationTime: item.reserved_at ? new Date(item.reserved_at).toLocaleString() : '未知时间',
@@ -152,10 +152,20 @@ Page({
   },
 
   handleModalButtonTap(e) {
-    const id = e.currentTarget.dataset.id;  // 使用解构赋值获取id
-    console.log(id);
-    wx.navigateTo({
-      url: `/pages/reservation/reservation-details/reservation-details?id=${id}`,
+    const id = e.currentTarget.dataset.id;
+    wx.showLoading({
+      title: '加载中...',
+      mask: true
     });
+    
+    // 添加500ms延迟确保loading显示
+    setTimeout(() => {
+      wx.navigateTo({
+        url: `/pages/reservation/reservation-details/reservation-details?id=${id}`,
+        complete: () => {
+          wx.hideLoading(); // 页面跳转完成后隐藏loading
+        }
+      });
+    }, 500);
   }
 })
