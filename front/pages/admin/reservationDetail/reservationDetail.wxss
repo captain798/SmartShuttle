@@ -105,6 +105,7 @@ page {
   margin-bottom: 0;
   word-break: break-all;
   box-shadow: 0 2rpx 8rpx rgba(44,224,158,0.04);
+  overflow: hidden; /* 添加overflow处理长内容 */
 }
 
 /* 统计数据项 */

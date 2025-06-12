@@ -15,7 +15,7 @@
   <view class="analysis-card" wx:if="{{analysis.summary}}">
     <view class="card-title">AI分析建议</view>
     <view class="analysis-content">
-      <text>{{analysis.suggestions}}</text>
+      <towxml nodes="{{analysis.markdownContent}}"/>
     </view>
   </view>
 </view>
