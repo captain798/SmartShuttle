@@ -67,15 +67,20 @@ Page({
             id: item.id,
             scheduleId: item.schedule_id.replace(/[a-zA-Z]/g, ''), 
             seatNumber: item.seat_number,
-            status: statusMap[item.status] || item.status, // 将英文状态转为中文
+            status: statusMap[item.status] || item.status,
             reservationTime: item.reserved_at ? new Date(item.reserved_at).toLocaleString() : '未知时间',
             canceledTime: item.canceled_at ? new Date(item.canceled_at).toLocaleString() : null,
             isTeacherPriority: item.priority_used,
-            qrCode: item.qr_code // 添加二维码字段
+            qrCode: item.qr_code,
+            // 添加原始时间戳用于排序
+            timestamp: item.reserved_at ? new Date(item.reserved_at).getTime() : 0
           }));
           
+          // 按时间戳降序排序
+          formattedList.sort((a, b) => b.timestamp - a.timestamp);
+          
           that.setData({
-            reservationList: formattedList, // 使用格式化后的数据
+            reservationList: formattedList,
             isLoading: false
           });
         } else {

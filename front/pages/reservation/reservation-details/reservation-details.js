@@ -62,8 +62,8 @@ Page({
   generateQRCode() {
     const qrCodeText = this.data.reservationDetail.qr_code || 'https://example.com';
     drawQrcode({
-      width: 300,
-      height: 300,
+      width: 170,
+      height: 170,
       canvasId: 'qrcodeCanvas',
       text: qrCodeText,
       callback: () => {
