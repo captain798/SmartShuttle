@@ -249,3 +249,15 @@ page {
   background: #d2f8e6;
   border-radius: 8rpx;
 }
+
+/* 添加文本选择样式 */
+text {
+  user-select: text;  
+  -webkit-user-select: text; 
+}
+
+/* 针对特定提示文本的样式 */
+.no-data text {
+  user-select: text;
+  -webkit-user-select: text;
+}
