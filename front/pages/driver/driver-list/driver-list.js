@@ -2,16 +2,17 @@
 const app = getApp();
 
 // 获取司机班次列表
-const getDriverSchedules = (date, status, page = 1, perPage = 10) => {
+const getDriverSchedules = (date, status) => {
   return new Promise((resolve, reject) => {
-    wx.showLoading({ title: '加载中...' }); // 显示加载状态
+    wx.showLoading({ title: '加载中...' });
     
     wx.request({
-      url: `${app.globalData.baseUrl}/driver/schedules`,
+      url: `${app.globalData.baseUrl}/drivers/schedules`,
       method: 'GET',
-      data: { date, status, page, per_page: perPage },
+      data: { date, status },
       header: {
-        'Authorization': `Bearer ${app.globalData.accessToken}`
+        'Authorization': `Bearer ${app.globalData.accessToken}`,
+         'Content-Type': 'application/json'
       },
       success: (res) => {
         wx.hideLoading(); // 隐藏加载状态
@@ -42,13 +43,12 @@ const getDriverSchedules = (date, status, page = 1, perPage = 10) => {
 // 在Page中使用示例
 Page({
   data: {
+    driverName : app.globalData.userInfo?.user.name,
+    driverId : app.globalData.userInfo?.user.school_id,
     schedules: [],
     isLoading: false,
-    currentPage: 1,
-    hasMore: true,
-    // 新增筛选相关数据
-    selectedDate: null,
-    selectedStatus: null,
+    selectedDate: new Date().toISOString().split('T')[0], // 默认设置为当天日期
+    selectedStatus: 'normal', // 默认设置为normal状态
     statusOptions: [
       {label: '全部', value: null},
       {label: '正常', value: 'normal'},
@@ -82,15 +82,14 @@ Page({
 
   // 修改loadSchedules方法
   loadSchedules: function() {
-    if (this.data.isLoading || !this.data.hasMore) return;
+    if (this.data.isLoading) return;
     
     this.setData({ isLoading: true });
     
-    getDriverSchedules(this.data.selectedDate, this.data.selectedStatus, this.data.currentPage)
+    getDriverSchedules(this.data.selectedDate, this.data.selectedStatus)
       .then(data => {
         this.setData({
-          schedules: this.data.schedules.concat(data.schedules),
-          hasMore: this.data.currentPage < data.pages,
+          schedules: data.schedules, // 直接赋值而不是concat
           isLoading: false
         });
       })
@@ -110,18 +109,17 @@ Page({
     wx.stopPullDownRefresh();
   },
   
-  // 上拉加载更多
-  onReachBottom: function() {
-    if (this.data.hasMore) {
-      this.setData({ currentPage: this.data.currentPage + 1 });
-      this.loadSchedules();
-    }
-  },
-  
   // 页面显示时加载数据
-  onShow: function() {
+  onShow: function () {
+    if (typeof this.getTabBar === 'function' &&  this.getTabBar()) {
+    this.getTabBar().setData({
+       selected: 1
+      })
+    };
+    console.log('userInfo:', app.globalData.userInfo); // 添加调试日志
     this.loadSchedules();
   },
+  
 
   // 新增导航到班次详情页的方法
   navigateToScheduleDetail: function(e) {

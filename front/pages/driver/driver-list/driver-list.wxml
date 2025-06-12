@@ -1,32 +1,47 @@
 <navigation-bar title="我的班次" back="{{false}}" color="black" background="#FFF"></navigation-bar>
 <view class="page-bg">
   <view class="container">
-    <!-- 新增筛选区域 -->
+    
+    <!-- 优化司机卡片结构，分行展示内容 -->
+    <view class="driver-card">
+      <view class="driver-info">
+        <view class="info-line">
+          <text class="info-label">姓名：</text>
+          <text class="info-value">{{driverName || '暂无姓名'}}</text>
+        </view>
+        <view class="info-line">
+          <text class="info-label">工号：</text>
+          <text class="info-value">{{driverId || '暂无工号'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 修改筛选区域结构 -->
+    <!-- 修改后的均衡分布筛选栏 -->
     <view class="filter-container">
       <picker mode="date" bindchange="onDateChange">
-        <view class="filter-item">日期: {{selectedDate || '请选择日期'}}</view>
+        <view class="filter-item {{selectedDate ? 'active' : ''}}">
+          {{selectedDate || '选择日期'}}
+        </view>
       </picker>
-      <picker mode="selector" range="statusOptions" range-key="label" bindchange="onStatusChange">
-        <view class="filter-item">状态: {{selectedStatus || '请选择状态'}}</view>
+      <picker mode="selector" range="{{statusOptions}}" range-key="label" bindchange="onStatusChange">
+        <view class="filter-item {{selectedStatus ? 'active' : ''}}">
+          {{selectedStatus || '选择状态'}}
+        </view>
       </picker>
-    </view>
-    <!-- 司机信息卡片 -->
-    <view class="driver-card driver-row" style="background-color: #1D953F; color: white; border-radius: 8px; padding: 15px;">
-      <image class="avatar" src="/images/driver.png"></image>
-      <view class="driver-info">
-        <text class="info-item" style="color: white;">司机：{{driverName || '暂无姓名'}}</text>
-        <text class="info-item" style="color: white;">工号：{{driverId || '暂无工号'}}</text>
-      </view>
     </view>
     
     <!-- 班次列表 -->
     <view class="schedule-list">
       <block wx:for="{{schedules}}" wx:key="id">
         <!-- 修改班次卡片，添加点击事件绑定 -->
+        <!-- 修改班次卡片结构，保持设计统一 -->
         <view class="schedule-item" bindtap="navigateToScheduleDetail" data-id="{{item.id}}">
           <view class="schedule-header">
             <text class="route-name">{{item.route_name}}</text>
-            <text class="status {{item.status}}">{{item.status === 'normal' ? '正常' : item.status === 'canceled' ? '已取消' : '延误'}}</text>
+            <text class="status {{item.status}}">
+              {{item.status === 'normal' ? '正常' : item.status === 'canceled' ? '已取消' : '延误'}}
+            </text>
           </view>
           <view class="schedule-info">
             <text>{{item.start_point}} → {{item.end_point}}</text>
@@ -43,24 +58,7 @@
       <view wx:if="{{isLoading}}" class="loading-more">
         <text>加载中...</text>
       </view>
-      <view wx:if="{{!hasMore && !isLoading}}" class="no-more">
-        <text>没有更多班次了</text>
-      </view>
     </view>
   </view>
 </view>
 <view class="spacer"></view>
-<view class="form-card">
-  <view class="action-list">
-    <view class="action-item" hover-class="action-hover">
-      <image class="action-icon" src="/images/Selected_VehicleBus.png"></image>
-      <text class="action-text">我的班车</text>
-      <image class="arrow-icon" src="/images/arrow-right.png"></image>
-    </view>
-    <view class="action-item" hover-class="action-hover">
-      <image class="action-icon" src="/images/reserve.png"></image>
-      <text class="action-text">预约情况</text>
-      <image class="arrow-icon" src="/images/arrow-right.png"></image>
-    </view>
-  </view>
-</view>

@@ -1,170 +1,172 @@
-/* 页面背景颜色 */
+/* 统一页面背景和容器样式 */
 .page-bg {
   min-height: 100vh;
-  background: linear-gradient(135deg, #e9f6ff 0%, #f5f7fa 100%);
+  background: #f5f7fa;
 }
 
-/* 容器样式 */
 .container {
-  padding: 36rpx 0 90rpx 0;
-  max-width: 98vw;
+  padding: 20rpx 0 100rpx 0;
+  max-width: 96vw;
   margin: 0 auto;
-  box-sizing: border-box;
 }
 
-/* 间隔分割线 */
-.spacer {
-  height: 28rpx;
-  width: 100%;
-  background: transparent;
+/* 班次列表整体样式 */
+.schedule-list {
+  margin-top: 20rpx;
+  padding: 0 20rpx;
 }
 
-/* 司机信息卡片 */
-.driver-card.driver-row {
-  display: flex;
-  align-items: center;
-  padding: 42rpx 38rpx;
-  width: 85vw;
-  margin: 0 auto 18rpx auto;
-  background: linear-gradient(90deg, rgba(145,231,227,0.75) 0%, rgba(182,226,252,0.70) 100%);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);  /* 添加阴影效果 */
-  margin: 15px;  /* 增加外边距 */
-  border-radius: 30rpx;
-  box-shadow: 0 10rpx 32rpx 0 rgba(39, 174, 255, 0.14), 0 2rpx 8rpx 0 rgba(110, 217, 255, 0.10);
-  backdrop-filter: blur(8rpx);
-  border: 2rpx solid #e0faff;
-  transition: box-shadow .25s;
-}
-
-/* 司机头像 */
-.avatar {
-  width: 130rpx;
-  height: 130rpx;
-  border-radius: 50%;
+/* 班次卡片统一设计 */
+.schedule-item {
+  width: 92%;
+  margin: 20rpx auto;
+  padding: 28rpx;
   background: #fff;
-  border: 5rpx solid #b8e0ef;
-  object-fit: cover;
-  margin-right: 38rpx;
-  box-shadow: 0 3rpx 18rpx 0 rgba(0,0,0,0.09);
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  border: 1rpx solid #f0f0f0;
 }
 
-/* 司机信息 */
+/* 卡片悬停效果 */
+.schedule-item:active {
+  transform: translateY(2px);
+  box-shadow: 0 6rpx 20rpx rgba(0,0,0,0.1);
+  background: #f9f9f9;
+}
+
+/* 统一字体和间距 */
+.route-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.schedule-info {
+  margin: 16rpx 0;
+  color: #666;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+/* 状态标签统一 */
+.status {
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+/* 底部信息样式 */
+.schedule-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #999;
+  font-size: 24rpx;
+  margin-top: 10rpx;
+}
+
+/* 箭头图标统一 */
+.arrow-icon {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.6;
+}
+
+
+
+/* 筛选项样式 - 均衡宽度 */
+/* 优化司机卡片样式 */
+/* 司机卡片样式 */
+.driver-card {
+  background: linear-gradient(135deg, #1D953F, #2ECC71);
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 350px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+/* 司机信息容器 */
 .driver-info {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 6rpx;
+  gap: 8px;
+  color: white;
 }
 
-/* 信息项字体样式 */
-.info-item {
-  font-size: 36rpx;
-  color: #1a3c4c;
-  margin-bottom: 10rpx;
-  font-weight: 700;
-  letter-spacing: 1.5rpx;
-  display: block;
-  text-shadow: 0 2rpx 8rpx #e9f6ffaa;
-}
-.info-item:last-child {
-  margin-bottom: 0;
-}
-
-/* 功能菜单卡片 */
-.form-card {
-  width: 92vw;
-  margin: 0 auto;
-  background: rgba(255,255,255,0.98);
-  border-radius: 24rpx;
-  box-shadow: 0 12rpx 32rpx rgba(39, 174, 255, 0.09), 0 2rpx 8rpx #e0f6ff;
-  padding: 36rpx 20rpx 22rpx 20rpx;
-  border: 2rpx solid #e4f1ff;
-  backdrop-filter: blur(6rpx);
-  box-sizing: border-box;
-}
-
-/* 功能列表 */
-.action-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-}
-
-/* 单个功能项样式 */
-.action-item {
+/* 信息行样式 */
+.info-line {
   display: flex;
   align-items: center;
-  padding: 32rpx 14rpx 26rpx 10rpx;
-  border-bottom: 1px solid #f1f6fa;
-  background: transparent;
-  cursor: pointer;
-  position: relative;
-  border-radius: 16rpx;
-  transition: background .18s, box-shadow .18s;
-}
-.action-item:last-child {
-  border-bottom: none;
-}
-.action-hover, .action-item:active {
-  background: linear-gradient(90deg, #f4fcff 60%, #e4f7fa 100%);
-  box-shadow: 0 2rpx 12rpx 0 rgba(39, 174, 255, 0.08);
 }
 
-/* 功能项图标样式 */
-.action-icon {
-  width: 58rpx;
-  height: 58rpx;
-  margin-right: 28rpx;
-  flex-shrink: 0;
-  border-radius: 16rpx;
-  background: linear-gradient(135deg, #e4f1ff 40%, #f7fafd 100%);
-  box-shadow: 0 1rpx 6rpx 0 rgba(90,156,255,0.05);
+/* 信息标签样式 */
+.info-label {
+  font-weight: bold;
+  width: 60px;
 }
 
-/* 功能项文字样式 */
-.action-text {
-  font-size: 34rpx;
-  color: #232a32;
-  flex: 1;
-  font-weight: 700;
-  letter-spacing: 1.5rpx;
-  text-shadow: 0 2rpx 8rpx #e9f6ff70;
+/* 信息值样式 */
+.info-value {
+  font-size: 16px;
 }
 
-/* 箭头优化 */
-.arrow-icon {
-  width: 34rpx;
-  height: 34rpx;
-  margin-left: 20rpx;
-  opacity: 0.48;
-  flex-shrink: 0;
-  transition: transform .18s;
-}
-.action-item:active .arrow-icon, .action-hover .arrow-icon {
-  transform: translateX(4rpx) scale(1.06);
+/* 新增分行样式 */
+.info-line {
+  display: flex;
+  margin-bottom: 16rpx;
 }
 
-/* 添加按钮悬停动画 */
-.action-item {
-  transition: all 0.3s ease;
-}
-.action-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+.info-label {
+  width: 120rpx;
+  font-weight: bold;
 }
 
+/* 优化宽度分布后的选择器卡片样式 */
+/* 优化选择卡片水平分布 */
 .filter-container {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
+  flex-wrap: wrap; /* 允许换行 */
+  justify-content: flex-start; /* 左对齐 */
+  gap: 20rpx; /* 设置间距 */
+  margin: 24rpx 0;
+  padding: 0 20rpx;
 }
 
 .filter-item {
-  padding: 8px 15px;
-  background-color: white;
-  border-radius: 4px;
-  color: #333;
+  flex: 0 0 calc(50% - 10rpx); /* 每行显示2个，考虑间距 */
+  min-width: 200rpx;
+  max-width: none; /* 取消最大宽度限制 */
+  padding: 24rpx 0;
+  margin: 0;
+  text-align: center;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 6rpx 24rpx rgba(0,0,0,0.08);
+  border: 1rpx solid #e8e8e8;
+  font-size: 30rpx;
+  color: #555;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 选中状态优化 */
+.filter-item.active {
+  background: linear-gradient(135deg, #1D953F, #2BB24C);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 6rpx 24rpx rgba(29,149,63,0.3);
+}
+
+/* 点击效果优化 */
+.filter-item:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.15);
+}
+
+/* 添加微妙的悬浮效果 */
+.filter-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8rpx 28rpx rgba(0,0,0,0.12);
 }

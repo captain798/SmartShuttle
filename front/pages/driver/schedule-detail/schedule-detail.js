@@ -25,10 +25,11 @@ Page({
    */
   getScheduleDetail(scheduleId) {
     wx.request({
-      url: app.globalData.baseUrl + '/driver/schedules/' + scheduleId,
+      url: app.globalData.baseUrl + '/drivers/schedules/' + scheduleId,
       method: 'GET',
       header: {
-        'Authorization': 'Bearer ' + app.globalData.token
+        'Authorization': 'Bearer ' + app.globalData.accessToken,  
+        'Content-Type': 'application/json'
       },
       success: (res) => {
         if (res.statusCode === 200) {
@@ -50,10 +51,11 @@ Page({
    */
   getPassengerList(scheduleId) {
     wx.request({
-      url: app.globalData.baseUrl + '/driver/schedules/' + scheduleId + '/passengers',
+      url: app.globalData.baseUrl + '/drivers/schedules/' + scheduleId + '/passengers',
       method: 'GET',
       header: {
-        'Authorization': 'Bearer ' + app.globalData.token
+        'Authorization': 'Bearer ' + app.globalData.accessToken,  
+        'Content-Type': 'application/json'
       },
       success: (res) => {
         if (res.statusCode === 200) {
