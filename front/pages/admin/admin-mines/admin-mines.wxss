@@ -142,17 +142,7 @@
     transform: translateX(4rpx) scale(1.06);
   }
 
-/* 日期选择器样式 */
-.date-picker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 20rpx 0;
-  padding: 20rpx;
-  background: #fff;
-  border-radius: 16rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
-}
+
 
 .date-item {
   padding: 12rpx 24rpx;
@@ -161,14 +151,7 @@
   margin: 0 10rpx;
 }
 
-/* AI分析卡片 */
-.analysis-card {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 24rpx;
-  margin-bottom: 24rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
-}
+
 
 .card-title {
   font-size: 32rpx;
